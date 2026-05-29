@@ -1,0 +1,59 @@
+<header class="topbar" role="banner">
+
+  <!-- Marca -->
+  <div class="brand">
+    <button class="icon-btn" id="menu-toggle"
+            title="Menú" aria-label="Abrir menú" style="display:none">
+      <span>☰</span>
+    </button>
+    <div>
+      <div class="brand-mark">VERTI<span>CE</span></div>
+      <div class="brand-sub">Academia · Campus Virtual</div>
+    </div>
+  </div>
+
+  <!-- Navegación principal -->
+  <nav class="top-nav" aria-label="Navegación principal">
+    <a class="top-link {% if request.endpoint == 'dashboard.dashboard' %}active{% endif %}"
+       href="{{ url_for('dashboard.dashboard') }}" aria-label="Mi plan formativo">
+      <span class="link-icon">▦</span>
+      <span>Mi plan formativo</span>
+    </a>
+    <a class="top-link {% if request.endpoint and request.endpoint.startswith('courses') %}active{% endif %}"
+       href="{{ url_for('courses.courses') }}" aria-label="Mis cursos">
+      <span class="link-icon">☰</span>
+      <span>Mis cursos</span>
+    </a>
+    <a class="top-link {% if request.endpoint == 'admin.admin' %}active{% endif %}"
+       href="{{ url_for('admin.admin') }}" aria-label="Administración del sitio">
+      <span class="link-icon">⚙</span>
+      <span>Administración del sitio</span>
+    </a>
+    <a class="top-link {% if request.endpoint == 'portal.portal' %}active{% endif %}"
+       href="{{ url_for('portal.portal') }}" aria-label="Portal Vertice">
+      <span class="link-icon">⌂</span>
+      <span>Portal Vertice</span>
+    </a>
+  </nav>
+
+  <!-- Acciones de usuario -->
+  <div class="top-actions">
+    <button class="icon-btn" title="Notificaciones" aria-label="Notificaciones"
+            onclick="abrirModal('Notificaciones', '<p class=&quot;modal-text&quot;>No tienes notificaciones nuevas.</p>')">
+      <span>🔔</span>
+      <span class="badge-dot"></span>
+    </button>
+    <button class="icon-btn" title="Mensajes" aria-label="Mensajes"
+            onclick="abrirModal('Mensajes', '<p class=&quot;modal-text&quot;>No tienes mensajes nuevos.</p>')">
+      <span>✉</span>
+    </button>
+    <span class="user-name">{{ usuario.nombre }}</span>
+    <div class="avatar" title="Mi perfil"
+         onclick="abrirModalPerfil()"
+         role="button" tabindex="0"
+         onkeydown="if(event.key==='Enter') abrirModalPerfil()">
+      {{ usuario.iniciales }}
+    </div>
+  </div>
+
+</header>

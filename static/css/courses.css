@@ -1,0 +1,64 @@
+/*
+ * courses.css — Grid de cursos, tarjetas, filtros.
+ * TODO: Sustituir por tu CSS original.
+ */
+
+.courses-filters {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  margin-bottom: 20px;
+}
+.filter-btn {
+  padding: 6px 14px; border-radius: 99px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--line); background: var(--surface); color: var(--muted);
+  cursor: pointer; transition: all .15s; text-decoration: none;
+}
+.filter-btn:hover, .filter-btn.active {
+  background: var(--cyan); border-color: var(--cyan); color: #fff;
+  text-decoration: none;
+}
+.filter-search { display: flex; gap: 4px; margin-left: auto; }
+.filter-search input {
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 6px 10px; font-size: 13px; font-family: var(--font); outline: none;
+}
+.filter-search input:focus { border-color: var(--cyan); }
+.filter-search button { background: var(--cyan); color: #fff; border: none; border-radius: var(--radius-sm); padding: 6px 10px; cursor: pointer; }
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.course-card {
+  background: var(--surface); border-radius: var(--radius);
+  box-shadow: var(--shadow); overflow: hidden;
+  cursor: pointer; transition: box-shadow .15s, transform .12s;
+}
+.course-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+
+.course-thumb {
+  height: 100px; display: flex; flex-direction: column;
+  justify-content: flex-end; padding: 10px 12px;
+  background: linear-gradient(135deg, var(--topbar-bg) 0%, #2a3050 100%);
+  position: relative;
+}
+/* Variantes de color de thumbs */
+.thumb-1 { background: linear-gradient(135deg,#1a6b8a,#19bed3); }
+.thumb-2 { background: linear-gradient(135deg,#1a5c3a,#3bb273); }
+.thumb-3 { background: linear-gradient(135deg,#6b3a1a,#f0a500); }
+.thumb-4 { background: linear-gradient(135deg,#3a1a6b,#9b6dff); }
+.thumb-5 { background: linear-gradient(135deg,#6b1a3a,#e05555); }
+
+.course-thumb-cat  { font-size: 10px; font-weight: 700; color: rgba(255,255,255,.7); text-transform: uppercase; letter-spacing: .8px; }
+.course-thumb-title { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.3; }
+
+.course-card-body { padding: 12px 14px; }
+.course-tutor { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.course-dates { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+.course-progress-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.course-prog-bar { flex: 1; height: 5px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.course-prog-bar span { display: block; height: 100%; background: var(--cyan); border-radius: 99px; }
+.course-prog-pct { font-size: 11px; font-weight: 700; color: var(--cyan-dark); flex-shrink: 0; }
+
+.empty-state { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }

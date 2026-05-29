@@ -1,0 +1,64 @@
+<aside class="sidebar" id="sidebar" aria-label="Navegación lateral">
+  <div id="sidebar-default">
+
+    <div class="sidebar-head">
+      <h2>Mi Campus</h2>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-group-title">Navegación</div>
+
+      <a class="sidebar-item {% if request.endpoint == 'dashboard.dashboard' %}active{% endif %}"
+         href="{{ url_for('dashboard.dashboard') }}">
+        <span class="item-icon">🏠</span> Mi plan formativo
+      </a>
+      <a class="sidebar-item {% if request.endpoint and request.endpoint.startswith('courses') %}active{% endif %}"
+         href="{{ url_for('courses.courses') }}">
+        <span class="item-icon">📚</span> Mis cursos
+        <span class="item-badge">{{ usuario.matriculas | length }}</span>
+      </a>
+      <a class="sidebar-item {% if request.endpoint == 'admin.admin' %}active{% endif %}"
+         href="{{ url_for('admin.admin') }}">
+        <span class="item-icon">⚙</span> Administración
+      </a>
+      <a class="sidebar-item {% if request.endpoint == 'portal.portal' %}active{% endif %}"
+         href="{{ url_for('portal.portal') }}">
+        <span class="item-icon">🏛</span> Portal Vertice
+      </a>
+    </div>
+
+    {% set sidebar_courses = mis_cursos if mis_cursos is defined else layout_mis_cursos %}
+    {% if sidebar_courses %}
+    <div class="sidebar-section">
+      <div class="sidebar-group-title">Mis cursos activos</div>
+      {% for c in sidebar_courses %}
+      <a class="sidebar-item" href="{{ url_for('courses.course_detail', course_id=c.id) }}">
+        <span class="item-icon">📖</span>
+        <span style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex:1">
+          {{ c.titulo.split(':')[0] }}
+        </span>
+        <span style="font-size:10px;font-weight:700;color:var(--cyan-dark);flex-shrink:0">
+          {{ c._progreso }}%
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% set sidebar_events = eventos if eventos is defined else layout_eventos %}
+    {% if sidebar_events %}
+    <div class="sidebar-section">
+      <div class="sidebar-group-title">Próximos eventos</div>
+      {% for ev in sidebar_events[:3] %}
+      <div class="sidebar-item">
+        <span class="item-icon" style="font-size:11px">{{ ev._fecha_corta if ev._fecha_corta is defined else ev.fecha }}</span>
+        <span style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:12px">
+          {{ ev.titulo }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div>
+</aside>

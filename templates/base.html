@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Academia Vertice — Campus Virtual. Plataforma de formación online." />
+  <title>{% block title %}Academia Vertice — Campus Virtual{% endblock %}</title>
+
+  <!-- Google Fonts: DM Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
+
+  <!-- CSS principal (importa el resto de módulos) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ── TOPBAR ──────────────────────────────────────────── -->
+  {% include 'partials/topbar.html' %}
+
+  <!-- ── LAYOUT BODY ─────────────────────────────────────── -->
+  <div class="body-layout">
+
+    <!-- ── SIDEBAR ──────────────────────────────────────── -->
+    {% include 'partials/sidebar.html' %}
+
+    <!-- ── CONTENIDO PRINCIPAL ──────────────────────────── -->
+    <main class="main-content" id="main-content" role="main">
+
+      <!-- ── HERO BANNER ──────────────────────────────── -->
+      <div class="hero" id="hero-banner" aria-hidden="true">
+        <div class="hero-label" id="hero-label">Academia Vertice · Campus Virtual</div>
+        <div class="hero-title" id="hero-title">{% block hero_title %}{% endblock %}</div>
+        {% block hero_extra %}{% endblock %}
+      </div>
+
+      <!-- ── MENSAJES FLASH ────────────────────────────── -->
+      {% include 'partials/flash_messages.html' %}
+
+      <!-- ── CONTENIDO DE LA VISTA ────────────────────── -->
+      <div class="page-wrap">
+        {% block content %}{% endblock %}
+      </div>
+
+    </main>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ── MODAL ──────────────────────────────────────────────── -->
+{% include 'partials/modal.html' %}
+
+<!-- ── TOAST CONTAINER ────────────────────────────────────── -->
+<div class="toast-container" id="toast-container"
+     aria-live="polite" aria-atomic="true"></div>
+
+<!-- ── BOTÓN FLOTANTE AYUDA ───────────────────────────────── -->
+<button class="floating-help" id="floating-help"
+        title="¿Necesitas ayuda?" aria-label="Abrir soporte">?</button>
+
+<!-- ── JAVASCRIPT ─────────────────────────────────────────── -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+</body>
+</html>

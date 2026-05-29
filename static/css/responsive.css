@@ -1,0 +1,30 @@
+/*
+ * responsive.css — Media queries.
+ * TODO: Ampliar con tus breakpoints originales cuando pases el CSS completo.
+ */
+
+@media (max-width: 860px) {
+  .top-nav { display: none; }
+  .sidebar {
+    position: fixed; left: -260px; top: 58px; bottom: 0;
+    z-index: 200; transition: left .25s; width: 240px;
+    box-shadow: var(--shadow-md);
+  }
+  .sidebar.open { left: 0; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .quick-grid { grid-template-columns: repeat(2, 1fr); }
+  .admin-kpis { gap: 8px; }
+  .kpi-card { min-width: 80px; padding: 12px; }
+  .kpi-num { font-size: 22px; }
+}
+
+@media (max-width: 520px) {
+  .page-wrap { padding: 16px; }
+  .hero { padding: 16px 20px 14px; }
+  .hero-title { font-size: 17px; }
+  .welcome-banner { flex-direction: column; }
+  .welcome-meta { gap: 16px; }
+  .quick-grid { grid-template-columns: repeat(2, 1fr); }
+  .portal-grid { grid-template-columns: 1fr 1fr; }
+  .courses-grid { grid-template-columns: 1fr; }
+}
