@@ -4,9 +4,19 @@ Rutas: /portal y /portal/<area_slug>
 """
 
 from flask import Blueprint, render_template, request, redirect, url_for
-from services.data_service import get_current_user, get_notices, get_centro, format_date
 
-portal_bp = Blueprint('portal', __name__)
+from services.data_service import (
+    get_current_user,
+    get_notices,
+    get_centro,
+    format_date,
+    get_areas_moodle,
+    get_area_by_slug,
+    get_documentos_by_area,
+)
+
+portal_bp = Blueprint("portal", __name__)
+
 
 AREA_ALIASES = {
     "reglamento": "regulamento-interno",
@@ -27,13 +37,26 @@ AREA_ALIASES = {
     "area-docente": "area-docente",
 }
 
-PORTAL_AREAS = {
+
+PORTAL_ORDER = [
+    "regulamento-interno",
+    "projeto-educativo",
+    "plano-atividades",
+    "eqavet",
+    "erasmus",
+    "manual-aluno",
+    "manual-formador",
+    "biblioteca-digital",
+    "centro-qualifica",
+    "area-docente",
+]
+
+
+AREA_UI = {
     "regulamento-interno": {
-        "titulo": "Regulamento Interno",
         "icono": "📋",
         "cls": "pci-cyan",
         "desc": "Normativa interna, regras de funcionamento e documentação oficial do centro.",
-        "intro": "Espaço para consulta das normas internas, direitos, deveres, procedimentos e documentos orientadores da Academia Profissional Prof. Albino de Matos.",
         "documentos": [
             {"titulo": "Regulamento Interno 2024/25", "tipo": "PDF", "desc": "Documento principal com regras de funcionamento da escola."},
             {"titulo": "Código de Conduta do Aluno", "tipo": "Documento", "desc": "Normas de comportamento, assiduidade e participação."},
@@ -41,11 +64,9 @@ PORTAL_AREAS = {
         ],
     },
     "projeto-educativo": {
-        "titulo": "Projeto Educativo",
         "icono": "📖",
         "cls": "pci-green",
         "desc": "Projeto educativo da Academia Profissional Prof. Albino de Matos.",
-        "intro": "Área dedicada à missão, visão, valores, objetivos pedagógicos e linhas estratégicas do projeto educativo.",
         "documentos": [
             {"titulo": "Projeto Educativo de Centro", "tipo": "PDF", "desc": "Documento orientador do projeto educativo."},
             {"titulo": "Missão, Visão e Valores", "tipo": "Documento", "desc": "Princípios institucionais da academia."},
@@ -53,11 +74,9 @@ PORTAL_AREAS = {
         ],
     },
     "plano-atividades": {
-        "titulo": "Plano Anual de Atividades",
         "icono": "📅",
         "cls": "pci-orange",
         "desc": "Atividades, eventos, calendários e planeamento anual da escola.",
-        "intro": "Calendário de atividades escolares, eventos, reuniões, sessões de orientação, provas e iniciativas pedagógicas.",
         "documentos": [
             {"titulo": "Plano Anual de Atividades", "tipo": "PDF", "desc": "Planeamento anual das atividades do centro."},
             {"titulo": "Calendário Escolar", "tipo": "Calendário", "desc": "Datas relevantes do ano letivo."},
@@ -65,11 +84,9 @@ PORTAL_AREAS = {
         ],
     },
     "eqavet": {
-        "titulo": "EQAVET",
         "icono": "🏅",
         "cls": "pci-blue",
         "desc": "Documentos de qualidade, indicadores, avaliação e melhoria contínua.",
-        "intro": "Área de qualidade alinhada com o quadro EQAVET: indicadores, autoavaliação, melhoria contínua e evidências do sistema de garantia da qualidade.",
         "documentos": [
             {"titulo": "Referencial EQAVET", "tipo": "PDF", "desc": "Documentação base do sistema de garantia da qualidade."},
             {"titulo": "Indicadores de Qualidade", "tipo": "Relatório", "desc": "Indicadores pedagógicos e institucionais."},
@@ -78,11 +95,9 @@ PORTAL_AREAS = {
         ],
     },
     "erasmus": {
-        "titulo": "Erasmus+",
         "icono": "🇪🇺",
         "cls": "pci-gray",
         "desc": "Mobilidades, candidaturas, relatórios e divulgação de resultados.",
-        "intro": "Espaço para projetos Erasmus+, mobilidades internacionais, documentação de candidatura, relatórios e disseminação de resultados.",
         "documentos": [
             {"titulo": "Mobilidades de Alunos", "tipo": "Documento", "desc": "Informação e candidaturas para alunos."},
             {"titulo": "Mobilidades de Pessoal", "tipo": "Documento", "desc": "Informação para docentes e colaboradores."},
@@ -91,11 +106,9 @@ PORTAL_AREAS = {
         ],
     },
     "manual-aluno": {
-        "titulo": "Manual do Aluno",
         "icono": "🎒",
         "cls": "pci-red",
         "desc": "Informação de apoio aos alunos, regras, contactos e procedimentos.",
-        "intro": "Guia para os alunos com informação sobre funcionamento da plataforma, avaliação, FCT, PAP, contactos e procedimentos administrativos.",
         "documentos": [
             {"titulo": "Manual do Aluno", "tipo": "PDF", "desc": "Guia geral para alunos."},
             {"titulo": "Guia de Utilização da Plataforma", "tipo": "Tutorial", "desc": "Como usar o campus virtual."},
@@ -104,11 +117,9 @@ PORTAL_AREAS = {
         ],
     },
     "manual-formador": {
-        "titulo": "Manual do Formador",
         "icono": "👨‍🏫",
         "cls": "pci-green",
         "desc": "Recursos internos para docentes, instrumentos de avaliação e planificações.",
-        "intro": "Área de apoio ao corpo docente com planificações, instrumentos de avaliação, rubricas, atas e recursos partilhados.",
         "restrito": True,
         "documentos": [
             {"titulo": "Manual do Formador", "tipo": "PDF", "desc": "Guia interno para docentes/formadores."},
@@ -118,11 +129,9 @@ PORTAL_AREAS = {
         ],
     },
     "biblioteca-digital": {
-        "titulo": "Biblioteca Digital",
         "icono": "📚",
         "cls": "pci-cyan",
         "desc": "Recursos digitais, documentos de apoio e materiais de estudo.",
-        "intro": "Repositório de recursos pedagógicos, materiais de estudo, apresentações, manuais, ligações úteis e trabalhos de referência.",
         "documentos": [
             {"titulo": "Catálogo de Recursos Digitais", "tipo": "Link", "desc": "Listagem de recursos disponíveis."},
             {"titulo": "Repositório de Trabalhos PAP", "tipo": "Repositório", "desc": "Exemplos e evidências de projetos."},
@@ -130,11 +139,9 @@ PORTAL_AREAS = {
         ],
     },
     "centro-qualifica": {
-        "titulo": "Centro Qualifica",
         "icono": "🎓",
         "cls": "pci-orange",
         "desc": "Reconhecimento, validação e certificação de competências.",
-        "intro": "Informação sobre processos de reconhecimento, validação e certificação de competências, candidaturas e acompanhamento de adultos.",
         "documentos": [
             {"titulo": "O que é o Centro Qualifica", "tipo": "Documento", "desc": "Informação geral sobre o serviço."},
             {"titulo": "Processo RVCC", "tipo": "Documento", "desc": "Reconhecimento, Validação e Certificação de Competências."},
@@ -142,11 +149,9 @@ PORTAL_AREAS = {
         ],
     },
     "area-docente": {
-        "titulo": "Área Docente",
         "icono": "🔒",
         "cls": "pci-gray",
         "desc": "Planificações, instrumentos, atas, rúbricas e seguimento pedagógico.",
-        "intro": "Área reservada para docentes/formadores. De momento está preparada visualmente; será protegida por roles quando o login estiver implementado.",
         "restrito": True,
         "documentos": [
             {"titulo": "Planificações", "tipo": "Documento", "desc": "Planificações anuais e modulares."},
@@ -157,10 +162,6 @@ PORTAL_AREAS = {
     },
 }
 
-PORTAL_ORDER = [
-    "regulamento-interno", "projeto-educativo", "plano-atividades", "eqavet", "erasmus",
-    "manual-aluno", "manual-formador", "biblioteca-digital", "centro-qualifica",
-]
 
 LINKS_UTILES = [
     {"label": "ANQEP", "url": "https://www.anqep.gov.pt"},
@@ -170,35 +171,144 @@ LINKS_UTILES = [
 ]
 
 
-def _build_context(area_slug=None):
-    usuario = get_current_user()
-    centro = get_centro()
-    avisos = get_notices()
+def _get_ui(slug):
+    return AREA_UI.get(slug, {
+        "icono": "📘",
+        "cls": "pci-cyan",
+        "desc": "Área institucional da Academia Profissional Prof. Albino de Matos.",
+        "documentos": [],
+    })
 
-    for a in avisos:
-        a['_fecha'] = format_date(a['fecha'])
 
-    portal_cards = []
+def _normalizar_documentos(area_slug):
+    """
+    Intenta cargar documentos desde BD.
+    Si no hay tabla/documentos todavía, usa documentos visuales de fallback.
+    """
+    documentos_db = get_documentos_by_area(area_slug)
+
+    if documentos_db:
+        return [
+            {
+                "titulo": d.get("titulo", ""),
+                "tipo": d.get("tipo", "Documento"),
+                "desc": d.get("descripcion") or d.get("desc") or "",
+                "url": d.get("url"),
+            }
+            for d in documentos_db
+        ]
+
+    return _get_ui(area_slug).get("documentos", [])
+
+
+def _area_to_view(area):
+    """
+    Convierte un área de MySQL al formato que espera portal.html.
+    """
+    slug = area["slug"]
+    ui = _get_ui(slug)
+
+    titulo = area.get("titulo") or area.get("nombre") or slug
+    descripcion = area.get("descripcion") or ui.get("desc", "")
+    conteudo = area.get("conteudo") or ""
+
+    return {
+        "id": area.get("id"),
+        "slug": slug,
+        "titulo": titulo,
+        "nombre": titulo,
+        "icono": area.get("icono") or ui.get("icono", "📘"),
+        "cls": ui.get("cls", "pci-cyan"),
+        "desc": descripcion,
+        "descripcion": descripcion,
+
+        # Esta es la clave: ahora la intro sale del campo conteudo de MySQL.
+        "intro": conteudo or descripcion,
+        "conteudo": conteudo,
+
+        "restrito": area.get("restringido", False) or ui.get("restrito", False),
+        "restringido": area.get("restringido", False) or ui.get("restrito", False),
+        "documentos": _normalizar_documentos(slug),
+    }
+
+
+def _fallback_area(slug):
+    """
+    Fallback por si no existe el área en MySQL.
+    """
+    ui = _get_ui(slug)
+
+    titulo = slug.replace("-", " ").title()
+
+    return {
+        "id": None,
+        "slug": slug,
+        "titulo": titulo,
+        "nombre": titulo,
+        "icono": ui.get("icono", "📘"),
+        "cls": ui.get("cls", "pci-cyan"),
+        "desc": ui.get("desc", ""),
+        "descripcion": ui.get("desc", ""),
+        "intro": ui.get("desc", ""),
+        "conteudo": "",
+        "restrito": ui.get("restrito", False),
+        "restringido": ui.get("restrito", False),
+        "documentos": ui.get("documentos", []),
+    }
+
+
+def _build_portal_cards():
+    """
+    Construye las tarjetas del portal desde MySQL.
+    Usa AREA_UI solo para iconos, colores y documentos visuales.
+    """
+    areas_db = get_areas_moodle()
+    areas_by_slug = {a["slug"]: a for a in areas_db}
+
+    cards = []
+
     for slug in PORTAL_ORDER:
-        area = PORTAL_AREAS[slug]
-        portal_cards.append({
+        area_db = areas_by_slug.get(slug)
+
+        if area_db:
+            area = _area_to_view(area_db)
+        else:
+            area = _fallback_area(slug)
+
+        cards.append({
             "slug": slug,
             "titulo": area["titulo"],
             "icono": area["icono"],
             "cls": area["cls"],
             "desc": area["desc"],
-            "restrito": area.get("restrito", False),
+            "restrito": area["restrito"],
         })
 
-    area_activa = PORTAL_AREAS.get(area_slug) if area_slug else None
-    if area_activa:
-        area_activa = dict(area_activa)
-        area_activa["slug"] = area_slug
+    return cards
+
+
+def _build_context(area_slug=None):
+    usuario = get_current_user()
+    centro = get_centro()
+    avisos = get_notices()
+
+    for aviso in avisos:
+        aviso["_fecha"] = format_date(aviso["fecha"])
+
+    area_activa = None
+
+    if area_slug:
+        area_db = get_area_by_slug(area_slug)
+
+        if area_db:
+            area_activa = _area_to_view(area_db)
+        else:
+            area_activa = None
 
     return {
         "usuario": usuario,
         "centro": centro,
-        "portal_cards": portal_cards,
+        "portal_cards": _build_portal_cards(),
         "links_utiles": LINKS_UTILES,
         "avisos": avisos,
         "area_activa": area_activa,
@@ -206,20 +316,24 @@ def _build_context(area_slug=None):
     }
 
 
-@portal_bp.route('/portal')
+@portal_bp.route("/portal")
 def portal():
-    area = request.args.get('area')
+    area = request.args.get("area")
+
     if area:
         area = AREA_ALIASES.get(area, area)
-        return redirect(url_for('portal.portal_area', area_slug=area))
+        return redirect(url_for("portal.portal_area", area_slug=area))
 
-    return render_template('portal.html', **_build_context())
+    return render_template("portal.html", **_build_context())
 
 
-@portal_bp.route('/portal/<area_slug>')
+@portal_bp.route("/portal/<area_slug>")
 def portal_area(area_slug):
     area_slug = AREA_ALIASES.get(area_slug, area_slug)
-    if area_slug not in PORTAL_AREAS:
-        return render_template('404.html', usuario=get_current_user()), 404
 
-    return render_template('portal.html', **_build_context(area_slug))
+    area_db = get_area_by_slug(area_slug)
+
+    if not area_db:
+        return render_template("404.html", usuario=get_current_user()), 404
+
+    return render_template("portal.html", **_build_context(area_slug))

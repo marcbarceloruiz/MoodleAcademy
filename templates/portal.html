@@ -23,7 +23,7 @@
 
   <div class="card portal-detail-card mb-20">
     <div class="card-body">
-      <p class="portal-detail-intro">{{ area_activa.intro }}</p>
+      <div class="portal-detail-intro" style="white-space: pre-line;">{{ area_activa.intro }}</div>
     </div>
   </div>
 
@@ -32,28 +32,56 @@
       <h3>Documentos e recursos</h3>
       <span class="text-sm text-muted">Conteúdo inicial</span>
     </div>
+
     <div class="card-body docs-list">
-      {% for d in area_activa.documentos %}
-      <div class="doc-item">
-        <div class="doc-icon">
-          {% if d.tipo in ['PDF', 'Relatório'] %}📄{% elif d.tipo in ['Calendário'] %}📅{% elif d.tipo in ['Vídeo'] %}▶{% elif d.tipo in ['Formulário'] %}📝{% elif d.tipo in ['Link', 'Repositório'] %}🔗{% else %}📋{% endif %}
+      {% if area_activa.documentos %}
+        {% for d in area_activa.documentos %}
+        <div class="doc-item">
+          <div class="doc-icon">
+            {% if d.tipo in ['PDF', 'Relatório'] %}
+              📄
+            {% elif d.tipo in ['Calendário'] %}
+              📅
+            {% elif d.tipo in ['Vídeo'] %}
+              ▶
+            {% elif d.tipo in ['Formulário'] %}
+              📝
+            {% elif d.tipo in ['Link', 'Repositório'] %}
+              🔗
+            {% else %}
+              📋
+            {% endif %}
+          </div>
+
+          <div class="doc-info">
+            <div class="doc-titulo">{{ d.titulo }}</div>
+            <div class="doc-desc">{{ d.desc }}</div>
+          </div>
+
+          {% if d.url %}
+            <a class="doc-type" href="{{ d.url }}" target="_blank" rel="noopener">{{ d.tipo }}</a>
+          {% else %}
+            <span class="doc-type">{{ d.tipo }}</span>
+          {% endif %}
         </div>
-        <div class="doc-info">
-          <div class="doc-titulo">{{ d.titulo }}</div>
-          <div class="doc-desc">{{ d.desc }}</div>
-        </div>
-        <span class="doc-type">{{ d.tipo }}</span>
-      </div>
-      {% endfor %}
+        {% endfor %}
+      {% else %}
+        <p class="text-sm text-muted">
+          Ainda não existem documentos associados a esta área.
+        </p>
+      {% endif %}
     </div>
   </div>
 
   <div class="card">
-    <div class="card-head"><h3>Estado da implementação</h3></div>
+    <div class="card-head">
+      <h3>Estado da implementação</h3>
+    </div>
     <div class="card-body">
       <p style="font-size:13px;color:var(--muted);line-height:1.7">
-        Esta secção já está preparada no portal. Quando forem adicionados login, roles e upload de ficheiros,
-        estes itens poderão passar a abrir PDFs, formulários, recursos internos e documentos reais da academia.
+        Esta secção já está ligada à base de dados. Quando forem adicionados login,
+        roles e upload de ficheiros, estes itens poderão abrir PDFs, formulários,
+        recursos internos e documentos reais da academia.
       </p>
     </div>
   </div>
@@ -66,7 +94,6 @@
     </div>
   </div>
 
-  <!-- TARJETAS DE PORTAL -->
   <div class="portal-grid mb-20">
     {% for c in portal_cards %}
     <a class="portal-card" href="{{ url_for('portal.portal_area', area_slug=c.slug) }}">
@@ -80,11 +107,12 @@
     {% endfor %}
   </div>
 
-  <!-- AVISOS + ENLACES -->
   <div class="grid-2">
 
     <div class="card">
-      <div class="card-head"><h3>📢 Avisos importantes</h3></div>
+      <div class="card-head">
+        <h3>📢 Avisos importantes</h3>
+      </div>
       <div class="card-body">
         {% set colores = {'info': 'ad-info', 'normativa': 'ad-normativa', 'sistema': 'ad-sistema'} %}
         {% for a in avisos %}
@@ -103,7 +131,9 @@
     </div>
 
     <div class="card">
-      <div class="card-head"><h3>🔗 Enlaces de interés</h3></div>
+      <div class="card-head">
+        <h3>🔗 Enlaces de interés</h3>
+      </div>
       <div class="card-body">
         {% for l in links_utiles %}
         <div style="padding:10px 0;border-bottom:1px solid var(--line);
@@ -116,7 +146,8 @@
         <div style="padding:10px 0">
           <div style="font-size:13px;font-weight:700;margin-bottom:6px">📞 Contacto</div>
           <div style="font-size:12px;color:var(--muted);line-height:1.8">
-            Geral: <a href="mailto:geral@academiaprofissional.pt">geral@academiaprofissional.pt</a><br>
+            Geral:
+            <a href="mailto:geral@academiaprofissional.pt">geral@academiaprofissional.pt</a><br>
             Centro: Academia Profissional Prof. Albino de Matos - Escola Profissional Vértice<br>
             Localização: Paços de Ferreira, Portugal
           </div>
