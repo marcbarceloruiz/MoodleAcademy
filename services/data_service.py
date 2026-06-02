@@ -618,10 +618,45 @@ def get_area_by_slug(slug):
 
 def get_documentos_by_area(area_slug):
     """
-    De momento no hay tabla de documentos institucionales.
-    Devuelve lista vacía para que no rompa el portal.
+    Devuelve documentos institucionales desde MySQL según el slug del área.
     """
-    return []
+    try:
+        rows = db.session.execute(
+            text("""
+                SELECT
+                    d.id,
+                    d.titulo,
+                    d.tipo,
+                    d.descricao,
+                    d.url,
+                    d.orden
+                FROM documentos_institucionais d
+                JOIN areas_institucionais a ON a.id = d.area_id
+                WHERE a.slug = :area_slug
+                  AND d.visible = 1
+                ORDER BY d.orden ASC, d.id ASC
+            """),
+            {"area_slug": area_slug}
+        ).mappings().all()
+
+        documentos = []
+
+        for row in rows:
+            documentos.append({
+                "id": row["id"],
+                "titulo": row["titulo"],
+                "tipo": row["tipo"],
+                "descripcion": row["descricao"],
+                "desc": row["descricao"],
+                "url": row["url"],
+                "orden": row["orden"],
+            })
+
+        return documentos
+
+    except Exception as e:
+        print("Error cargando documentos institucionales desde MySQL:", e)
+        return []
 
 
 # ──────────────────────────────────────────────
