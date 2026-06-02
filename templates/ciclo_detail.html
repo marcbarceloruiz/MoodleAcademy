@@ -58,9 +58,11 @@
 
                 <div style="font-size:11px;color:var(--muted)">
                   {{ disc.tipo | upper }}
+
                   {% if disc.codigo %}
                     · {{ disc.codigo }}
                   {% endif %}
+
                   {% if disc.horas %}
                     · {{ disc.horas }}h
                   {% endif %}
@@ -74,12 +76,18 @@
               </div>
 
               {% if disc.tipo == 'fct' %}
-                <span class="act-badge ab-pendiente">FCT</span>
+                <a class="act-badge ab-pendiente"
+                   href="{{ url_for('courses.disciplina_detail', disciplina_id=disc.id) }}">
+                  FCT
+                </a>
               {% elif disc.tipo == 'pap' %}
-                <span class="act-badge ab-abierto">PAP</span>
+                <a class="act-badge ab-abierto"
+                   href="{{ url_for('courses.disciplina_detail', disciplina_id=disc.id) }}">
+                  PAP
+                </a>
               {% else %}
                 <a class="btn btn-secondary btn-sm"
-                    href="{{ url_for('courses.disciplina_detail', disciplina_id=disc.id) }}">
+                   href="{{ url_for('courses.disciplina_detail', disciplina_id=disc.id) }}">
                   Ver
                 </a>
               {% endif %}
