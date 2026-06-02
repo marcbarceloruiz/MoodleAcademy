@@ -1,115 +1,369 @@
 /*
  * layout.css — Estructura principal: topbar, sidebar, hero, main-content.
- *
- * TODO: Sustituir por el CSS original cuando lo recibas.
- * Mantén los selectores .topbar, .sidebar, .body-layout, .hero, .page-wrap,
- * .main-content para que los templates Jinja los encuentren sin cambios.
+ * Campus Virtual — Academia Profissional Prof. Albino de Matos
  */
 
-/* APP WRAPPER */
+/* =========================================================
+   PALETA APPAM
+   ========================================================= */
+
+:root {
+  --appam-blue: #1f35ff;
+  --appam-blue-dark: #1728b8;
+  --appam-blue-soft: #eef2ff;
+
+  --appam-cyan: #15b8c8;
+  --appam-cyan-dark: #0b93a3;
+  --appam-cyan-soft: #e8fbff;
+
+  --appam-navy: #151b2e;
+  --appam-navy-soft: #20263a;
+
+  --appam-bg: #f4f6f8;
+  --appam-line: #e5e7eb;
+  --appam-text: #111827;
+  --appam-muted: #747b91;
+}
+
+/* =========================================================
+   APP WRAPPER
+   ========================================================= */
+
 .app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-/* ── TOPBAR ─────────────────────────────────────── */
+/* =========================================================
+   TOPBAR — blanco profesional, como web institucional
+   ========================================================= */
+
 .topbar {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 0 24px;
-  height: 58px;
-  background: var(--topbar-bg);
-  color: var(--topbar-text);
+  gap: 18px;
+  height: 68px;
+  padding: 0 28px;
+  background: #ffffff !important;
+  color: var(--appam-text) !important;
+  border-bottom: 1px solid var(--appam-line);
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.06);
   position: sticky;
   top: 0;
   z-index: 100;
   flex-shrink: 0;
 }
 
-.brand { display: flex; align-items: center; gap: 10px; }
-.brand-mark { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: 1px; }
-.brand-mark span { color: var(--cyan); }
-.brand-sub { font-size: 10px; color: var(--muted); letter-spacing: .5px; }
+/* Logo */
 
-.top-nav { display: flex; gap: 4px; margin: 0 auto; }
-.top-link {
-  display: flex; align-items: center; gap: 6px;
-  padding: 6px 14px; border-radius: var(--radius-sm);
-  font-size: 13px; font-weight: 500; color: var(--topbar-text);
-  background: none; border: none;
-  transition: background .15s;
-  text-decoration: none;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.top-link:hover, .top-link.active {
-  background: rgba(255,255,255,.1);
-  color: #fff;
-  text-decoration: none;
-}
-.top-link.active { color: var(--cyan); }
-.link-icon { font-size: 14px; }
 
-.top-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-.icon-btn {
-  display: flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px; border-radius: 50%;
-  background: rgba(255,255,255,.08); border: none;
-  color: var(--topbar-text); font-size: 15px;
-  cursor: pointer; position: relative; transition: background .15s;
-}
-.icon-btn:hover { background: rgba(255,255,255,.15); }
-.badge-dot {
-  width: 7px; height: 7px; background: var(--danger);
-  border-radius: 50%; position: absolute; top: 5px; right: 5px;
-}
-.user-name { font-size: 13px; color: var(--topbar-text); font-weight: 500; }
-.avatar {
-  width: 34px; height: 34px; border-radius: 50%;
-  background: var(--cyan); color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700; cursor: pointer;
+.brand-appam {
+  width: 245px;
+  min-width: 245px;
+  height: 68px;
+  display: flex;
+  align-items: center;
   flex-shrink: 0;
 }
 
-/* ── BODY LAYOUT ────────────────────────────────── */
+.brand-link-appam {
+  width: auto;
+  height: auto;
+  background: transparent !important;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none !important;
+  border-right: none;
+  text-decoration: none !important;
+  color: inherit;
+}
+
+.brand-logo-chip {
+  width: auto;
+  height: auto;
+  background: transparent !important;
+  padding: 0;
+  box-shadow: none !important;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+}
+
+.brand-logo-appam {
+  width: 190px;
+  max-width: 190px;
+  max-height: 44px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Ocultar restos antiguos de marca textual */
+
+.brand-mark,
+.brand-sub,
+.brand-mark-appam,
+.brand-text-appam,
+.brand-product-name,
+.brand-text-appam .brand-sub {
+  display: none !important;
+}
+
+/* =========================================================
+   TOP NAV
+   ========================================================= */
+
+.top-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 auto;
+}
+
+.top-link {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--appam-text) !important;
+  background: transparent;
+  border: none;
+  transition: background .15s, color .15s, transform .12s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.top-link:hover {
+  background: #f3f4f6 !important;
+  color: var(--appam-text) !important;
+  text-decoration: none;
+}
+
+.top-link.active {
+  background: var(--appam-blue-soft) !important;
+  color: var(--appam-blue) !important;
+  text-decoration: none;
+}
+
+.link-icon {
+  font-size: 14px;
+}
+
+/* =========================================================
+   USER ACTIONS
+   ========================================================= */
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #f3f4f6 !important;
+  border: none;
+  color: var(--appam-text) !important;
+  font-size: 15px;
+  cursor: pointer;
+  position: relative;
+  transition: background .15s;
+}
+
+.icon-btn:hover {
+  background: #e5e7eb !important;
+}
+
+/* Sin rojo fuerte: punto azul/cian corporativo */
+.badge-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--appam-blue);
+  border-radius: 50%;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+
+.user-name {
+  font-size: 13px;
+  color: var(--appam-text) !important;
+  font-weight: 700;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--appam-blue) !important;
+  color: #ffffff !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   BODY LAYOUT
+   ========================================================= */
+
 .body-layout {
   display: flex;
   flex: 1;
   min-height: 0;
 }
 
-/* ── SIDEBAR ────────────────────────────────────── */
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
 .sidebar {
   width: 240px;
   min-width: 240px;
   background: var(--sidebar-bg);
   border-right: 1px solid var(--line);
   overflow-y: auto;
-  padding: 16px 0;
+  padding: 10px 0 16px;
   flex-shrink: 0;
 }
 
-.sidebar-head { padding: 0 16px 12px; }
-.sidebar-head h2 { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
-.sidebar-section { margin-bottom: 8px; }
-.sidebar-group-title { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; padding: 8px 16px 4px; }
-.sidebar-item {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 16px; font-size: 13px; color: var(--text-2);
-  background: none; border: none; width: 100%; text-align: left;
-  cursor: pointer; border-radius: 0; transition: background .12s;
-  text-decoration: none;
-}
-.sidebar-item:hover { background: var(--cyan-light); text-decoration: none; }
-.sidebar-item.active { background: var(--cyan-light); color: var(--cyan-dark); font-weight: 600; }
-.item-icon { font-size: 14px; flex-shrink: 0; }
-.item-badge {
-  margin-left: auto; background: var(--cyan); color: #fff;
-  font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 99px;
+/* Ocultar cabeceras antiguas o logos duplicados */
+
+.sidebar-head,
+.sidebar-head-appam,
+.sidebar-head-text-only,
+.sidebar-campus-title,
+.sidebar-campus-subtitle,
+.sidebar-campus-official,
+.sidebar-campus-school,
+.sidebar-campus-label,
+.sidebar-school-name,
+.sidebar-logo-appam {
+  display: none !important;
 }
 
-/* ── MAIN CONTENT ───────────────────────────────── */
+.sidebar-section {
+  margin-bottom: 8px;
+}
+
+.sidebar-section-first .sidebar-group-title {
+  padding-top: 8px;
+}
+
+.sidebar-group-title {
+  padding: 12px 16px 5px;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .09em;
+}
+
+.sidebar-item {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--text-2);
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 0;
+  transition: background .12s, color .12s;
+  text-decoration: none;
+}
+
+.sidebar-item:hover {
+  background: var(--appam-blue-soft);
+  text-decoration: none;
+}
+
+.sidebar-item.active {
+  border-left: 3px solid var(--appam-blue);
+  padding-left: 13px;
+  background: var(--appam-blue-soft);
+  color: var(--appam-blue) !important;
+  font-weight: 700;
+}
+
+.item-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.item-badge {
+  margin-left: auto;
+  background: var(--appam-blue);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 99px;
+}
+
+.sidebar-item-restricted .item-badge-restricted {
+  background: rgba(31, 53, 255, .12);
+  color: var(--appam-blue-dark);
+}
+
+.sidebar-course-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.sidebar-course-progress {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--appam-blue);
+  flex-shrink: 0;
+}
+
+.sidebar-event-date {
+  font-size: 11px;
+}
+
+.sidebar-event-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+
+/* =========================================================
+   MAIN CONTENT
+   ========================================================= */
+
 .main-content {
   flex: 1;
   min-width: 0;
@@ -118,20 +372,183 @@
   flex-direction: column;
 }
 
-/* ── HERO ───────────────────────────────────────── */
+/* =========================================================
+   HERO
+   ========================================================= */
+
 .hero {
-  background: linear-gradient(135deg, var(--topbar-bg) 0%, #252b40 100%);
+  background: linear-gradient(135deg, var(--appam-navy) 0%, var(--appam-navy-soft) 100%);
   padding: 24px 32px 20px;
-  color: #fff;
+  color: #ffffff;
 }
-.hero-label { font-size: 11px; color: var(--cyan); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-.hero-title { font-size: 22px; font-weight: 700; }
 
-.hero-progress-box { margin-top: 12px; max-width: 320px; }
-.progress-label { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,.7); margin-bottom: 6px; }
-.prog-pct { font-weight: 700; color: var(--cyan); }
-.progress-track { height: 6px; background: rgba(255,255,255,.15); border-radius: 99px; overflow: hidden; }
-.progress-fill { height: 100%; background: var(--cyan); border-radius: 99px; transition: width .4s; }
+.hero-label {
+  font-size: 11px;
+  color: var(--appam-cyan);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
 
-/* ── PAGE WRAP ──────────────────────────────────── */
-.page-wrap { padding: 24px; flex: 1; }
+.hero-title {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.hero-progress-box {
+  margin-top: 12px;
+  max-width: 320px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: rgba(255, 255, 255, .7);
+  margin-bottom: 6px;
+}
+
+.prog-pct {
+  font-weight: 700;
+  color: var(--appam-cyan);
+}
+
+.progress-track {
+  height: 6px;
+  background: rgba(255, 255, 255, .15);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--appam-blue) 0%, var(--appam-cyan) 100%);
+  border-radius: 99px;
+  transition: width .4s;
+}
+
+/* =========================================================
+   PAGE WRAP
+   ========================================================= */
+
+.page-wrap {
+  padding: 24px;
+  flex: 1;
+}
+
+/* =========================================================
+   APPAM — AJUSTES DE COLOR EN COMPONENTES EXISTENTES
+   ========================================================= */
+
+/* Banner principal del dashboard */
+.welcome-banner {
+  background: linear-gradient(135deg, var(--appam-blue-dark) 0%, var(--appam-cyan) 100%) !important;
+  box-shadow: 0 14px 34px rgba(31, 53, 255, .16);
+}
+
+/* Miniaturas de cursos */
+.mini-thumb {
+  background: linear-gradient(135deg, var(--appam-blue) 0%, var(--appam-cyan) 100%) !important;
+}
+
+.mini-prog-num {
+  color: var(--appam-blue) !important;
+}
+
+.mini-prog-bar span {
+  background: linear-gradient(90deg, var(--appam-blue) 0%, var(--appam-cyan) 100%) !important;
+}
+
+/* Fechas y detalles de tareas */
+.task-date {
+  color: var(--appam-blue) !important;
+}
+
+/* Botones principales */
+.btn-primary,
+.btn.btn-primary {
+  background: var(--appam-blue) !important;
+  border-color: var(--appam-blue) !important;
+  color: #ffffff !important;
+}
+
+.btn-primary:hover,
+.btn.btn-primary:hover {
+  background: var(--appam-blue-dark) !important;
+  border-color: var(--appam-blue-dark) !important;
+}
+
+/* Botones rápidos */
+.quick-btn:hover {
+  border-color: var(--appam-blue) !important;
+  box-shadow: 0 2px 10px rgba(31, 53, 255, .14) !important;
+}
+
+/* Enlaces */
+a {
+  color: var(--appam-blue);
+}
+
+a:hover {
+  color: var(--appam-blue-dark);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1180px) {
+  .brand-appam {
+    width: 210px;
+    min-width: 210px;
+  }
+
+  .brand-logo-appam {
+    width: 165px;
+    max-width: 165px;
+  }
+
+  .top-link {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 860px) {
+  .topbar {
+    height: 62px;
+    padding: 0 14px;
+  }
+
+  .brand-appam {
+    width: auto;
+    min-width: auto;
+  }
+
+  .brand-logo-appam {
+    width: 145px;
+    max-width: 145px;
+    max-height: 36px;
+  }
+
+  .top-nav {
+    display: none;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 62px;
+    left: -260px;
+    height: calc(100vh - 62px);
+    z-index: 90;
+    transition: left .2s ease;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  .page-wrap {
+    padding: 18px;
+  }
+}

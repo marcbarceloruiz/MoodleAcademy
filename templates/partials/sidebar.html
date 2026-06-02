@@ -1,29 +1,95 @@
 <aside class="sidebar" id="sidebar" aria-label="Navegación lateral">
   <div id="sidebar-default">
 
-    <div class="sidebar-head">
-      <h2>Mi Campus</h2>
-    </div>
+    {% set current_endpoint = request.endpoint or '' %}
+    {% set current_area_slug = active_area_slug if active_area_slug is defined else (request.view_args.get('area_slug') if request.view_args else None) %}
 
-    <div class="sidebar-section">
+    <div class="sidebar-section sidebar-section-first">
       <div class="sidebar-group-title">Navegación</div>
 
-      <a class="sidebar-item {% if request.endpoint == 'dashboard.dashboard' %}active{% endif %}"
+      <a class="sidebar-item {% if current_endpoint == 'dashboard.dashboard' %}active{% endif %}"
          href="{{ url_for('dashboard.dashboard') }}">
         <span class="item-icon">🏠</span> Mi plan formativo
       </a>
-      <a class="sidebar-item {% if request.endpoint and request.endpoint.startswith('courses') %}active{% endif %}"
+
+      <a class="sidebar-item {% if current_endpoint == 'courses.courses' or current_endpoint == 'courses.course_detail' %}active{% endif %}"
          href="{{ url_for('courses.courses') }}">
         <span class="item-icon">📚</span> Mis cursos
         <span class="item-badge">{{ usuario.matriculas | length }}</span>
       </a>
-      <a class="sidebar-item {% if request.endpoint == 'admin.admin' %}active{% endif %}"
+
+      <a class="sidebar-item {% if current_endpoint == 'courses.ciclos' or current_endpoint == 'courses.ciclo_detail' %}active{% endif %}"
+         href="{{ url_for('courses.ciclos') }}">
+        <span class="item-icon">🎓</span> Ciclos formativos
+      </a>
+
+      <a class="sidebar-item {% if current_endpoint == 'admin.admin' %}active{% endif %}"
          href="{{ url_for('admin.admin') }}">
         <span class="item-icon">⚙</span> Administración
       </a>
-      <a class="sidebar-item {% if request.endpoint == 'portal.portal' %}active{% endif %}"
+
+      <a class="sidebar-item {% if current_endpoint == 'portal.portal' and not current_area_slug %}active{% endif %}"
          href="{{ url_for('portal.portal') }}">
-        <span class="item-icon">🏛</span> Portal Vertice
+        <span class="item-icon">🏛</span> Portal institucional
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-group-title">Área institucional</div>
+
+      <a class="sidebar-item {% if current_area_slug == 'regulamento-interno' %}active{% endif %}"
+         href="{{ url_for('portal.portal_area', area_slug='regulamento-interno') }}">
+        <span class="item-icon">📋</span> Regulamento Interno
+      </a>
+
+      <a class="sidebar-item {% if current_area_slug == 'projeto-educativo' %}active{% endif %}"
+         href="{{ url_for('portal.portal_area', area_slug='projeto-educativo') }}">
+        <span class="item-icon">📖</span> Projeto Educativo
+      </a>
+
+      <a class="sidebar-item {% if current_area_slug == 'plano-atividades' %}active{% endif %}"
+         href="{{ url_for('portal.portal_area', area_slug='plano-atividades') }}">
+        <span class="item-icon">📅</span> Plano de Atividades
+      </a>
+
+      <a class="sidebar-item {% if current_area_slug == 'eqavet' %}active{% endif %}"
+         href="{{ url_for('portal.portal_area', area_slug='eqavet') }}">
+        <span class="item-icon">🏅</span> EQAVET
+      </a>
+
+      <a class="sidebar-item {% if current_area_slug == 'erasmus' %}active{% endif %}"
+         href="{{ url_for('portal.portal_area', area_slug='erasmus') }}">
+        <span class="item-icon">🇪🇺</span> Erasmus+
+      </a>
+
+      <a class="sidebar-item {% if current_area_slug == 'manual-aluno' %}active{% endif %}"
+         href="{{ url_for('portal.portal_area', area_slug='manual-aluno') }}">
+        <span class="item-icon">🎒</span> Manual do Aluno
+      </a>
+
+      <a class="sidebar-item {% if current_area_slug == 'manual-formador' %}active{% endif %}"
+         href="{{ url_for('portal.portal_area', area_slug='manual-formador') }}">
+        <span class="item-icon">👨‍🏫</span> Manual do Formador
+      </a>
+
+      <a class="sidebar-item {% if current_area_slug == 'biblioteca-digital' %}active{% endif %}"
+         href="{{ url_for('portal.portal_area', area_slug='biblioteca-digital') }}">
+        <span class="item-icon">📚</span> Biblioteca Digital
+      </a>
+
+      <a class="sidebar-item {% if current_area_slug == 'centro-qualifica' %}active{% endif %}"
+         href="{{ url_for('portal.portal_area', area_slug='centro-qualifica') }}">
+        <span class="item-icon">🎓</span> Centro Qualifica
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-group-title">Área restringida</div>
+
+      <a class="sidebar-item sidebar-item-restricted {% if current_area_slug == 'area-docente' %}active{% endif %}"
+         href="{{ url_for('portal.portal_area', area_slug='area-docente') }}">
+        <span class="item-icon">🔒</span> Área Docente
+        <span class="item-badge item-badge-restricted">Docentes</span>
       </a>
     </div>
 
@@ -31,13 +97,14 @@
     {% if sidebar_courses %}
     <div class="sidebar-section">
       <div class="sidebar-group-title">Mis cursos activos</div>
+
       {% for c in sidebar_courses %}
       <a class="sidebar-item" href="{{ url_for('courses.course_detail', course_id=c.id) }}">
         <span class="item-icon">📖</span>
-        <span style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex:1">
+        <span class="sidebar-course-title">
           {{ c.titulo.split(':')[0] }}
         </span>
-        <span style="font-size:10px;font-weight:700;color:var(--cyan-dark);flex-shrink:0">
+        <span class="sidebar-course-progress">
           {{ c._progreso }}%
         </span>
       </a>
@@ -49,10 +116,13 @@
     {% if sidebar_events %}
     <div class="sidebar-section">
       <div class="sidebar-group-title">Próximos eventos</div>
+
       {% for ev in sidebar_events[:3] %}
       <div class="sidebar-item">
-        <span class="item-icon" style="font-size:11px">{{ ev._fecha_corta if ev._fecha_corta is defined else ev.fecha }}</span>
-        <span style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:12px">
+        <span class="item-icon sidebar-event-date">
+          {{ ev._fecha_corta if ev._fecha_corta is defined else ev.fecha }}
+        </span>
+        <span class="sidebar-event-title">
           {{ ev.titulo }}
         </span>
       </div>

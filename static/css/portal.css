@@ -24,3 +24,72 @@
 .pci-gray   { background: var(--bg); }
 .portal-card h3 { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
 .portal-card p  { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* ── Portal institucional con páginas internas ─────────────── */
+.portal-card {
+  position: relative;
+  text-decoration: none;
+  color: var(--text-1);
+  display: block;
+}
+.portal-card:hover { color: var(--text-1); text-decoration: none; }
+.portal-card-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--danger);
+  background: #fff1f1;
+  border-radius: 99px;
+  padding: 2px 7px;
+}
+.area-breadcrumb {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+  margin-bottom: 16px;
+  color: var(--muted);
+}
+.area-breadcrumb a { font-weight: 700; }
+.portal-detail-card { border-left: 3px solid var(--cyan); }
+.portal-detail-intro {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.8;
+}
+.docs-list { display: flex; flex-direction: column; gap: 8px; }
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  background: var(--surface);
+}
+.doc-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cyan-light);
+  flex-shrink: 0;
+}
+.doc-info { flex: 1; min-width: 0; }
+.doc-titulo { font-size: 13px; font-weight: 700; }
+.doc-desc { font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+.doc-type {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--cyan-dark);
+  background: var(--cyan-light);
+  border-radius: 99px;
+  padding: 3px 8px;
+  flex-shrink: 0;
+}

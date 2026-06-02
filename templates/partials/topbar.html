@@ -1,38 +1,51 @@
 <header class="topbar" role="banner">
 
-  <!-- Marca -->
-  <div class="brand">
+  <!-- Marca institucional: solo logo oficial APPAM -->
+  <div class="brand brand-appam">
     <button class="icon-btn" id="menu-toggle"
             title="Menú" aria-label="Abrir menú" style="display:none">
       <span>☰</span>
     </button>
-    <div>
-      <div class="brand-mark">VERTI<span>CE</span></div>
-      <div class="brand-sub">Academia · Campus Virtual</div>
-    </div>
+
+    <a href="{{ url_for('dashboard.dashboard') }}"
+       class="brand-link-appam"
+       aria-label="Ir al Campus Virtual de la Academia Profissional Prof. Albino de Matos">
+      <img src="{{ url_for('static', filename='img/logo-appam.svg') }}"
+           alt="Academia Profissional Prof. Albino de Matos"
+           class="brand-logo-appam">
+    </a>
   </div>
 
   <!-- Navegación principal -->
   <nav class="top-nav" aria-label="Navegación principal">
     <a class="top-link {% if request.endpoint == 'dashboard.dashboard' %}active{% endif %}"
-       href="{{ url_for('dashboard.dashboard') }}" aria-label="Mi plan formativo">
+       href="{{ url_for('dashboard.dashboard') }}">
       <span class="link-icon">▦</span>
       <span>Mi plan formativo</span>
     </a>
-    <a class="top-link {% if request.endpoint and request.endpoint.startswith('courses') %}active{% endif %}"
-       href="{{ url_for('courses.courses') }}" aria-label="Mis cursos">
+
+    <a class="top-link {% if request.endpoint == 'courses.courses' or request.endpoint == 'courses.course_detail' %}active{% endif %}"
+       href="{{ url_for('courses.courses') }}">
       <span class="link-icon">☰</span>
       <span>Mis cursos</span>
     </a>
+
+    <a class="top-link {% if request.endpoint == 'courses.ciclos' or request.endpoint == 'courses.ciclo_detail' %}active{% endif %}"
+       href="{{ url_for('courses.ciclos') }}">
+      <span class="link-icon">🎓</span>
+      <span>Ciclos formativos</span>
+    </a>
+
     <a class="top-link {% if request.endpoint == 'admin.admin' %}active{% endif %}"
-       href="{{ url_for('admin.admin') }}" aria-label="Administración del sitio">
+       href="{{ url_for('admin.admin') }}">
       <span class="link-icon">⚙</span>
       <span>Administración del sitio</span>
     </a>
-    <a class="top-link {% if request.endpoint == 'portal.portal' %}active{% endif %}"
-       href="{{ url_for('portal.portal') }}" aria-label="Portal Vertice">
+
+    <a class="top-link {% if request.endpoint == 'portal.portal' or request.endpoint == 'portal.portal_area' %}active{% endif %}"
+       href="{{ url_for('portal.portal') }}">
       <span class="link-icon">⌂</span>
-      <span>Portal Vertice</span>
+      <span>Portal</span>
     </a>
   </nav>
 
@@ -43,15 +56,18 @@
       <span>🔔</span>
       <span class="badge-dot"></span>
     </button>
+
     <button class="icon-btn" title="Mensajes" aria-label="Mensajes"
             onclick="abrirModal('Mensajes', '<p class=&quot;modal-text&quot;>No tienes mensajes nuevos.</p>')">
       <span>✉</span>
     </button>
+
     <span class="user-name">{{ usuario.nombre }}</span>
+
     <div class="avatar" title="Mi perfil"
          onclick="abrirModalPerfil()"
          role="button" tabindex="0"
-         onkeydown="if(event.key==='Enter') abrirModalPerfil()">
+         onkeydown="if(event.key==='Enter')abrirModalPerfil()">
       {{ usuario.iniciales }}
     </div>
   </div>
