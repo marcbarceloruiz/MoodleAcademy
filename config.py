@@ -1,6 +1,5 @@
 """
 Configuración de la aplicación.
-Academia Profissional Prof. Albino de Matos - Escola Profissional Vértice
 """
 
 import os
@@ -10,9 +9,7 @@ load_dotenv()
 
 
 class Config:
-    SECRET_KEY = os.environ.get("SECRET_KEY", "academia-vertice-dev-key-2025")
-    DEBUG = True
-    TEMPLATES_AUTO_RELOAD = True
+    SECRET_KEY = os.environ.get("SECRET_KEY", "academia-vertice-dev-key")
 
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DATABASE_URL",
@@ -20,3 +17,6 @@ class Config:
     )
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    DEBUG = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
+    TEMPLATES_AUTO_RELOAD = True
