@@ -8,51 +8,94 @@
 <div class="view-header">
   <div>
     <h1>Ciclos Formativos</h1>
-    <p class="subtitle">Cursos profissionais e EFA da Academia Profissional Prof. Albino de Matos - Escola Profissional Vértice</p>
+    <p class="subtitle">
+      Cursos profissionais e EFA da Academia Profissional Prof. Albino de Matos - Escola Profissional Vértice
+    </p>
   </div>
 </div>
 
 <div class="courses-filters mb-20">
-  <a class="filter-btn {% if not area_activa %}active{% endif %}" href="{{ url_for('courses.ciclos') }}">Todos</a>
-  <a class="filter-btn {% if area_activa == 'social' %}active{% endif %}" href="{{ url_for('courses.ciclos', area='social') }}">Social</a>
-  <a class="filter-btn {% if area_activa == 'industrial' %}active{% endif %}" href="{{ url_for('courses.ciclos', area='industrial') }}">Industrial</a>
-  <a class="filter-btn {% if area_activa == 'madeira' %}active{% endif %}" href="{{ url_for('courses.ciclos', area='madeira') }}">Madeira</a>
-  <a class="filter-btn {% if area_activa == 'design' %}active{% endif %}" href="{{ url_for('courses.ciclos', area='design') }}">Design</a>
-  <a class="filter-btn {% if area_activa == 'informatica' %}active{% endif %}" href="{{ url_for('courses.ciclos', area='informatica') }}">Informática</a>
-  <a class="filter-btn {% if area_activa == 'efa' %}active{% endif %}" href="{{ url_for('courses.ciclos', area='efa') }}">Cursos EFA</a>
+  <a class="filter-btn {% if not area_activa %}active{% endif %}"
+     href="{{ url_for('courses.ciclos') }}">
+    Todos
+  </a>
+
+  <a class="filter-btn {% if area_activa == 'social' %}active{% endif %}"
+     href="{{ url_for('courses.ciclos', area='social') }}">
+    Social
+  </a>
+
+  <a class="filter-btn {% if area_activa == 'industrial' %}active{% endif %}"
+     href="{{ url_for('courses.ciclos', area='industrial') }}">
+    Industrial
+  </a>
+
+  <a class="filter-btn {% if area_activa == 'madeira' %}active{% endif %}"
+     href="{{ url_for('courses.ciclos', area='madeira') }}">
+    Madeira
+  </a>
+
+  <a class="filter-btn {% if area_activa == 'design' %}active{% endif %}"
+     href="{{ url_for('courses.ciclos', area='design') }}">
+    Design
+  </a>
+
+  <a class="filter-btn {% if area_activa == 'informatica' %}active{% endif %}"
+     href="{{ url_for('courses.ciclos', area='informatica') }}">
+    Informática
+  </a>
+
+  <a class="filter-btn {% if area_activa == 'efa' %}active{% endif %}"
+     href="{{ url_for('courses.ciclos', area='efa') }}">
+    Cursos EFA
+  </a>
 </div>
 
 {% if ciclos %}
-<div class="ciclos-grid">
-  {% for c in ciclos %}
-  <article class="ciclo-card">
-    <div class="ciclo-card-head">
-      <div style="font-size:26px;margin-bottom:8px">{{ c._icono }}</div>
-      <h3 style="font-size:16px;line-height:1.35">{{ c.nombre }}</h3>
-    </div>
-    <div class="ciclo-card-body">
-      <div class="ciclo-area-badge">{{ c._area_label }}</div>
-      <p style="font-size:12px;color:var(--muted);line-height:1.6;margin:10px 0">
-        {{ c.descripcion or 'Ciclo formativo profissional.' }}
-      </p>
-      <div style="font-size:12px;color:var(--text-2);margin-bottom:12px">
-        <strong>{{ c.nivel or 'Nível 4' }}</strong> · {{ c.duracion or '3 anos' }}
-      </div>
-      <a href="{{ url_for('courses.ciclo_detail', ciclo_id=c.id) }}" class="btn btn-primary btn-sm">
-        Ver estructura →
-      </a>
-    </div>
-  </article>
-  {% endfor %}
-</div>
-{% else %}
-<div class="card">
-  <div class="card-body">
-    <p style="font-size:13px;color:var(--muted);line-height:1.7">
-      Todavía no hay ciclos cargados. Ejecuta <strong>python seed.py</strong> para cargar datos iniciales.
-    </p>
+  <div class="ciclos-grid">
+    {% for c in ciclos %}
+      <article class="ciclo-card">
+        <div class="ciclo-card-head">
+          <div style="font-size:26px;margin-bottom:8px">
+            {{ c._icono }}
+          </div>
+
+          <h3 style="font-size:16px;line-height:1.35">
+            {{ c.nombre }}
+          </h3>
+        </div>
+
+        <div class="ciclo-card-body">
+          <div class="ciclo-area-badge">
+            {{ c._area_label }}
+          </div>
+
+          <p style="font-size:12px;color:var(--muted);line-height:1.6;margin:10px 0">
+            {{ c.descripcion or 'Ciclo formativo profissional.' }}
+          </p>
+
+          <div style="font-size:12px;color:var(--text-2);margin-bottom:12px">
+            <strong>{{ c.nivel or 'Nível 4' }}</strong>
+            ·
+            {{ c.duracion or '3 anos' }}
+          </div>
+
+          <a href="{{ url_for('courses.ciclo_detail', ciclo_id=c.id) }}"
+             class="btn btn-primary btn-sm">
+            Ver estrutura →
+          </a>
+        </div>
+      </article>
+    {% endfor %}
   </div>
-</div>
+{% else %}
+  <div class="card">
+    <div class="card-body">
+      <p style="font-size:13px;color:var(--muted);line-height:1.7">
+        Ainda não existem ciclos carregados nesta área.
+      </p>
+    </div>
+  </div>
 {% endif %}
 
 {% endblock %}
