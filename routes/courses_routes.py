@@ -17,6 +17,7 @@ from services.data_service import (
     tipo_css_class,
     get_ciclos_formativos,
     get_ciclo_by_id,
+    get_disciplina_by_id,
 )
 
 courses_bp = Blueprint("courses", __name__)
@@ -151,4 +152,20 @@ def ciclo_detail(ciclo_id):
         "ciclo_detail.html",
         usuario=usuario,
         ciclo=ciclo,
+    )
+@courses_bp.route("/disciplinas/<int:disciplina_id>")
+def disciplina_detail(disciplina_id):
+    """
+    Detalle tipo Moodle de una disciplina/asignatura.
+    """
+    usuario = get_current_user()
+    disciplina = get_disciplina_by_id(disciplina_id)
+
+    if not disciplina:
+        return render_template("404.html", usuario=usuario), 404
+
+    return render_template(
+        "disciplina_detail.html",
+        usuario=usuario,
+        disciplina=disciplina,
     )

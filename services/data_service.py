@@ -926,3 +926,156 @@ def _get_ciclo_fallback_by_id(ciclo_id):
     ]
 
     return ciclo
+
+    # ──────────────────────────────────────────────
+# DETALLE DE DISCIPLINA / ASIGNATURA
+# ──────────────────────────────────────────────
+
+def get_disciplina_by_id(disciplina_id):
+    """
+    Devuelve una disciplina/asignatura con su ciclo, año, secciones y recursos.
+    """
+    try:
+        disciplina_row = db.session.execute(
+            text("""
+                SELECT
+                    d.id,
+                    d.codigo,
+                    d.nombre,
+                    d.tipo,
+                    d.horas,
+                    d.descripcion,
+                    a.id AS ano_id,
+                    a.numero AS ano_numero,
+                    a.ano_escolar,
+                    c.id AS ciclo_id,
+                    c.codigo AS ciclo_codigo,
+                    c.nombre AS ciclo_nombre,
+                    c.area AS ciclo_area,
+                    c.nivel AS ciclo_nivel,
+                    c.duracion AS ciclo_duracion
+                FROM disciplinas_ciclo d
+                JOIN anos_ciclo a ON a.id = d.ano_id
+                JOIN ciclos_formativos c ON c.id = a.ciclo_id
+                WHERE d.id = :disciplina_id
+                LIMIT 1
+            """),
+            {"disciplina_id": disciplina_id}
+        ).mappings().first()
+
+        if not disciplina_row:
+            return None
+
+        disciplina = {
+            "id": disciplina_row["id"],
+            "codigo": disciplina_row["codigo"],
+            "nombre": disciplina_row["nombre"],
+            "tipo": disciplina_row["tipo"],
+            "horas": disciplina_row["horas"],
+            "descripcion": disciplina_row["descripcion"],
+            "ano": {
+                "id": disciplina_row["ano_id"],
+                "numero": disciplina_row["ano_numero"],
+                "ano_escolar": disciplina_row["ano_escolar"],
+            },
+            "ciclo": {
+                "id": disciplina_row["ciclo_id"],
+                "codigo": disciplina_row["ciclo_codigo"],
+                "nombre": disciplina_row["ciclo_nombre"],
+                "area": disciplina_row["ciclo_area"],
+                "nivel": disciplina_row["ciclo_nivel"],
+                "duracion": disciplina_row["ciclo_duracion"],
+            },
+            "secciones": [],
+        }
+
+        secciones_rows = db.session.execute(
+            text("""
+                SELECT
+                    id,
+                    titulo,
+                    slug,
+                    descripcion,
+                    orden
+                FROM secciones_disciplina
+                WHERE disciplina_id = :disciplina_id
+                  AND visible = 1
+                ORDER BY orden ASC, id ASC
+            """),
+            {"disciplina_id": disciplina_id}
+        ).mappings().all()
+
+        for seccion_row in secciones_rows:
+            seccion = {
+                "id": seccion_row["id"],
+                "titulo": seccion_row["titulo"],
+                "slug": seccion_row["slug"],
+                "descripcion": seccion_row["descripcion"],
+                "orden": seccion_row["orden"],
+                "recursos": [],
+            }
+
+            recursos_rows = db.session.execute(
+                text("""
+                    SELECT
+                        id,
+                        titulo,
+                        tipo,
+                        descripcion,
+                        url,
+                        orden
+                    FROM recursos_disciplina
+                    WHERE seccion_id = :seccion_id
+                      AND visible = 1
+                    ORDER BY orden ASC, id ASC
+                """),
+                {"seccion_id": seccion_row["id"]}
+            ).mappings().all()
+
+            for recurso_row in recursos_rows:
+                tipo = recurso_row["tipo"]
+
+                seccion["recursos"].append({
+                    "id": recurso_row["id"],
+                    "titulo": recurso_row["titulo"],
+                    "tipo": tipo,
+                    "descripcion": recurso_row["descripcion"],
+                    "url": recurso_row["url"],
+                    "orden": recurso_row["orden"],
+                    "_icono": recurso_icono(tipo),
+                    "_badge": recurso_badge(tipo),
+                })
+
+            disciplina["secciones"].append(seccion)
+
+        return disciplina
+
+    except Exception as e:
+        print("Error cargando disciplina desde MySQL:", e)
+        return None
+
+
+def recurso_icono(tipo):
+    return {
+        "documento": "📄",
+        "video": "▶",
+        "lectura": "📖",
+        "tarea": "✏",
+        "foro": "💬",
+        "cuestionario": "✅",
+        "evidencia": "📁",
+        "enlace": "🔗",
+    }.get(tipo, "📌")
+
+
+def recurso_badge(tipo):
+    return {
+        "documento": "DOCUMENTO",
+        "video": "VÍDEO",
+        "lectura": "LECTURA",
+        "tarea": "TAREA",
+        "foro": "FORO",
+        "cuestionario": "CUESTIONARIO",
+        "evidencia": "EVIDENCIA",
+        "enlace": "ENLACE",
+    }.get(tipo, tipo.upper() if tipo else "RECURSO")
