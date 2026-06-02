@@ -26,40 +26,82 @@
   </div>
 </div>
 
+<!-- Resumen superior de la disciplina -->
 <div class="card mb-20">
   <div class="card-body">
-    <p style="font-size:13px;color:var(--text-2);line-height:1.7">
-      {% if disciplina.descripcion %}
-        {{ disciplina.descripcion }}
-      {% else %}
-        Espaço da disciplina com informação geral, conteúdos, avaliação, evidências e comunicação.
-      {% endif %}
-    </p>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap">
+      <div style="flex:1;min-width:260px">
+        <h3 style="font-size:16px;margin-bottom:8px">
+          Espaço da disciplina
+        </h3>
 
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
-      <span class="act-badge ab-abierto">{{ disciplina.tipo | upper }}</span>
+        <p style="font-size:13px;color:var(--text-2);line-height:1.7">
+          {% if disciplina.descripcion %}
+            {{ disciplina.descripcion }}
+          {% else %}
+            Espaço organizado para consulta de informação geral, conteúdos, avaliação,
+            evidências e comunicação da disciplina.
+          {% endif %}
+        </p>
+      </div>
 
-      {% if disciplina.horas %}
-        <span class="act-badge ab-pendiente">{{ disciplina.horas }}h</span>
-      {% endif %}
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <span class="act-badge ab-abierto">
+          {{ disciplina.tipo | upper }}
+        </span>
 
-      <span class="act-badge ab-completado">{{ disciplina.ano.ano_escolar }}</span>
+        {% if disciplina.horas %}
+          <span class="act-badge ab-pendiente">
+            {{ disciplina.horas }}h
+          </span>
+        {% endif %}
+
+        <span class="act-badge ab-completado">
+          {{ disciplina.ano.ano_escolar }}
+        </span>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- Navegación rápida -->
+{% if disciplina.secciones %}
+  <div class="card mb-20">
+    <div class="card-head">
+      <h3>Accesos rápidos</h3>
+    </div>
+
+    <div class="card-body">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        {% for seccion in disciplina.secciones %}
+          <a href="#{{ seccion.slug }}"
+             class="btn btn-secondary btn-sm">
+            {{ seccion.titulo }}
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<!-- Secciones tipo Moodle -->
 {% if disciplina.secciones %}
   {% for seccion in disciplina.secciones %}
     <section class="card mb-20" id="{{ seccion.slug }}">
       <div class="card-head">
         <div>
           <h3>{{ seccion.titulo }}</h3>
+
           {% if seccion.descripcion %}
-            <p style="font-size:12px;color:var(--muted);margin-top:4px">
+            <p style="font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5">
               {{ seccion.descripcion }}
             </p>
           {% endif %}
         </div>
+
+        <span class="text-sm text-muted">
+          {{ seccion.recursos|length }} recurso(s)
+        </span>
       </div>
 
       <div class="card-body" style="padding:0">
