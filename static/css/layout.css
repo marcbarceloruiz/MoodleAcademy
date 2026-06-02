@@ -1,44 +1,28 @@
 /*
- * layout.css — Estructura principal: topbar, sidebar, hero, main-content.
+ * layout.css — estructura principal: topbar, sidebar, hero y contenedor.
  * Campus Virtual — Academia Profissional Prof. Albino de Matos
  */
-
-/* =========================================================
-   PALETA APPAM
-   ========================================================= */
 
 :root {
   --appam-blue: #1f35ff;
   --appam-blue-dark: #1728b8;
   --appam-blue-soft: #eef2ff;
-
   --appam-cyan: #15b8c8;
   --appam-cyan-dark: #0b93a3;
-  --appam-cyan-soft: #e8fbff;
-
   --appam-navy: #151b2e;
   --appam-navy-soft: #20263a;
-
-  --appam-bg: #f4f6f8;
   --appam-line: #e5e7eb;
   --appam-text: #111827;
-  --appam-muted: #747b91;
 }
 
-/* =========================================================
-   APP WRAPPER
-   ========================================================= */
-
+/* APP WRAPPER */
 .app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-/* =========================================================
-   TOPBAR — blanco profesional, como web institucional
-   ========================================================= */
-
+/* TOPBAR */
 .topbar {
   display: flex;
   align-items: center;
@@ -54,8 +38,6 @@
   z-index: 100;
   flex-shrink: 0;
 }
-
-/* Logo */
 
 .brand {
   display: flex;
@@ -73,31 +55,15 @@
 }
 
 .brand-link-appam {
-  width: auto;
-  height: auto;
-  background: transparent !important;
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 0;
-  border-radius: 0;
-  box-shadow: none !important;
-  border-right: none;
-  text-decoration: none !important;
   color: inherit;
+  text-decoration: none !important;
 }
 
 .brand-logo-chip {
-  width: auto;
-  height: auto;
-  background: transparent !important;
-  padding: 0;
-  box-shadow: none !important;
-  border-radius: 0;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  flex-shrink: 0;
+  display: contents;
 }
 
 .brand-logo-appam {
@@ -109,8 +75,6 @@
   display: block;
 }
 
-/* Ocultar restos antiguos de marca textual */
-
 .brand-mark,
 .brand-sub,
 .brand-mark-appam,
@@ -119,10 +83,6 @@
 .brand-text-appam .brand-sub {
   display: none !important;
 }
-
-/* =========================================================
-   TOP NAV
-   ========================================================= */
 
 .top-nav {
   display: flex;
@@ -143,7 +103,7 @@
   color: var(--appam-text) !important;
   background: transparent;
   border: none;
-  transition: background .15s, color .15s, transform .12s;
+  transition: background .15s, color .15s;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -163,10 +123,6 @@
 .link-icon {
   font-size: 14px;
 }
-
-/* =========================================================
-   USER ACTIONS
-   ========================================================= */
 
 .top-actions {
   display: flex;
@@ -196,7 +152,6 @@
   background: #e5e7eb !important;
 }
 
-/* Sin rojo fuerte: punto azul/cian corporativo */
 .badge-dot {
   width: 7px;
   height: 7px;
@@ -228,20 +183,14 @@
   flex-shrink: 0;
 }
 
-/* =========================================================
-   BODY LAYOUT
-   ========================================================= */
-
+/* BODY */
 .body-layout {
   display: flex;
   flex: 1;
   min-height: 0;
 }
 
-/* =========================================================
-   SIDEBAR
-   ========================================================= */
-
+/* SIDEBAR */
 .sidebar {
   width: 240px;
   min-width: 240px;
@@ -251,8 +200,6 @@
   padding: 10px 0 16px;
   flex-shrink: 0;
 }
-
-/* Ocultar cabeceras antiguas o logos duplicados */
 
 .sidebar-head,
 .sidebar-head-appam,
@@ -335,10 +282,14 @@
   color: var(--appam-blue-dark);
 }
 
-.sidebar-course-title {
+.sidebar-course-title,
+.sidebar-event-title {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.sidebar-course-title {
   flex: 1;
 }
 
@@ -354,16 +305,10 @@
 }
 
 .sidebar-event-title {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
   font-size: 12px;
 }
 
-/* =========================================================
-   MAIN CONTENT
-   ========================================================= */
-
+/* MAIN */
 .main-content {
   flex: 1;
   min-width: 0;
@@ -372,10 +317,7 @@
   flex-direction: column;
 }
 
-/* =========================================================
-   HERO
-   ========================================================= */
-
+/* HERO */
 .hero {
   background: linear-gradient(135deg, var(--appam-navy) 0%, var(--appam-navy-soft) 100%);
   padding: 24px 32px 20px;
@@ -427,31 +369,24 @@
   transition: width .4s;
 }
 
-/* =========================================================
-   PAGE WRAP
-   ========================================================= */
-
+/* PAGE */
 .page-wrap {
   padding: 24px;
   flex: 1;
 }
 
-/* =========================================================
-   APPAM — AJUSTES DE COLOR EN COMPONENTES EXISTENTES
-   ========================================================= */
-
-/* Banner principal del dashboard */
+/* COMPONENTES GLOBALES APPAM */
 .welcome-banner {
   background: linear-gradient(135deg, var(--appam-blue-dark) 0%, var(--appam-cyan) 100%) !important;
   box-shadow: 0 14px 34px rgba(31, 53, 255, .16);
 }
 
-/* Miniaturas de cursos */
 .mini-thumb {
   background: linear-gradient(135deg, var(--appam-blue) 0%, var(--appam-cyan) 100%) !important;
 }
 
-.mini-prog-num {
+.mini-prog-num,
+.task-date {
   color: var(--appam-blue) !important;
 }
 
@@ -459,12 +394,6 @@
   background: linear-gradient(90deg, var(--appam-blue) 0%, var(--appam-cyan) 100%) !important;
 }
 
-/* Fechas y detalles de tareas */
-.task-date {
-  color: var(--appam-blue) !important;
-}
-
-/* Botones principales */
 .btn-primary,
 .btn.btn-primary {
   background: var(--appam-blue) !important;
@@ -478,13 +407,11 @@
   border-color: var(--appam-blue-dark) !important;
 }
 
-/* Botones rápidos */
 .quick-btn:hover {
   border-color: var(--appam-blue) !important;
   box-shadow: 0 2px 10px rgba(31, 53, 255, .14) !important;
 }
 
-/* Enlaces */
 a {
   color: var(--appam-blue);
 }
@@ -493,10 +420,7 @@ a:hover {
   color: var(--appam-blue-dark);
 }
 
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
+/* RESPONSIVE */
 @media (max-width: 1180px) {
   .brand-appam {
     width: 210px;

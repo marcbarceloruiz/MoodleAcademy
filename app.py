@@ -1,58 +1,53 @@
-"""
-Academia Profissional Prof. Albino de Matos - Escola Profissional Vértice
-Campus Virtual
-
-Punto de entrada principal de la aplicación Flask.
-"""
+"""Punto de entrada del Campus Virtual APPAM."""
 
 from flask import Flask
+
 from config import Config
 from extensions import db, migrate
-
-from routes.dashboard_routes import dashboard_bp
-from routes.courses_routes import courses_bp
 from routes.admin_routes import admin_bp
+from routes.courses_routes import courses_bp
+from routes.dashboard_routes import dashboard_bp
 from routes.portal_routes import portal_bp
-
-from services.data_service import (
-    get_user_courses,
-    get_events,
-    calculate_course_progress,
-    format_date_short,
-)
-
-from models import Centro
+from services.data_service import calculate_course_progress, format_date_short, get_events, get_user_courses
 
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Base de datos y migraciones
     db.init_app(app)
     migrate.init_app(app, db)
 
+    register_context_processors(app)
+    register_routes(app)
+    register_blueprints(app)
+
+    return app
+
+
+def register_context_processors(app):
     @app.context_processor
     def inject_layout_data():
-        """Datos comunes para el layout y el sidebar."""
-        layout_mis_cursos = get_user_courses()
-        for curso in layout_mis_cursos:
-            curso["_progreso"] = calculate_course_progress(curso)
+        layout_courses = get_user_courses()
+        for course in layout_courses:
+            course["_progreso"] = calculate_course_progress(course)
 
-        layout_eventos = get_events(limit=3)
-        for evento in layout_eventos:
-            evento["_fecha_corta"] = format_date_short(evento["fecha"])
+        layout_events = get_events(limit=3)
+        for event in layout_events:
+            event["_fecha_corta"] = format_date_short(event["fecha"])
 
         return {
-            "layout_mis_cursos": layout_mis_cursos,
-            "layout_eventos": layout_eventos,
+            "layout_mis_cursos": layout_courses,
+            "layout_eventos": layout_events,
         }
 
-    # Ruta temporal para comprobar conexión con MySQL
+
+def register_routes(app):
     @app.route("/db-test")
     def db_test():
-        centro = Centro.query.first()
+        from models import Centro
 
+        centro = Centro.query.first()
         if not centro:
             return """
             <h1>Conexión correcta, pero no hay datos en la tabla centro</h1>
@@ -65,17 +60,16 @@ def create_app():
         <p><strong>Ubicación:</strong> {centro.cidade}, {centro.pais}</p>
         """
 
-    # Registro de Blueprints
+
+def register_blueprints(app):
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(courses_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(portal_bp)
-
-    return app
 
 
 app = create_app()
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=app.config["DEBUG"])
