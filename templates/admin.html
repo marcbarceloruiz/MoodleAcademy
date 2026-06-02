@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Administración — Academia Vertice{% endblock %}
+{% block title %}Administración — Prof. Albino de Matos{% endblock %}
 {% block hero_title %}Administración del Sitio{% endblock %}
 
 {% block content %}
@@ -8,252 +8,506 @@
 <div class="view-header">
   <div>
     <h1>Administración del Sitio</h1>
-    <p class="subtitle">Panel de gestión de la academia</p>
+    <p class="subtitle">
+      Panel provisional de gestión del campus de la Academia Profissional Prof. Albino de Matos
+    </p>
   </div>
-  <button class="btn btn-primary"
-          onclick="mostrarToast('Función disponible en próxima versión', 'info')">
-    + Nueva acción
-  </button>
 </div>
 
-<!-- KPIs -->
 <div class="admin-kpis">
-  <a class="kpi-card" href="{{ url_for('admin.admin', tab='alumnos') }}">
-    <div class="kpi-num">{{ stats.totalAlumnos }}</div>
-    <div class="kpi-lbl">Alumnos</div>
+  <a class="kpi-card" href="{{ url_for('admin.admin', tab='portal') }}">
+    <div class="kpi-num">{{ stats.total_areas }}</div>
+    <div class="kpi-lbl">Áreas</div>
   </a>
-  <a class="kpi-card" href="{{ url_for('admin.admin', tab='profesores') }}">
-    <div class="kpi-num">{{ stats.totalProfesores }}</div>
-    <div class="kpi-lbl">Profesores</div>
+
+  <a class="kpi-card" href="{{ url_for('admin.admin', tab='documentos') }}">
+    <div class="kpi-num">{{ stats.total_documentos }}</div>
+    <div class="kpi-lbl">Documentos</div>
   </a>
-  <a class="kpi-card" href="{{ url_for('admin.admin', tab='cursos') }}">
-    <div class="kpi-num">{{ stats.totalCursos }}</div>
-    <div class="kpi-lbl">Cursos</div>
+
+  <a class="kpi-card" href="{{ url_for('admin.admin', tab='ciclos') }}">
+    <div class="kpi-num">{{ stats.total_ciclos }}</div>
+    <div class="kpi-lbl">Ciclos</div>
   </a>
-  <a class="kpi-card" href="{{ url_for('admin.admin', tab='matriculas') }}">
-    <div class="kpi-num">{{ stats.totalMatriculas }}</div>
-    <div class="kpi-lbl">Matrículas</div>
+
+  <a class="kpi-card" href="{{ url_for('admin.admin', tab='disciplinas') }}">
+    <div class="kpi-num">{{ stats.total_disciplinas }}</div>
+    <div class="kpi-lbl">Disciplinas</div>
   </a>
-  <a class="kpi-card" href="{{ url_for('admin.admin', tab='asistencia') }}">
-    <div class="kpi-num">{{ stats.asistenciaHoy }}%</div>
-    <div class="kpi-lbl">Asistencia hoy</div>
+
+  <a class="kpi-card" href="{{ url_for('admin.admin', tab='recursos') }}">
+    <div class="kpi-num">{{ stats.total_recursos }}</div>
+    <div class="kpi-lbl">Recursos</div>
   </a>
 </div>
 
-<!-- TABS + CONTENIDO -->
 <div class="card">
   <div class="tabs" style="box-shadow:none;margin:0;border-bottom:1px solid var(--line);border-radius:0">
-    {% for t, label in [('alumnos','Alumnos'),('profesores','Profesores'),
-                        ('cursos','Cursos'),('matriculas','Matrículas'),('asistencia','Asistencia')] %}
-    <a class="tab {% if tab == t %}active{% endif %}"
-       href="{{ url_for('admin.admin', tab=t) }}">{{ label }}</a>
+    {% for t, label in [
+      ('portal','Portal institucional'),
+      ('documentos','Documentos'),
+      ('ciclos','Ciclos formativos'),
+      ('disciplinas','Disciplinas'),
+      ('recursos','Recursos')
+    ] %}
+      <a class="tab {% if tab == t %}active{% endif %}"
+         href="{{ url_for('admin.admin', tab=t) }}">
+        {{ label }}
+      </a>
     {% endfor %}
   </div>
 
   <div id="admin-tab-content">
 
-    <!-- ── TAB: ALUMNOS ──────────────────────────────── -->
-    {% if tab == 'alumnos' %}
-    <div class="table-toolbar">
-      <form method="get" action="{{ url_for('admin.admin') }}"
-            style="display:contents">
-        <input type="hidden" name="tab" value="alumnos">
-        <div class="table-search">
-          <span>🔍</span>
-          <input type="text" name="q" placeholder="Buscar alumno…"
-                 value="{{ q }}">
+    {% if tab == 'portal' %}
+      <div class="table-toolbar">
+        <span class="text-sm text-muted">
+          {{ areas | length }} áreas institucionales conectadas a MySQL
+        </span>
+      </div>
+
+      {% for area in areas %}
+        <form method="post"
+              action="{{ url_for('admin.update_area', area_id=area.id) }}"
+              class="card mb-20"
+              style="box-shadow:none;border:1px solid var(--line)">
+          <div class="card-head">
+            <div>
+              <h3>{{ area.titulo }}</h3>
+              <p class="text-sm text-muted">/{{ area.slug }}</p>
+            </div>
+
+            <label class="text-sm text-muted">
+              <input type="hidden" name="ativo" value="0">
+              <input type="checkbox" name="ativo" value="1" {% if area.ativo %}checked{% endif %}>
+              Visible
+            </label>
+          </div>
+
+          <div class="card-body">
+            <div style="display:grid;gap:12px">
+              <div>
+                <label class="text-sm text-muted">Título</label>
+                <input class="table-filter" style="width:100%" name="titulo" value="{{ area.titulo }}">
+              </div>
+
+              <div>
+                <label class="text-sm text-muted">Descripción corta</label>
+                <textarea class="table-filter" style="width:100%;min-height:70px" name="descricao">{{ area.descricao or '' }}</textarea>
+              </div>
+
+              <div>
+                <label class="text-sm text-muted">Contenido principal</label>
+                <textarea class="table-filter" style="width:100%;min-height:150px" name="conteudo">{{ area.conteudo or '' }}</textarea>
+              </div>
+
+              <div>
+                <button class="btn btn-primary btn-sm" type="submit">
+                  Guardar área
+                </button>
+
+                <a class="btn btn-secondary btn-sm"
+                   href="{{ url_for('portal.portal_area', area_slug=area.slug) }}"
+                   target="_blank">
+                  Ver página →
+                </a>
+              </div>
+            </div>
+          </div>
+        </form>
+      {% endfor %}
+
+    {% elif tab == 'documentos' %}
+      <div class="table-toolbar">
+        <span class="text-sm text-muted">
+          {{ documentos | length }} documentos institucionales
+        </span>
+      </div>
+
+      <div class="card mb-20" style="box-shadow:none;border:1px solid var(--line)">
+        <div class="card-head">
+          <h3>Añadir documento institucional</h3>
         </div>
-        <select class="table-filter" name="estado"
-                onchange="this.form.submit()">
-          <option value="">Todos los estados</option>
-          <option value="activo"    {% if estado_f == 'activo' %}selected{% endif %}>Activo</option>
-          <option value="pendiente" {% if estado_f == 'pendiente' %}selected{% endif %}>Pendiente</option>
-          <option value="inactivo"  {% if estado_f == 'inactivo' %}selected{% endif %}>Inactivo</option>
-        </select>
-        <button type="submit" class="btn btn-secondary btn-sm">Filtrar</button>
-      </form>
-      <span class="text-sm text-muted">{{ alumnos | length }} resultados</span>
-      <button class="btn btn-primary ml-auto btn-sm"
-              onclick="mostrarToast('Función: añadir nuevo alumno', 'info')">
-        + Añadir alumno
-      </button>
-    </div>
-    <div style="overflow-x:auto">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Alumno</th><th>Email</th><th>DNI</th><th>Cursos</th>
-            <th>Asistencia</th><th>Estado</th><th>Última conexión</th><th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for a in alumnos %}
-          <tr>
-            <td class="td-name">{{ a.nombre }}</td>
-            <td class="text-sm text-muted">{{ a.email }}</td>
-            <td class="text-sm">{{ a.dni }}</td>
-            <td class="text-sm">{{ a.cursos | length }} curso(s)</td>
-            <td>
-              <div style="display:flex;align-items:center;gap:6px">
-                <div style="width:50px;height:5px;background:var(--line);border-radius:99px;overflow:hidden">
-                  <div style="height:100%;width:{{ a.asistencia }}%;background:{% if a.asistencia > 80 %}var(--success){% elif a.asistencia > 60 %}var(--warning){% else %}var(--danger){% endif %};border-radius:99px"></div>
-                </div>
-                <span style="font-size:11px;font-weight:700">{{ a.asistencia }}%</span>
-              </div>
-            </td>
-            <td><span class="status-pill sp-{{ a.estado }}">{{ a.estado }}</span></td>
-            <td class="text-sm text-muted">{{ a._ultima }}</td>
-            <td>
-              <div class="td-actions">
-                <button class="btn btn-secondary btn-sm"
-                        onclick="mostrarToast('Ver ficha: {{ a.nombre }}', 'info')">Ver</button>
-                <button class="btn btn-secondary btn-sm"
-                        onclick="mostrarToast('Editar: {{ a.nombre }}', 'info')">Editar</button>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
 
-    <!-- ── TAB: PROFESORES ───────────────────────────── -->
-    {% elif tab == 'profesores' %}
-    <div class="table-toolbar">
-      <span class="text-sm text-muted">{{ profesores | length }} profesores</span>
-      <button class="btn btn-primary ml-auto btn-sm"
-              onclick="mostrarToast('Función: añadir profesor', 'info')">+ Añadir profesor</button>
-    </div>
-    <table class="data-table">
-      <thead>
-        <tr><th>Profesor/a</th><th>Email</th><th>Especialidad</th>
-            <th>Cursos</th><th>Estado</th><th>Acciones</th></tr>
-      </thead>
-      <tbody>
-        {% for p in profesores %}
-        <tr>
-          <td class="td-name">{{ p.nombre }}</td>
-          <td class="text-sm text-muted">{{ p.email }}</td>
-          <td>{{ p.especialidad }}</td>
-          <td>{{ p.cursos | length }} curso(s)</td>
-          <td><span class="status-pill sp-{{ p.estado }}">{{ p.estado }}</span></td>
-          <td>
-            <div class="td-actions">
-              <button class="btn btn-secondary btn-sm"
-                      onclick="mostrarToast('Ver: {{ p.nombre }}', 'info')">Ver</button>
-              <button class="btn btn-secondary btn-sm"
-                      onclick="mostrarToast('Editar: {{ p.nombre }}', 'info')">Editar</button>
+        <div class="card-body">
+          <form method="post"
+                action="{{ url_for('admin.create_documento') }}"
+                style="display:grid;grid-template-columns:1.2fr 1.4fr .8fr 2fr auto;gap:10px;align-items:end">
+            <div>
+              <label class="text-sm text-muted">Área</label>
+              <select class="table-filter" name="area_id" required style="width:100%">
+                {% for area in areas %}
+                  <option value="{{ area.id }}">{{ area.titulo }}</option>
+                {% endfor %}
+              </select>
             </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
 
-    <!-- ── TAB: CURSOS ───────────────────────────────── -->
-    {% elif tab == 'cursos' %}
-    <div class="table-toolbar">
-      <span class="text-sm text-muted">{{ cursos | length }} cursos</span>
-      <button class="btn btn-primary ml-auto btn-sm"
-              onclick="mostrarToast('Función: crear nuevo curso', 'info')">+ Crear curso</button>
-    </div>
-    <table class="data-table">
-      <thead>
-        <tr><th>Curso</th><th>Tutor/a</th><th>Categoría</th>
-            <th>Alumnos</th><th>Estado</th><th>Acciones</th></tr>
-      </thead>
-      <tbody>
-        {% for c in cursos %}
-        <tr>
-          <td class="td-name">{{ c.titulo }}</td>
-          <td class="text-sm">{{ c.tutor }}</td>
-          <td>
-            <span class="filter-btn active"
-                  style="cursor:default;font-size:10px;padding:3px 8px">
-              {{ c.categoria }}
-            </span>
-          </td>
-          <td>{{ c._alumnos }}</td>
-          <td><span class="course-status-badge {{ c._badge[0] }}">{{ c._badge[1] }}</span></td>
-          <td>
-            <div class="td-actions">
+            <div>
+              <label class="text-sm text-muted">Título</label>
+              <input class="table-filter" name="titulo" required style="width:100%">
+            </div>
+
+            <div>
+              <label class="text-sm text-muted">Tipo</label>
+              <input class="table-filter" name="tipo" value="Documento" style="width:100%">
+            </div>
+
+            <div>
+              <label class="text-sm text-muted">Descripción</label>
+              <input class="table-filter" name="descricao" style="width:100%">
+            </div>
+
+            <button class="btn btn-primary btn-sm" type="submit">
+              Añadir
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Área</th>
+              <th>Documento</th>
+              <th>Tipo</th>
+              <th>Descripción</th>
+              <th>URL</th>
+              <th>Orden</th>
+              <th>Visible</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for d in documentos %}
+              <tr>
+                <form method="post"
+                      action="{{ url_for('admin.update_documento', documento_id=d.id) }}">
+                  <td class="text-sm text-muted">{{ d.area_titulo }}</td>
+
+                  <td>
+                    <input class="table-filter" name="titulo" value="{{ d.titulo }}" style="width:190px">
+                  </td>
+
+                  <td>
+                    <input class="table-filter" name="tipo" value="{{ d.tipo }}" style="width:95px">
+                  </td>
+
+                  <td>
+                    <input class="table-filter" name="descricao" value="{{ d.descricao or '' }}" style="width:280px">
+                  </td>
+
+                  <td>
+                    <input class="table-filter" name="url" value="{{ d.url or '' }}" placeholder="https://..." style="width:180px">
+                  </td>
+
+                  <td>
+                    <input class="table-filter" type="number" name="orden" value="{{ d.orden }}" style="width:70px">
+                  </td>
+
+                  <td>
+                    <input type="hidden" name="visible" value="0">
+                    <input type="checkbox" name="visible" value="1" {% if d.visible %}checked{% endif %}>
+                  </td>
+
+                  <td>
+                    <button class="btn btn-secondary btn-sm" type="submit">
+                      Guardar
+                    </button>
+                  </td>
+                </form>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    {% elif tab == 'ciclos' %}
+      <div class="table-toolbar">
+        <span class="text-sm text-muted">
+          {{ ciclos | length }} ciclos formativos
+        </span>
+      </div>
+
+      {% for c in ciclos %}
+        <form method="post"
+              action="{{ url_for('admin.update_ciclo', ciclo_id=c.id) }}"
+              class="card mb-20"
+              style="box-shadow:none;border:1px solid var(--line)">
+          <div class="card-head">
+            <div>
+              <h3>{{ c.nombre }}</h3>
+              <p class="text-sm text-muted">{{ c.codigo }} · {{ c.area }}</p>
+            </div>
+
+            <label class="text-sm text-muted">
+              <input type="hidden" name="activo" value="0">
+              <input type="checkbox" name="activo" value="1" {% if c.activo %}checked{% endif %}>
+              Activo
+            </label>
+          </div>
+
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:120px 1fr 130px 120px 120px 90px;gap:10px">
+              <input class="table-filter" name="codigo" value="{{ c.codigo }}">
+              <input class="table-filter" name="nombre" value="{{ c.nombre }}">
+              <input class="table-filter" name="area" value="{{ c.area }}">
+              <input class="table-filter" name="nivel" value="{{ c.nivel or '' }}">
+              <input class="table-filter" name="duracion" value="{{ c.duracion or '' }}">
+              <input class="table-filter" type="number" name="orden" value="{{ c.orden }}">
+            </div>
+
+            <textarea class="table-filter"
+                      style="width:100%;min-height:70px;margin-top:10px"
+                      name="descripcion">{{ c.descripcion or '' }}</textarea>
+
+            <div style="margin-top:10px">
+              <button class="btn btn-primary btn-sm" type="submit">
+                Guardar ciclo
+              </button>
+
               <a class="btn btn-secondary btn-sm"
-                 href="{{ url_for('courses.course_detail', course_id=c.id) }}">Ver</a>
+                 href="{{ url_for('courses.ciclo_detail', ciclo_id=c.id) }}"
+                 target="_blank">
+                Ver ciclo →
+              </a>
+            </div>
+          </div>
+        </form>
+      {% endfor %}
+
+    {% elif tab == 'disciplinas' %}
+      <div class="table-toolbar">
+        <span class="text-sm text-muted">
+          Mostrando {{ disciplinas | length }} disciplinas
+        </span>
+      </div>
+
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Ciclo</th>
+              <th>Año</th>
+              <th>Código</th>
+              <th>Disciplina</th>
+              <th>Tipo</th>
+              <th>Horas</th>
+              <th>Descripción</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for d in disciplinas %}
+              <tr>
+                <form method="post"
+                      action="{{ url_for('admin.update_disciplina', disciplina_id=d.id) }}">
+                  <td class="text-sm text-muted">{{ d.ciclo_codigo }}</td>
+                  <td class="text-sm">{{ d.ano_escolar }}</td>
+
+                  <td>
+                    <input class="table-filter" name="codigo" value="{{ d.codigo or '' }}" style="width:80px">
+                  </td>
+
+                  <td>
+                    <input class="table-filter" name="nombre" value="{{ d.nombre }}" style="width:210px">
+                  </td>
+
+                  <td>
+                    <select class="table-filter" name="tipo" style="width:115px">
+                      <option value="disciplina" {% if d.tipo == 'disciplina' %}selected{% endif %}>disciplina</option>
+                      <option value="fct" {% if d.tipo == 'fct' %}selected{% endif %}>fct</option>
+                      <option value="pap" {% if d.tipo == 'pap' %}selected{% endif %}>pap</option>
+                    </select>
+                  </td>
+
+                  <td>
+                    <input class="table-filter" type="number" name="horas" value="{{ d.horas or '' }}" style="width:80px">
+                  </td>
+
+                  <td>
+                    <input class="table-filter" name="descripcion" value="{{ d.descripcion or '' }}" style="width:270px">
+                  </td>
+
+                  <td>
+                    <button class="btn btn-secondary btn-sm" type="submit">
+                      Guardar
+                    </button>
+
+                    <a class="btn btn-secondary btn-sm"
+                       href="{{ url_for('courses.disciplina_detail', disciplina_id=d.id) }}"
+                       target="_blank">
+                      Ver
+                    </a>
+                  </td>
+                </form>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    {% elif tab == 'recursos' %}
+  <div class="table-toolbar">
+    <span class="text-sm text-muted">
+      Mostrando {{ recursos | length }} recursos de disciplinas
+    </span>
+  </div>
+
+  <div class="card mb-20" style="box-shadow:none;border:1px solid var(--line)">
+    <div class="card-head">
+      <h3>Añadir recurso a una disciplina</h3>
+    </div>
+
+    <div class="card-body">
+      <form method="post"
+            action="{{ url_for('admin.create_recurso') }}"
+            style="display:grid;grid-template-columns:1.7fr 1.2fr .8fr 1.6fr 1.2fr auto;gap:10px;align-items:end">
+
+        <div>
+          <label class="text-sm text-muted">Sección</label>
+          <select class="table-filter" name="seccion_id" required style="width:100%">
+            {% for s in secciones %}
+              <option value="{{ s.id }}">
+                {{ s.ciclo_codigo }} · {{ s.ano_escolar }} · {{ s.disciplina_nombre }} · {{ s.titulo }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label class="text-sm text-muted">Título</label>
+          <input class="table-filter" name="titulo" required style="width:100%">
+        </div>
+
+        <div>
+          <label class="text-sm text-muted">Tipo</label>
+          <select class="table-filter" name="tipo" style="width:100%">
+            <option value="documento">documento</option>
+            <option value="video">video</option>
+            <option value="lectura">lectura</option>
+            <option value="tarea">tarea</option>
+            <option value="foro">foro</option>
+            <option value="cuestionario">cuestionario</option>
+            <option value="evidencia">evidencia</option>
+            <option value="enlace">enlace</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="text-sm text-muted">Descripción</label>
+          <input class="table-filter" name="descripcion" style="width:100%">
+        </div>
+
+        <div>
+          <label class="text-sm text-muted">URL</label>
+          <input class="table-filter" name="url" placeholder="https://..." style="width:100%">
+        </div>
+
+        <button class="btn btn-primary btn-sm" type="submit">
+          Añadir
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div style="overflow-x:auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Disciplina</th>
+          <th>Sección</th>
+          <th>Recurso</th>
+          <th>Tipo</th>
+          <th>Descripción</th>
+          <th>URL</th>
+          <th>Orden</th>
+          <th>Visible</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for r in recursos %}
+          <tr>
+            <td class="text-sm">{{ r.disciplina_nombre }}</td>
+            <td class="text-sm text-muted">{{ r.seccion_titulo }}</td>
+
+            <td>
+              <input form="recurso-form-{{ r.id }}"
+                     class="table-filter"
+                     name="titulo"
+                     value="{{ r.titulo }}"
+                     style="width:190px">
+            </td>
+
+            <td>
+              <select form="recurso-form-{{ r.id }}"
+                      class="table-filter"
+                      name="tipo"
+                      style="width:125px">
+                <option value="documento" {% if r.tipo == 'documento' %}selected{% endif %}>documento</option>
+                <option value="video" {% if r.tipo == 'video' %}selected{% endif %}>video</option>
+                <option value="lectura" {% if r.tipo == 'lectura' %}selected{% endif %}>lectura</option>
+                <option value="tarea" {% if r.tipo == 'tarea' %}selected{% endif %}>tarea</option>
+                <option value="foro" {% if r.tipo == 'foro' %}selected{% endif %}>foro</option>
+                <option value="cuestionario" {% if r.tipo == 'cuestionario' %}selected{% endif %}>cuestionario</option>
+                <option value="evidencia" {% if r.tipo == 'evidencia' %}selected{% endif %}>evidencia</option>
+                <option value="enlace" {% if r.tipo == 'enlace' %}selected{% endif %}>enlace</option>
+              </select>
+            </td>
+
+            <td>
+              <input form="recurso-form-{{ r.id }}"
+                     class="table-filter"
+                     name="descripcion"
+                     value="{{ r.descripcion or '' }}"
+                     style="width:260px">
+            </td>
+
+            <td>
+              <input form="recurso-form-{{ r.id }}"
+                     class="table-filter"
+                     name="url"
+                     value="{{ r.url or '' }}"
+                     placeholder="https://..."
+                     style="width:170px">
+            </td>
+
+            <td>
+              <input form="recurso-form-{{ r.id }}"
+                     class="table-filter"
+                     type="number"
+                     name="orden"
+                     value="{{ r.orden }}"
+                     style="width:70px">
+            </td>
+
+            <td>
+              <input form="recurso-form-{{ r.id }}" type="hidden" name="visible" value="0">
+              <input form="recurso-form-{{ r.id }}" type="checkbox" name="visible" value="1" {% if r.visible %}checked{% endif %}>
+            </td>
+
+            <td>
+              <form id="recurso-form-{{ r.id }}"
+                    method="post"
+                    action="{{ url_for('admin.update_recurso', recurso_id=r.id) }}">
+              </form>
+
               <button class="btn btn-secondary btn-sm"
-                      onclick="mostrarToast('Editar: {{ c.titulo }}', 'info')">Editar</button>
-            </div>
-          </td>
-        </tr>
+                      form="recurso-form-{{ r.id }}"
+                      type="submit">
+                Guardar
+              </button>
+            </td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
-
-    <!-- ── TAB: MATRÍCULAS ──────────────────────────── -->
-    {% elif tab == 'matriculas' %}
-    <div class="table-toolbar">
-      <span class="text-sm text-muted">{{ matriculas | length }} matrículas</span>
-      <button class="btn btn-primary ml-auto btn-sm"
-              onclick="mostrarToast('Función: nueva matrícula', 'info')">+ Matricular alumno</button>
-    </div>
-    <table class="data-table">
-      <thead>
-        <tr><th>Alumno</th><th>Curso</th><th>Tutor/a</th><th>Estado</th><th>Acciones</th></tr>
-      </thead>
-      <tbody>
-        {% for m in matriculas %}
-        <tr>
-          <td class="td-name">{{ m.alumno }}</td>
-          <td>{{ m.curso }}</td>
-          <td class="text-sm text-muted">{{ m.tutor }}</td>
-          <td><span class="status-pill sp-{{ m.alumno_estado }}">{{ m.alumno_estado }}</span></td>
-          <td>
-            <button class="btn btn-secondary btn-sm"
-                    onclick="mostrarToast('Gestionar matrícula', 'info')">Gestionar</button>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
-    <!-- ── TAB: ASISTENCIA ──────────────────────────── -->
-    {% elif tab == 'asistencia' %}
-    <div class="table-toolbar">
-      <span class="text-sm text-muted">Asistencia hoy</span>
-    </div>
-    <table class="data-table">
-      <thead>
-        <tr><th>Alumno</th><th>Estado hoy</th><th>Asistencia global</th><th>Acciones</th></tr>
-      </thead>
-      <tbody>
-        {% for a in alumnos %}
-        {% if a.asistencia > 85 %}
-          {% set asist_hoy = 'Presente' %}{% set asist_cls = 'sp-activo' %}
-        {% elif a.asistencia > 60 %}
-          {% set asist_hoy = 'Retraso' %}{% set asist_cls = 'sp-pendiente' %}
-        {% else %}
-          {% set asist_hoy = 'Ausente' %}{% set asist_cls = 'sp-ausente' %}
-        {% endif %}
-        <tr>
-          <td class="td-name">{{ a.nombre }}</td>
-          <td><span class="status-pill {{ asist_cls }}">{{ asist_hoy }}</span></td>
-          <td>
-            <div style="display:flex;align-items:center;gap:6px">
-              <div style="width:60px;height:5px;background:var(--line);border-radius:99px;overflow:hidden">
-                <div style="height:100%;width:{{ a.asistencia }}%;background:{% if a.asistencia > 80 %}var(--success){% else %}var(--warning){% endif %};border-radius:99px"></div>
-              </div>
-              <span style="font-size:11px;font-weight:700">{{ a.asistencia }}%</span>
-            </div>
-          </td>
-          <td>
-            <button class="btn btn-secondary btn-sm"
-                    onclick="mostrarToast('Historial: {{ a.nombre }}', 'info')">Historial</button>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% endif %}
-
+  </div>
+{% endif %}
   </div>
 </div>
 

@@ -155,6 +155,22 @@ def _load_recursos(limit=120):
         LIMIT :limit
     """, {"limit": limit})
 
+def _load_secciones_for_select():
+    return _fetch_all("""
+        SELECT
+            s.id,
+            s.titulo,
+            s.slug,
+            d.nombre AS disciplina_nombre,
+            a.ano_escolar,
+            c.codigo AS ciclo_codigo,
+            c.nombre AS ciclo_nombre
+        FROM secciones_disciplina s
+        JOIN disciplinas_ciclo d ON d.id = s.disciplina_id
+        JOIN anos_ciclo a ON a.id = d.ano_id
+        JOIN ciclos_formativos c ON c.id = a.ciclo_id
+        ORDER BY c.orden ASC, d.id ASC, s.orden ASC, s.id ASC
+    """)
 
 @admin_bp.route("/admin")
 def admin():
@@ -168,6 +184,7 @@ def admin():
     ciclos = _load_ciclos()
     disciplinas = _load_disciplinas()
     recursos = _load_recursos()
+    secciones = _load_secciones_for_select()
 
     return render_template(
         "admin.html",
@@ -180,6 +197,7 @@ def admin():
         ciclos=ciclos,
         disciplinas=disciplinas,
         recursos=recursos,
+        secciones=secciones,
     )
 
 
@@ -352,3 +370,75 @@ def update_disciplina(disciplina_id):
         print("Error actualizando disciplina:", e)
 
     return redirect(url_for("admin.admin", tab="disciplinas"))
+
+@admin_bp.route("/admin/recursos/create", methods=["POST"])
+def create_recurso():
+    try:
+        seccion_id = _to_int(request.form.get("seccion_id"))
+        titulo = request.form.get("titulo", "").strip()
+
+        if seccion_id and titulo:
+            db.session.execute(
+                text("""
+                    INSERT INTO recursos_disciplina
+                    (seccion_id, titulo, tipo, descripcion, url, orden, visible)
+                    SELECT
+                        :seccion_id,
+                        :titulo,
+                        :tipo,
+                        :descripcion,
+                        :url,
+                        COALESCE(MAX(orden), 0) + 1,
+                        1
+                    FROM recursos_disciplina
+                    WHERE seccion_id = :seccion_id
+                """),
+                {
+                    "seccion_id": seccion_id,
+                    "titulo": titulo,
+                    "tipo": request.form.get("tipo", "documento").strip(),
+                    "descripcion": request.form.get("descripcion", "").strip(),
+                    "url": request.form.get("url", "").strip() or None,
+                },
+            )
+            db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error creando recurso de disciplina:", e)
+
+    return redirect(url_for("admin.admin", tab="recursos"))
+
+
+@admin_bp.route("/admin/recursos/<int:recurso_id>/update", methods=["POST"])
+def update_recurso(recurso_id):
+    try:
+        db.session.execute(
+            text("""
+                UPDATE recursos_disciplina
+                SET
+                    titulo = :titulo,
+                    tipo = :tipo,
+                    descripcion = :descripcion,
+                    url = :url,
+                    orden = :orden,
+                    visible = :visible
+                WHERE id = :recurso_id
+            """),
+            {
+                "recurso_id": recurso_id,
+                "titulo": request.form.get("titulo", "").strip(),
+                "tipo": request.form.get("tipo", "documento").strip(),
+                "descripcion": request.form.get("descripcion", "").strip(),
+                "url": request.form.get("url", "").strip() or None,
+                "orden": _to_int(request.form.get("orden"), 0),
+                "visible": _checkbox_value("visible"),
+            },
+        )
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error actualizando recurso de disciplina:", e)
+
+    return redirect(url_for("admin.admin", tab="recursos"))
