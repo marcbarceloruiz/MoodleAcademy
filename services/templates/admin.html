@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block title %}Administración — Academia Vertice{% endblock %}
+{% block hero_title %}Administración del Sitio{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <h1>Administración del Sitio</h1>
+    <p class="subtitle">Panel de gestión de la academia</p>
+  </div>
+  <button class="btn btn-primary"
+          onclick="mostrarToast('Función disponible en próxima versión', 'info')">
+    + Nueva acción
+  </button>
+</div>
+
+<!-- KPIs -->
+<div class="admin-kpis">
+  <a class="kpi-card" href="{{ url_for('admin.admin', tab='alumnos') }}">
+    <div class="kpi-num">{{ stats.totalAlumnos }}</div>
+    <div class="kpi-lbl">Alumnos</div>
+  </a>
+  <a class="kpi-card" href="{{ url_for('admin.admin', tab='profesores') }}">
+    <div class="kpi-num">{{ stats.totalProfesores }}</div>
+    <div class="kpi-lbl">Profesores</div>
+  </a>
+  <a class="kpi-card" href="{{ url_for('admin.admin', tab='cursos') }}">
+    <div class="kpi-num">{{ stats.totalCursos }}</div>
+    <div class="kpi-lbl">Cursos</div>
+  </a>
+  <a class="kpi-card" href="{{ url_for('admin.admin', tab='matriculas') }}">
+    <div class="kpi-num">{{ stats.totalMatriculas }}</div>
+    <div class="kpi-lbl">Matrículas</div>
+  </a>
+  <a class="kpi-card" href="{{ url_for('admin.admin', tab='asistencia') }}">
+    <div class="kpi-num">{{ stats.asistenciaHoy }}%</div>
+    <div class="kpi-lbl">Asistencia hoy</div>
+  </a>
+</div>
+
+<!-- TABS + CONTENIDO -->
+<div class="card">
+  <div class="tabs" style="box-shadow:none;margin:0;border-bottom:1px solid var(--line);border-radius:0">
+    {% for t, label in [('alumnos','Alumnos'),('profesores','Profesores'),
+                        ('cursos','Cursos'),('matriculas','Matrículas'),('asistencia','Asistencia')] %}
+    <a class="tab {% if tab == t %}active{% endif %}"
+       href="{{ url_for('admin.admin', tab=t) }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  <div id="admin-tab-content">
+
+    <!-- ── TAB: ALUMNOS ──────────────────────────────── -->
+    {% if tab == 'alumnos' %}
+    <div class="table-toolbar">
+      <form method="get" action="{{ url_for('admin.admin') }}"
+            style="display:contents">
+        <input type="hidden" name="tab" value="alumnos">
+        <div class="table-search">
+          <span>🔍</span>
+          <input type="text" name="q" placeholder="Buscar alumno…"
+                 value="{{ q }}">
+        </div>
+        <select class="table-filter" name="estado"
+                onchange="this.form.submit()">
+          <option value="">Todos los estados</option>
+          <option value="activo"    {% if estado_f == 'activo' %}selected{% endif %}>Activo</option>
+          <option value="pendiente" {% if estado_f == 'pendiente' %}selected{% endif %}>Pendiente</option>
+          <option value="inactivo"  {% if estado_f == 'inactivo' %}selected{% endif %}>Inactivo</option>
+        </select>
+        <button type="submit" class="btn btn-secondary btn-sm">Filtrar</button>
+      </form>
+      <span class="text-sm text-muted">{{ alumnos | length }} resultados</span>
+      <button class="btn btn-primary ml-auto btn-sm"
+              onclick="mostrarToast('Función: añadir nuevo alumno', 'info')">
+        + Añadir alumno
+      </button>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Alumno</th><th>Email</th><th>DNI</th><th>Cursos</th>
+            <th>Asistencia</th><th>Estado</th><th>Última conexión</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in alumnos %}
+          <tr>
+            <td class="td-name">{{ a.nombre }}</td>
+            <td class="text-sm text-muted">{{ a.email }}</td>
+            <td class="text-sm">{{ a.dni }}</td>
+            <td class="text-sm">{{ a.cursos | length }} curso(s)</td>
+            <td>
+              <div style="display:flex;align-items:center;gap:6px">
+                <div style="width:50px;height:5px;background:var(--line);border-radius:99px;overflow:hidden">
+                  <div style="height:100%;width:{{ a.asistencia }}%;background:{% if a.asistencia > 80 %}var(--success){% elif a.asistencia > 60 %}var(--warning){% else %}var(--danger){% endif %};border-radius:99px"></div>
+                </div>
+                <span style="font-size:11px;font-weight:700">{{ a.asistencia }}%</span>
+              </div>
+            </td>
+            <td><span class="status-pill sp-{{ a.estado }}">{{ a.estado }}</span></td>
+            <td class="text-sm text-muted">{{ a._ultima }}</td>
+            <td>
+              <div class="td-actions">
+                <button class="btn btn-secondary btn-sm"
+                        onclick="mostrarToast('Ver ficha: {{ a.nombre }}', 'info')">Ver</button>
+                <button class="btn btn-secondary btn-sm"
+                        onclick="mostrarToast('Editar: {{ a.nombre }}', 'info')">Editar</button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── TAB: PROFESORES ───────────────────────────── -->
+    {% elif tab == 'profesores' %}
+    <div class="table-toolbar">
+      <span class="text-sm text-muted">{{ profesores | length }} profesores</span>
+      <button class="btn btn-primary ml-auto btn-sm"
+              onclick="mostrarToast('Función: añadir profesor', 'info')">+ Añadir profesor</button>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr><th>Profesor/a</th><th>Email</th><th>Especialidad</th>
+            <th>Cursos</th><th>Estado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        {% for p in profesores %}
+        <tr>
+          <td class="td-name">{{ p.nombre }}</td>
+          <td class="text-sm text-muted">{{ p.email }}</td>
+          <td>{{ p.especialidad }}</td>
+          <td>{{ p.cursos | length }} curso(s)</td>
+          <td><span class="status-pill sp-{{ p.estado }}">{{ p.estado }}</span></td>
+          <td>
+            <div class="td-actions">
+              <button class="btn btn-secondary btn-sm"
+                      onclick="mostrarToast('Ver: {{ p.nombre }}', 'info')">Ver</button>
+              <button class="btn btn-secondary btn-sm"
+                      onclick="mostrarToast('Editar: {{ p.nombre }}', 'info')">Editar</button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- ── TAB: CURSOS ───────────────────────────────── -->
+    {% elif tab == 'cursos' %}
+    <div class="table-toolbar">
+      <span class="text-sm text-muted">{{ cursos | length }} cursos</span>
+      <button class="btn btn-primary ml-auto btn-sm"
+              onclick="mostrarToast('Función: crear nuevo curso', 'info')">+ Crear curso</button>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr><th>Curso</th><th>Tutor/a</th><th>Categoría</th>
+            <th>Alumnos</th><th>Estado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        {% for c in cursos %}
+        <tr>
+          <td class="td-name">{{ c.titulo }}</td>
+          <td class="text-sm">{{ c.tutor }}</td>
+          <td>
+            <span class="filter-btn active"
+                  style="cursor:default;font-size:10px;padding:3px 8px">
+              {{ c.categoria }}
+            </span>
+          </td>
+          <td>{{ c._alumnos }}</td>
+          <td><span class="course-status-badge {{ c._badge[0] }}">{{ c._badge[1] }}</span></td>
+          <td>
+            <div class="td-actions">
+              <a class="btn btn-secondary btn-sm"
+                 href="{{ url_for('courses.course_detail', course_id=c.id) }}">Ver</a>
+              <button class="btn btn-secondary btn-sm"
+                      onclick="mostrarToast('Editar: {{ c.titulo }}', 'info')">Editar</button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- ── TAB: MATRÍCULAS ──────────────────────────── -->
+    {% elif tab == 'matriculas' %}
+    <div class="table-toolbar">
+      <span class="text-sm text-muted">{{ matriculas | length }} matrículas</span>
+      <button class="btn btn-primary ml-auto btn-sm"
+              onclick="mostrarToast('Función: nueva matrícula', 'info')">+ Matricular alumno</button>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr><th>Alumno</th><th>Curso</th><th>Tutor/a</th><th>Estado</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        {% for m in matriculas %}
+        <tr>
+          <td class="td-name">{{ m.alumno }}</td>
+          <td>{{ m.curso }}</td>
+          <td class="text-sm text-muted">{{ m.tutor }}</td>
+          <td><span class="status-pill sp-{{ m.alumno_estado }}">{{ m.alumno_estado }}</span></td>
+          <td>
+            <button class="btn btn-secondary btn-sm"
+                    onclick="mostrarToast('Gestionar matrícula', 'info')">Gestionar</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- ── TAB: ASISTENCIA ──────────────────────────── -->
+    {% elif tab == 'asistencia' %}
+    <div class="table-toolbar">
+      <span class="text-sm text-muted">Asistencia hoy</span>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr><th>Alumno</th><th>Estado hoy</th><th>Asistencia global</th><th>Acciones</th></tr>
+      </thead>
+      <tbody>
+        {% for a in alumnos %}
+        {% if a.asistencia > 85 %}
+          {% set asist_hoy = 'Presente' %}{% set asist_cls = 'sp-activo' %}
+        {% elif a.asistencia > 60 %}
+          {% set asist_hoy = 'Retraso' %}{% set asist_cls = 'sp-pendiente' %}
+        {% else %}
+          {% set asist_hoy = 'Ausente' %}{% set asist_cls = 'sp-ausente' %}
+        {% endif %}
+        <tr>
+          <td class="td-name">{{ a.nombre }}</td>
+          <td><span class="status-pill {{ asist_cls }}">{{ asist_hoy }}</span></td>
+          <td>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div style="width:60px;height:5px;background:var(--line);border-radius:99px;overflow:hidden">
+                <div style="height:100%;width:{{ a.asistencia }}%;background:{% if a.asistencia > 80 %}var(--success){% else %}var(--warning){% endif %};border-radius:99px"></div>
+              </div>
+              <span style="font-size:11px;font-weight:700">{{ a.asistencia }}%</span>
+            </div>
+          </td>
+          <td>
+            <button class="btn btn-secondary btn-sm"
+                    onclick="mostrarToast('Historial: {{ a.nombre }}', 'info')">Historial</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

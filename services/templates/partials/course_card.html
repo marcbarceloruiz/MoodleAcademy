@@ -1,0 +1,28 @@
+{#
+  Partial: tarjeta de curso reutilizable.
+  Espera la variable `c` con los campos del curso enriquecidos.
+#}
+<div class="course-card">
+  <a href="{{ url_for('courses.course_detail', course_id=c.id) }}" style="text-decoration:none;display:contents">
+    <div class="course-thumb thumb-{{ c.imagen }}">
+      <span class="course-thumb-cat">{{ c.categoria }}</span>
+      <div class="course-thumb-title">{{ c.titulo }}</div>
+    </div>
+    <div class="course-card-body">
+      <div class="course-tutor">👤 <span>{{ c.tutor }}</span></div>
+      <div class="course-dates">📅 {{ c._inicio }} — {{ c._fin }}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="course-status-badge {{ c._badge[0] }}">{{ c._badge[1] }}</span>
+        {% if c._matriculado %}
+          <span style="font-size:11px;color:var(--success)">✓ Matriculado</span>
+        {% endif %}
+      </div>
+      <div class="course-progress-row">
+        <div class="course-prog-bar">
+          <span style="width:{{ c._progreso }}%"></span>
+        </div>
+        <span class="course-prog-pct">{{ c._progreso }}%</span>
+      </div>
+    </div>
+  </a>
+</div>

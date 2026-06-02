@@ -1,0 +1,29 @@
+/*
+ * Academia Vertice — Campus Virtual
+ * styles.css — Punto de entrada de CSS.
+ *
+ * Importa los módulos en orden.
+ * Cuando recibas el CSS completo de tu proyecto original,
+ * pega o sustituye cada módulo en su archivo correspondiente.
+ *
+ * ARQUITECTURA:
+ *  base.css         → variables, reset, tipografía
+ *  layout.css       → topbar, sidebar, body-layout, hero, page-wrap
+ *  components.css   → botones, badges, modales, toasts, tablas, tarjetas
+ *  dashboard.css    → welcome banner, course-mini, task-item, quick-grid, avisos
+ *  courses.css      → courses-grid, course-card, filter-btn
+ *  course_detail.css→ modulo-block, actividad-item, tabs, sidebar-curso
+ *  admin.css        → kpis, data-table, table-toolbar, status-pill
+ *  portal.css       → portal-grid, portal-card, links
+ *  responsive.css   → media queries
+ */
+
+@import url('base.css');
+@import url('layout.css');
+@import url('components.css');
+@import url('dashboard.css');
+@import url('courses.css');
+@import url('course_detail.css');
+@import url('admin.css');
+@import url('portal.css');
+@import url('responsive.css');

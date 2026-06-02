@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ ciclo.nombre }} — Ciclo Formativo{% endblock %}
+{% block hero_title %}{{ ciclo.nombre }}{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <a href="{{ url_for('courses.ciclos') }}" class="btn btn-secondary btn-sm" style="margin-bottom:10px">← Volver a ciclos</a>
+    <h1>{{ ciclo.nombre }}</h1>
+    <p class="subtitle">{{ ciclo.nivel or 'Nível 4' }} · {{ ciclo.duracion or '3 anos' }}</p>
+  </div>
+</div>
+
+<div class="card mb-20">
+  <div class="card-body">
+    <p style="font-size:13px;color:var(--text-2);line-height:1.7">
+      {{ ciclo.descripcion or 'Estructura del ciclo formativo.' }}
+    </p>
+  </div>
+</div>
+
+{% if ciclo.anos %}
+  {% for ano in ciclo.anos %}
+  <section class="card ano-block">
+    <div class="card-head">
+      <h3>{{ ano.numero }}.º Curso — {{ ano.ano_escolar }} ano</h3>
+    </div>
+    <div class="card-body" style="padding:0">
+      {% for disc in ano.disciplinas %}
+      <div class="disciplina-row">
+        <div class="ai-icon ai-video">{{ disc._icono }}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700">{{ disc.nombre }}</div>
+          <div style="font-size:11px;color:var(--muted)">
+            {{ disc.tipo | upper }}{% if disc.horas %} · {{ disc.horas }}h{% endif %}
+          </div>
+        </div>
+        {% if disc.tipo == 'fct' %}
+          <span class="act-badge ab-pendiente">FCT</span>
+        {% elif disc.tipo == 'pap' %}
+          <span class="act-badge ab-abierto">PAP</span>
+        {% else %}
+          <button class="btn btn-secondary btn-sm" onclick="mostrarToast('Disciplina: {{ disc.nombre }}', 'info')">Ver</button>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+{% else %}
+<div class="card">
+  <div class="card-body">
+    <p style="font-size:13px;color:var(--muted)">Este ciclo todavía no tiene años o disciplinas cargadas.</p>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

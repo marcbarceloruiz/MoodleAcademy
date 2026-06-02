@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 150" role="img" aria-labelledby="title desc">
+  <title id="title">Academia Profissional Prof. Albino de Matos - Associação</title>
+  <desc id="desc">Logotipo textual em azul da Academia Profissional Prof. Albino de Matos - Associação</desc>
+  <rect width="600" height="150" fill="transparent"/>
+  <g fill="#1f33ff" font-family="Arial, Helvetica, sans-serif" font-weight="700">
+    <text x="8" y="98" font-size="72" letter-spacing="-4">academia.</text>
+    <rect x="386" y="24" width="22" height="4" fill="#1f33ff"/>
+    <text x="386" y="52" font-size="24">PROFISSIONAL</text>
+    <text x="386" y="80" font-size="24">PROF. ALBINO</text>
+    <text x="386" y="108" font-size="24">DE MATOS -</text>
+    <text x="386" y="136" font-size="24">ASSOCIAÇÃO</text>
+  </g>
+</svg>
