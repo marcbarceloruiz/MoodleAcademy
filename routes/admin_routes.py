@@ -812,3 +812,110 @@ def delete_recurso(recurso_id):
         print("Error eliminando recurso de disciplina:", e)
 
     return redirect(url_for("admin.admin", tab="recursos"))
+
+
+@admin_bp.route("/admin/ciclos/<int:ciclo_id>/delete", methods=["POST"])
+def delete_ciclo(ciclo_id):
+    """
+    Elimina un ciclo completo:
+    recursos -> secciones -> disciplinas -> años -> ciclo.
+    """
+    try:
+        db.session.execute(
+            text("""
+                DELETE r
+                FROM recursos_disciplina r
+                JOIN secciones_disciplina s ON s.id = r.seccion_id
+                JOIN disciplinas_ciclo d ON d.id = s.disciplina_id
+                JOIN anos_ciclo a ON a.id = d.ano_id
+                WHERE a.ciclo_id = :ciclo_id
+            """),
+            {"ciclo_id": ciclo_id},
+        )
+
+        db.session.execute(
+            text("""
+                DELETE s
+                FROM secciones_disciplina s
+                JOIN disciplinas_ciclo d ON d.id = s.disciplina_id
+                JOIN anos_ciclo a ON a.id = d.ano_id
+                WHERE a.ciclo_id = :ciclo_id
+            """),
+            {"ciclo_id": ciclo_id},
+        )
+
+        db.session.execute(
+            text("""
+                DELETE d
+                FROM disciplinas_ciclo d
+                JOIN anos_ciclo a ON a.id = d.ano_id
+                WHERE a.ciclo_id = :ciclo_id
+            """),
+            {"ciclo_id": ciclo_id},
+        )
+
+        db.session.execute(
+            text("""
+                DELETE FROM anos_ciclo
+                WHERE ciclo_id = :ciclo_id
+            """),
+            {"ciclo_id": ciclo_id},
+        )
+
+        db.session.execute(
+            text("""
+                DELETE FROM ciclos_formativos
+                WHERE id = :ciclo_id
+            """),
+            {"ciclo_id": ciclo_id},
+        )
+
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error eliminando ciclo formativo:", e)
+
+    return redirect(url_for("admin.admin", tab="ciclos"))
+
+
+@admin_bp.route("/admin/disciplinas/<int:disciplina_id>/delete", methods=["POST"])
+def delete_disciplina(disciplina_id):
+    """
+    Elimina una disciplina:
+    recursos -> secciones -> disciplina.
+    """
+    try:
+        db.session.execute(
+            text("""
+                DELETE r
+                FROM recursos_disciplina r
+                JOIN secciones_disciplina s ON s.id = r.seccion_id
+                WHERE s.disciplina_id = :disciplina_id
+            """),
+            {"disciplina_id": disciplina_id},
+        )
+
+        db.session.execute(
+            text("""
+                DELETE FROM secciones_disciplina
+                WHERE disciplina_id = :disciplina_id
+            """),
+            {"disciplina_id": disciplina_id},
+        )
+
+        db.session.execute(
+            text("""
+                DELETE FROM disciplinas_ciclo
+                WHERE id = :disciplina_id
+            """),
+            {"disciplina_id": disciplina_id},
+        )
+
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error eliminando disciplina:", e)
+
+    return redirect(url_for("admin.admin", tab="disciplinas"))

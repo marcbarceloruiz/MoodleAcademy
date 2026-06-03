@@ -454,10 +454,18 @@
               </button>
 
               <a class="btn btn-secondary btn-sm"
-                 href="{{ url_for('courses.ciclo_detail', ciclo_id=c.id) }}"
-                 target="_blank">
+                  href="{{ url_for('courses.ciclo_detail', ciclo_id=c.id) }}"
+                  target="_blank">
                 Ver ciclo →
               </a>
+
+              <button class="btn btn-danger-soft btn-sm"
+                      type="submit"
+                      formaction="{{ url_for('admin.delete_ciclo', ciclo_id=c.id) }}"
+                      formmethod="post"
+                      onclick="return confirm('¿Seguro que quieres eliminar este ciclo? Se borrarán también sus años, disciplinas, secciones y recursos.')">
+                Eliminar ciclo
+              </button>
             </div>
           </div>
         </form>
@@ -606,6 +614,14 @@
                        target="_blank">
                       Ver
                     </a>
+
+                    <button class="btn btn-danger-soft btn-sm"
+                            type="submit"
+                            formaction="{{ url_for('admin.delete_disciplina', disciplina_id=d.id) }}"
+                            formmethod="post"
+                            onclick="return confirm('¿Seguro que quieres eliminar esta disciplina? Se borrarán también sus secciones y recursos.')">
+                      Eliminar
+                    </button>
                   </td>
                 </form>
               </tr>
