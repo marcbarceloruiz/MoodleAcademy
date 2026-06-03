@@ -18,6 +18,7 @@ admin_bp = Blueprint("admin", __name__)
 def _as_bool(value):
     return 1 if str(value) == "1" else 0
 
+
 def _checkbox_value(field_name):
     """
     Lee correctamente checkboxes que tienen hidden value=0 + checkbox value=1.
@@ -25,6 +26,7 @@ def _checkbox_value(field_name):
     """
     values = request.form.getlist(field_name)
     return 1 if "1" in values else 0
+
 
 def _to_int(value, default=0):
     try:
@@ -49,6 +51,7 @@ def _admin_stats():
         "total_documentos": "SELECT COUNT(*) AS total FROM documentos_institucionais",
         "total_ciclos": "SELECT COUNT(*) AS total FROM ciclos_formativos",
         "total_disciplinas": "SELECT COUNT(*) AS total FROM disciplinas_ciclo",
+        "total_secciones": "SELECT COUNT(*) AS total FROM secciones_disciplina",
         "total_recursos": "SELECT COUNT(*) AS total FROM recursos_disciplina",
     }
 
@@ -56,7 +59,8 @@ def _admin_stats():
         try:
             row = _fetch_one(sql)
             stats[key] = row["total"] if row else 0
-        except Exception:
+        except Exception as e:
+            print(f"Error calculando estadística {key}:", e)
             stats[key] = 0
 
     return stats
@@ -132,6 +136,58 @@ def _load_disciplinas(limit=80):
     """, {"limit": limit})
 
 
+def _load_secciones(limit=150):
+    """
+    Carga secciones para la pestaña Admin > Secciones.
+    Usa LEFT JOIN para que no falle si alguna relación está incompleta.
+    """
+    try:
+        return _fetch_all("""
+            SELECT
+                s.id,
+                s.titulo,
+                s.slug,
+                s.descripcion,
+                s.orden,
+                s.visible,
+                d.nombre AS disciplina_nombre,
+                a.ano_escolar,
+                c.codigo AS ciclo_codigo,
+                c.nombre AS ciclo_nombre
+            FROM secciones_disciplina s
+            LEFT JOIN disciplinas_ciclo d ON d.id = s.disciplina_id
+            LEFT JOIN anos_ciclo a ON a.id = d.ano_id
+            LEFT JOIN ciclos_formativos c ON c.id = a.ciclo_id
+            ORDER BY c.orden ASC, d.id ASC, s.orden ASC, s.id ASC
+            LIMIT :limit
+        """, {"limit": limit})
+
+    except Exception as e:
+        print("Error cargando secciones de disciplinas:", e)
+        return []
+
+
+def _load_secciones_for_select():
+    """
+    Carga secciones para el selector de creación de recursos.
+    """
+    return _fetch_all("""
+        SELECT
+            s.id,
+            s.titulo,
+            s.slug,
+            d.nombre AS disciplina_nombre,
+            a.ano_escolar,
+            c.codigo AS ciclo_codigo,
+            c.nombre AS ciclo_nombre
+        FROM secciones_disciplina s
+        JOIN disciplinas_ciclo d ON d.id = s.disciplina_id
+        JOIN anos_ciclo a ON a.id = d.ano_id
+        JOIN ciclos_formativos c ON c.id = a.ciclo_id
+        ORDER BY c.orden ASC, d.id ASC, s.orden ASC, s.id ASC
+    """)
+
+
 def _load_recursos(limit=120):
     return _fetch_all("""
         SELECT
@@ -155,22 +211,6 @@ def _load_recursos(limit=120):
         LIMIT :limit
     """, {"limit": limit})
 
-def _load_secciones_for_select():
-    return _fetch_all("""
-        SELECT
-            s.id,
-            s.titulo,
-            s.slug,
-            d.nombre AS disciplina_nombre,
-            a.ano_escolar,
-            c.codigo AS ciclo_codigo,
-            c.nombre AS ciclo_nombre
-        FROM secciones_disciplina s
-        JOIN disciplinas_ciclo d ON d.id = s.disciplina_id
-        JOIN anos_ciclo a ON a.id = d.ano_id
-        JOIN ciclos_formativos c ON c.id = a.ciclo_id
-        ORDER BY c.orden ASC, d.id ASC, s.orden ASC, s.id ASC
-    """)
 
 @admin_bp.route("/admin")
 def admin():
@@ -183,8 +223,9 @@ def admin():
     documentos = _load_documentos()
     ciclos = _load_ciclos()
     disciplinas = _load_disciplinas()
-    recursos = _load_recursos()
+    secciones_admin = _load_secciones()
     secciones = _load_secciones_for_select()
+    recursos = _load_recursos()
 
     return render_template(
         "admin.html",
@@ -196,8 +237,9 @@ def admin():
         documentos=documentos,
         ciclos=ciclos,
         disciplinas=disciplinas,
-        recursos=recursos,
+        secciones_admin=secciones_admin,
         secciones=secciones,
+        recursos=recursos,
     )
 
 
@@ -219,10 +261,11 @@ def update_area(area_id):
                 "titulo": request.form.get("titulo", "").strip(),
                 "descricao": request.form.get("descricao", "").strip(),
                 "conteudo": request.form.get("conteudo", "").strip(),
-                "ativo": _as_bool(request.form.get("ativo", "0")),
+                "ativo": _checkbox_value("ativo"),
             },
         )
         db.session.commit()
+
     except Exception as e:
         db.session.rollback()
         print("Error actualizando área institucional:", e)
@@ -291,12 +334,59 @@ def update_documento(documento_id):
                 "descricao": request.form.get("descricao", "").strip(),
                 "url": request.form.get("url", "").strip() or None,
                 "orden": _to_int(request.form.get("orden"), 0),
-                "visible": _checkbox_value("visible"),            },
+                "visible": _checkbox_value("visible"),
+            },
         )
         db.session.commit()
+
     except Exception as e:
         db.session.rollback()
         print("Error actualizando documento institucional:", e)
+
+    return redirect(url_for("admin.admin", tab="documentos"))
+
+
+@admin_bp.route("/admin/documentos/<int:documento_id>/toggle", methods=["POST"])
+def toggle_documento(documento_id):
+    """
+    Oculta o muestra un documento institucional.
+    """
+    try:
+        db.session.execute(
+            text("""
+                UPDATE documentos_institucionais
+                SET visible = CASE WHEN visible = 1 THEN 0 ELSE 1 END
+                WHERE id = :documento_id
+            """),
+            {"documento_id": documento_id},
+        )
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error cambiando visibilidad del documento institucional:", e)
+
+    return redirect(url_for("admin.admin", tab="documentos"))
+
+
+@admin_bp.route("/admin/documentos/<int:documento_id>/delete", methods=["POST"])
+def delete_documento(documento_id):
+    """
+    Elimina definitivamente un documento institucional.
+    """
+    try:
+        db.session.execute(
+            text("""
+                DELETE FROM documentos_institucionais
+                WHERE id = :documento_id
+            """),
+            {"documento_id": documento_id},
+        )
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error eliminando documento institucional:", e)
 
     return redirect(url_for("admin.admin", tab="documentos"))
 
@@ -331,6 +421,7 @@ def update_ciclo(ciclo_id):
             },
         )
         db.session.commit()
+
     except Exception as e:
         db.session.rollback()
         print("Error actualizando ciclo formativo:", e)
@@ -365,11 +456,69 @@ def update_disciplina(disciplina_id):
             },
         )
         db.session.commit()
+
     except Exception as e:
         db.session.rollback()
         print("Error actualizando disciplina:", e)
 
     return redirect(url_for("admin.admin", tab="disciplinas"))
+
+
+@admin_bp.route("/admin/secciones/<int:seccion_id>/update", methods=["POST"])
+def update_seccion(seccion_id):
+    """
+    Actualiza una sección interna de una disciplina.
+    """
+    try:
+        db.session.execute(
+            text("""
+                UPDATE secciones_disciplina
+                SET
+                    titulo = :titulo,
+                    descripcion = :descripcion,
+                    orden = :orden,
+                    visible = :visible
+                WHERE id = :seccion_id
+            """),
+            {
+                "seccion_id": seccion_id,
+                "titulo": request.form.get("titulo", "").strip(),
+                "descripcion": request.form.get("descripcion", "").strip(),
+                "orden": _to_int(request.form.get("orden"), 0),
+                "visible": _checkbox_value("visible"),
+            },
+        )
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error actualizando sección de disciplina:", e)
+
+    return redirect(url_for("admin.admin", tab="secciones"))
+
+
+@admin_bp.route("/admin/secciones/<int:seccion_id>/toggle", methods=["POST"])
+def toggle_seccion(seccion_id):
+    """
+    Oculta o muestra una sección de disciplina.
+    """
+    try:
+        db.session.execute(
+            text("""
+                UPDATE secciones_disciplina
+                SET visible = CASE WHEN visible = 1 THEN 0 ELSE 1 END
+                WHERE id = :seccion_id
+            """),
+            {"seccion_id": seccion_id},
+        )
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error cambiando visibilidad de sección:", e)
+
+    return redirect(url_for("admin.admin", tab="secciones"))
+
 
 @admin_bp.route("/admin/recursos/create", methods=["POST"])
 def create_recurso():
@@ -487,48 +636,3 @@ def delete_recurso(recurso_id):
         print("Error eliminando recurso de disciplina:", e)
 
     return redirect(url_for("admin.admin", tab="recursos"))
-
-
-@admin_bp.route("/admin/documentos/<int:documento_id>/toggle", methods=["POST"])
-def toggle_documento(documento_id):
-    """
-    Oculta o muestra un documento institucional.
-    """
-    try:
-        db.session.execute(
-            text("""
-                UPDATE documentos_institucionais
-                SET visible = CASE WHEN visible = 1 THEN 0 ELSE 1 END
-                WHERE id = :documento_id
-            """),
-            {"documento_id": documento_id},
-        )
-        db.session.commit()
-
-    except Exception as e:
-        db.session.rollback()
-        print("Error cambiando visibilidad del documento institucional:", e)
-
-    return redirect(url_for("admin.admin", tab="documentos"))
-
-
-@admin_bp.route("/admin/documentos/<int:documento_id>/delete", methods=["POST"])
-def delete_documento(documento_id):
-    """
-    Elimina definitivamente un documento institucional.
-    """
-    try:
-        db.session.execute(
-            text("""
-                DELETE FROM documentos_institucionais
-                WHERE id = :documento_id
-            """),
-            {"documento_id": documento_id},
-        )
-        db.session.commit()
-
-    except Exception as e:
-        db.session.rollback()
-        print("Error eliminando documento institucional:", e)
-
-    return redirect(url_for("admin.admin", tab="documentos"))

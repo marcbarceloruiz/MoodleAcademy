@@ -14,6 +14,58 @@
   </div>
 </div>
 
+<style>
+  .admin-table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    border-top: 1px solid var(--line);
+  }
+
+  .admin-table-sticky-actions th:last-child,
+  .admin-table-sticky-actions td:last-child {
+    position: sticky;
+    right: 0;
+    background: var(--surface);
+    z-index: 2;
+    box-shadow: -8px 0 14px rgba(15, 23, 42, .06);
+  }
+
+  .admin-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
+  .admin-actions .btn {
+    white-space: nowrap;
+  }
+
+  .btn-danger-soft {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+
+  .btn-danger-soft:hover {
+    background: #fecaca;
+    color: #7f1d1d;
+  }
+
+  .admin-documentos-table {
+    min-width: 1350px;
+  }
+
+  .admin-secciones-table {
+    min-width: 1200px;
+  }
+
+  .admin-recursos-table {
+    min-width: 1500px;
+  }
+</style>
+
 <div class="admin-kpis">
   <a class="kpi-card" href="{{ url_for('admin.admin', tab='portal') }}">
     <div class="kpi-num">{{ stats.total_areas }}</div>
@@ -35,6 +87,11 @@
     <div class="kpi-lbl">Disciplinas</div>
   </a>
 
+  <a class="kpi-card" href="{{ url_for('admin.admin', tab='secciones') }}">
+    <div class="kpi-num">{{ stats.total_secciones or 0 }}</div>
+    <div class="kpi-lbl">Secciones</div>
+  </a>
+
   <a class="kpi-card" href="{{ url_for('admin.admin', tab='recursos') }}">
     <div class="kpi-num">{{ stats.total_recursos }}</div>
     <div class="kpi-lbl">Recursos</div>
@@ -48,6 +105,7 @@
       ('documentos','Documentos'),
       ('ciclos','Ciclos formativos'),
       ('disciplinas','Disciplinas'),
+      ('secciones','Secciones'),
       ('recursos','Recursos')
     ] %}
       <a class="tab {% if tab == t %}active{% endif %}"
@@ -60,6 +118,7 @@
   <div id="admin-tab-content">
 
     {% if tab == 'portal' %}
+
       <div class="table-toolbar">
         <span class="text-sm text-muted">
           {{ areas | length }} áreas institucionales conectadas a MySQL
@@ -88,17 +147,24 @@
             <div style="display:grid;gap:12px">
               <div>
                 <label class="text-sm text-muted">Título</label>
-                <input class="table-filter" style="width:100%" name="titulo" value="{{ area.titulo }}">
+                <input class="table-filter"
+                       style="width:100%"
+                       name="titulo"
+                       value="{{ area.titulo }}">
               </div>
 
               <div>
                 <label class="text-sm text-muted">Descripción corta</label>
-                <textarea class="table-filter" style="width:100%;min-height:70px" name="descricao">{{ area.descricao or '' }}</textarea>
+                <textarea class="table-filter"
+                          style="width:100%;min-height:70px"
+                          name="descricao">{{ area.descricao or '' }}</textarea>
               </div>
 
               <div>
                 <label class="text-sm text-muted">Contenido principal</label>
-                <textarea class="table-filter" style="width:100%;min-height:150px" name="conteudo">{{ area.conteudo or '' }}</textarea>
+                <textarea class="table-filter"
+                          style="width:100%;min-height:150px"
+                          name="conteudo">{{ area.conteudo or '' }}</textarea>
               </div>
 
               <div>
@@ -117,52 +183,7 @@
         </form>
       {% endfor %}
 
-        {% elif tab == 'documentos' %}
-
-      <style>
-        .admin-documentos-wrap {
-          width: 100%;
-          max-width: 100%;
-          overflow-x: auto;
-          border-top: 1px solid var(--line);
-        }
-
-        .admin-documentos-table {
-          min-width: 1350px;
-        }
-
-        .admin-documentos-table th:last-child,
-        .admin-documentos-table td:last-child {
-          position: sticky;
-          right: 0;
-          background: var(--surface);
-          z-index: 2;
-          box-shadow: -8px 0 14px rgba(15, 23, 42, .06);
-        }
-
-        .admin-documentos-actions {
-          display: flex;
-          gap: 6px;
-          align-items: center;
-          flex-wrap: nowrap;
-          min-width: 230px;
-        }
-
-        .admin-documentos-actions .btn {
-          white-space: nowrap;
-        }
-
-        .btn-danger-soft {
-          background: #fee2e2;
-          color: #991b1b;
-          border: 1px solid #fecaca;
-        }
-
-        .btn-danger-soft:hover {
-          background: #fecaca;
-          color: #7f1d1d;
-        }
-      </style>
+    {% elif tab == 'documentos' %}
 
       <div class="table-toolbar">
         <span class="text-sm text-muted">
@@ -216,8 +237,8 @@
         </div>
       </div>
 
-      <div class="admin-documentos-wrap">
-        <table class="data-table admin-documentos-table">
+      <div class="admin-table-wrap">
+        <table class="data-table admin-documentos-table admin-table-sticky-actions">
           <thead>
             <tr>
               <th>Área</th>
@@ -301,7 +322,7 @@
                         action="{{ url_for('admin.delete_documento', documento_id=d.id) }}">
                   </form>
 
-                  <div class="admin-documentos-actions">
+                  <div class="admin-actions" style="min-width:230px">
                     <button class="btn btn-secondary btn-sm"
                             form="documento-form-{{ d.id }}"
                             type="submit">
@@ -331,8 +352,8 @@
           </tbody>
         </table>
       </div>
-        {% elif tab == 'ciclos' %}
 
+    {% elif tab == 'ciclos' %}
 
       <div class="table-toolbar">
         <span class="text-sm text-muted">
@@ -388,13 +409,14 @@
       {% endfor %}
 
     {% elif tab == 'disciplinas' %}
+
       <div class="table-toolbar">
         <span class="text-sm text-muted">
           Mostrando {{ disciplinas | length }} disciplinas
         </span>
       </div>
 
-      <div style="overflow-x:auto">
+      <div class="admin-table-wrap">
         <table class="data-table">
           <thead>
             <tr>
@@ -418,11 +440,17 @@
                   <td class="text-sm">{{ d.ano_escolar }}</td>
 
                   <td>
-                    <input class="table-filter" name="codigo" value="{{ d.codigo or '' }}" style="width:80px">
+                    <input class="table-filter"
+                           name="codigo"
+                           value="{{ d.codigo or '' }}"
+                           style="width:80px">
                   </td>
 
                   <td>
-                    <input class="table-filter" name="nombre" value="{{ d.nombre }}" style="width:210px">
+                    <input class="table-filter"
+                           name="nombre"
+                           value="{{ d.nombre }}"
+                           style="width:210px">
                   </td>
 
                   <td>
@@ -434,11 +462,18 @@
                   </td>
 
                   <td>
-                    <input class="table-filter" type="number" name="horas" value="{{ d.horas or '' }}" style="width:80px">
+                    <input class="table-filter"
+                           type="number"
+                           name="horas"
+                           value="{{ d.horas or '' }}"
+                           style="width:80px">
                   </td>
 
                   <td>
-                    <input class="table-filter" name="descripcion" value="{{ d.descripcion or '' }}" style="width:270px">
+                    <input class="table-filter"
+                           name="descripcion"
+                           value="{{ d.descripcion or '' }}"
+                           style="width:270px">
                   </td>
 
                   <td>
@@ -459,52 +494,104 @@
         </table>
       </div>
 
-            {% elif tab == 'recursos' %}
+    {% elif tab == 'secciones' %}
 
-      <style>
-        .admin-recursos-wrap {
-          width: 100%;
-          max-width: 100%;
-          overflow-x: auto;
-          border-top: 1px solid var(--line);
-        }
+      <div class="table-toolbar">
+        <span class="text-sm text-muted">
+          Mostrando {{ secciones_admin | length }} secciones de disciplinas
+        </span>
+      </div>
 
-        .admin-recursos-table {
-          min-width: 1500px;
-        }
+      <div class="admin-table-wrap">
+        <table class="data-table admin-secciones-table admin-table-sticky-actions">
+          <thead>
+            <tr>
+              <th>Ciclo</th>
+              <th>Año</th>
+              <th>Disciplina</th>
+              <th>Slug</th>
+              <th>Título</th>
+              <th>Descripción</th>
+              <th>Orden</th>
+              <th>Visible</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
 
-        .admin-recursos-table th:last-child,
-        .admin-recursos-table td:last-child {
-          position: sticky;
-          right: 0;
-          background: var(--surface);
-          z-index: 2;
-          box-shadow: -8px 0 14px rgba(15, 23, 42, .06);
-        }
+          <tbody>
+            {% for s in secciones_admin %}
+              <tr>
+                <td class="text-sm text-muted">{{ s.ciclo_codigo }}</td>
+                <td class="text-sm">{{ s.ano_escolar }}</td>
+                <td class="text-sm">{{ s.disciplina_nombre }}</td>
+                <td class="text-sm text-muted">{{ s.slug }}</td>
 
-        .admin-recursos-actions {
-          display: flex;
-          gap: 6px;
-          align-items: center;
-          flex-wrap: nowrap;
-          min-width: 230px;
-        }
+                <td>
+                  <input form="seccion-form-{{ s.id }}"
+                         class="table-filter"
+                         name="titulo"
+                         value="{{ s.titulo }}"
+                         style="width:190px">
+                </td>
 
-        .admin-recursos-actions .btn {
-          white-space: nowrap;
-        }
+                <td>
+                  <input form="seccion-form-{{ s.id }}"
+                         class="table-filter"
+                         name="descripcion"
+                         value="{{ s.descripcion or '' }}"
+                         style="width:360px">
+                </td>
 
-        .btn-danger-soft {
-          background: #fee2e2;
-          color: #991b1b;
-          border: 1px solid #fecaca;
-        }
+                <td>
+                  <input form="seccion-form-{{ s.id }}"
+                         class="table-filter"
+                         type="number"
+                         name="orden"
+                         value="{{ s.orden }}"
+                         style="width:70px">
+                </td>
 
-        .btn-danger-soft:hover {
-          background: #fecaca;
-          color: #7f1d1d;
-        }
-      </style>
+                <td>
+                  <input form="seccion-form-{{ s.id }}" type="hidden" name="visible" value="0">
+                  <input form="seccion-form-{{ s.id }}" type="checkbox" name="visible" value="1" {% if s.visible %}checked{% endif %}>
+                </td>
+
+                <td>
+                  <form id="seccion-form-{{ s.id }}"
+                        method="post"
+                        action="{{ url_for('admin.update_seccion', seccion_id=s.id) }}">
+                  </form>
+
+                  <form id="seccion-toggle-{{ s.id }}"
+                        method="post"
+                        action="{{ url_for('admin.toggle_seccion', seccion_id=s.id) }}">
+                  </form>
+
+                  <div class="admin-actions" style="min-width:150px">
+                    <button class="btn btn-secondary btn-sm"
+                            form="seccion-form-{{ s.id }}"
+                            type="submit">
+                      Guardar
+                    </button>
+
+                    <button class="btn btn-secondary btn-sm"
+                            form="seccion-toggle-{{ s.id }}"
+                            type="submit">
+                      {% if s.visible %}
+                        Ocultar
+                      {% else %}
+                        Mostrar
+                      {% endif %}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    {% elif tab == 'recursos' %}
 
       <div class="table-toolbar">
         <span class="text-sm text-muted">
@@ -569,8 +656,8 @@
         </div>
       </div>
 
-      <div class="admin-recursos-wrap">
-        <table class="data-table admin-recursos-table">
+      <div class="admin-table-wrap">
+        <table class="data-table admin-recursos-table admin-table-sticky-actions">
           <thead>
             <tr>
               <th>Disciplina</th>
@@ -662,7 +749,7 @@
                         action="{{ url_for('admin.delete_recurso', recurso_id=r.id) }}">
                   </form>
 
-                  <div class="admin-recursos-actions">
+                  <div class="admin-actions" style="min-width:230px">
                     <button class="btn btn-secondary btn-sm"
                             form="recurso-form-{{ r.id }}"
                             type="submit">
