@@ -487,3 +487,48 @@ def delete_recurso(recurso_id):
         print("Error eliminando recurso de disciplina:", e)
 
     return redirect(url_for("admin.admin", tab="recursos"))
+
+
+@admin_bp.route("/admin/documentos/<int:documento_id>/toggle", methods=["POST"])
+def toggle_documento(documento_id):
+    """
+    Oculta o muestra un documento institucional.
+    """
+    try:
+        db.session.execute(
+            text("""
+                UPDATE documentos_institucionais
+                SET visible = CASE WHEN visible = 1 THEN 0 ELSE 1 END
+                WHERE id = :documento_id
+            """),
+            {"documento_id": documento_id},
+        )
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error cambiando visibilidad del documento institucional:", e)
+
+    return redirect(url_for("admin.admin", tab="documentos"))
+
+
+@admin_bp.route("/admin/documentos/<int:documento_id>/delete", methods=["POST"])
+def delete_documento(documento_id):
+    """
+    Elimina definitivamente un documento institucional.
+    """
+    try:
+        db.session.execute(
+            text("""
+                DELETE FROM documentos_institucionais
+                WHERE id = :documento_id
+            """),
+            {"documento_id": documento_id},
+        )
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error eliminando documento institucional:", e)
+
+    return redirect(url_for("admin.admin", tab="documentos"))

@@ -117,7 +117,53 @@
         </form>
       {% endfor %}
 
-    {% elif tab == 'documentos' %}
+        {% elif tab == 'documentos' %}
+
+      <style>
+        .admin-documentos-wrap {
+          width: 100%;
+          max-width: 100%;
+          overflow-x: auto;
+          border-top: 1px solid var(--line);
+        }
+
+        .admin-documentos-table {
+          min-width: 1350px;
+        }
+
+        .admin-documentos-table th:last-child,
+        .admin-documentos-table td:last-child {
+          position: sticky;
+          right: 0;
+          background: var(--surface);
+          z-index: 2;
+          box-shadow: -8px 0 14px rgba(15, 23, 42, .06);
+        }
+
+        .admin-documentos-actions {
+          display: flex;
+          gap: 6px;
+          align-items: center;
+          flex-wrap: nowrap;
+          min-width: 230px;
+        }
+
+        .admin-documentos-actions .btn {
+          white-space: nowrap;
+        }
+
+        .btn-danger-soft {
+          background: #fee2e2;
+          color: #991b1b;
+          border: 1px solid #fecaca;
+        }
+
+        .btn-danger-soft:hover {
+          background: #fecaca;
+          color: #7f1d1d;
+        }
+      </style>
+
       <div class="table-toolbar">
         <span class="text-sm text-muted">
           {{ documentos | length }} documentos institucionales
@@ -132,7 +178,8 @@
         <div class="card-body">
           <form method="post"
                 action="{{ url_for('admin.create_documento') }}"
-                style="display:grid;grid-template-columns:1.2fr 1.4fr .8fr 2fr auto;gap:10px;align-items:end">
+                style="display:grid;grid-template-columns:1.2fr 1.4fr .8fr 2fr 1.4fr auto;gap:10px;align-items:end">
+
             <div>
               <label class="text-sm text-muted">Área</label>
               <select class="table-filter" name="area_id" required style="width:100%">
@@ -157,6 +204,11 @@
               <input class="table-filter" name="descricao" style="width:100%">
             </div>
 
+            <div>
+              <label class="text-sm text-muted">URL</label>
+              <input class="table-filter" name="url" placeholder="https://..." style="width:100%">
+            </div>
+
             <button class="btn btn-primary btn-sm" type="submit">
               Añadir
             </button>
@@ -164,8 +216,8 @@
         </div>
       </div>
 
-      <div style="overflow-x:auto">
-        <table class="data-table">
+      <div class="admin-documentos-wrap">
+        <table class="data-table admin-documentos-table">
           <thead>
             <tr>
               <th>Área</th>
@@ -182,48 +234,106 @@
           <tbody>
             {% for d in documentos %}
               <tr>
-                <form method="post"
-                      action="{{ url_for('admin.update_documento', documento_id=d.id) }}">
-                  <td class="text-sm text-muted">{{ d.area_titulo }}</td>
+                <td class="text-sm text-muted">
+                  {{ d.area_titulo }}
+                </td>
 
-                  <td>
-                    <input class="table-filter" name="titulo" value="{{ d.titulo }}" style="width:190px">
-                  </td>
+                <td>
+                  <input form="documento-form-{{ d.id }}"
+                         class="table-filter"
+                         name="titulo"
+                         value="{{ d.titulo }}"
+                         style="width:190px">
+                </td>
 
-                  <td>
-                    <input class="table-filter" name="tipo" value="{{ d.tipo }}" style="width:95px">
-                  </td>
+                <td>
+                  <input form="documento-form-{{ d.id }}"
+                         class="table-filter"
+                         name="tipo"
+                         value="{{ d.tipo }}"
+                         style="width:110px">
+                </td>
 
-                  <td>
-                    <input class="table-filter" name="descricao" value="{{ d.descricao or '' }}" style="width:280px">
-                  </td>
+                <td>
+                  <input form="documento-form-{{ d.id }}"
+                         class="table-filter"
+                         name="descricao"
+                         value="{{ d.descricao or '' }}"
+                         style="width:280px">
+                </td>
 
-                  <td>
-                    <input class="table-filter" name="url" value="{{ d.url or '' }}" placeholder="https://..." style="width:180px">
-                  </td>
+                <td>
+                  <input form="documento-form-{{ d.id }}"
+                         class="table-filter"
+                         name="url"
+                         value="{{ d.url or '' }}"
+                         placeholder="https://..."
+                         style="width:180px">
+                </td>
 
-                  <td>
-                    <input class="table-filter" type="number" name="orden" value="{{ d.orden }}" style="width:70px">
-                  </td>
+                <td>
+                  <input form="documento-form-{{ d.id }}"
+                         class="table-filter"
+                         type="number"
+                         name="orden"
+                         value="{{ d.orden }}"
+                         style="width:70px">
+                </td>
 
-                  <td>
-                    <input type="hidden" name="visible" value="0">
-                    <input type="checkbox" name="visible" value="1" {% if d.visible %}checked{% endif %}>
-                  </td>
+                <td>
+                  <input form="documento-form-{{ d.id }}" type="hidden" name="visible" value="0">
+                  <input form="documento-form-{{ d.id }}" type="checkbox" name="visible" value="1" {% if d.visible %}checked{% endif %}>
+                </td>
 
-                  <td>
-                    <button class="btn btn-secondary btn-sm" type="submit">
+                <td>
+                  <form id="documento-form-{{ d.id }}"
+                        method="post"
+                        action="{{ url_for('admin.update_documento', documento_id=d.id) }}">
+                  </form>
+
+                  <form id="documento-toggle-{{ d.id }}"
+                        method="post"
+                        action="{{ url_for('admin.toggle_documento', documento_id=d.id) }}">
+                  </form>
+
+                  <form id="documento-delete-{{ d.id }}"
+                        method="post"
+                        action="{{ url_for('admin.delete_documento', documento_id=d.id) }}">
+                  </form>
+
+                  <div class="admin-documentos-actions">
+                    <button class="btn btn-secondary btn-sm"
+                            form="documento-form-{{ d.id }}"
+                            type="submit">
                       Guardar
                     </button>
-                  </td>
-                </form>
+
+                    <button class="btn btn-secondary btn-sm"
+                            form="documento-toggle-{{ d.id }}"
+                            type="submit">
+                      {% if d.visible %}
+                        Ocultar
+                      {% else %}
+                        Mostrar
+                      {% endif %}
+                    </button>
+
+                    <button class="btn btn-danger-soft btn-sm"
+                            form="documento-delete-{{ d.id }}"
+                            type="submit"
+                            onclick="return confirm('¿Seguro que quieres eliminar este documento? Esta acción no se puede deshacer.')">
+                      Eliminar
+                    </button>
+                  </div>
+                </td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
+        {% elif tab == 'ciclos' %}
 
-    {% elif tab == 'ciclos' %}
+
       <div class="table-toolbar">
         <span class="text-sm text-muted">
           {{ ciclos | length }} ciclos formativos
