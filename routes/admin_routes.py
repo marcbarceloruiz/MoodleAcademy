@@ -6,7 +6,16 @@ Panel provisional de administración del campus.
 De momento no hay login real, así que esta zona es solo para desarrollo.
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    session,
+    current_app,
+)
+
 from sqlalchemy import text
 
 from extensions import db
@@ -14,6 +23,81 @@ from services.data_service import get_current_user, get_centro
 
 admin_bp = Blueprint("admin", __name__)
 
+# ──────────────────────────────────────────────
+# AUTENTICACIÓN SIMPLE DEL ADMIN
+# ──────────────────────────────────────────────
+
+def _admin_autenticado():
+    """
+    Comprueba si la sesión actual tiene acceso al panel admin.
+    """
+    return session.get("admin_ok") is True
+
+
+@admin_bp.before_request
+def proteger_admin():
+    """
+    Protege todas las rutas del blueprint admin.
+
+    Permite acceder solo a:
+    - /admin/login
+    - /admin/logout
+
+    El resto de rutas requieren sesión admin_ok=True.
+    """
+    rutas_libres = {
+        "admin.admin_login",
+        "admin.admin_logout",
+    }
+
+    if request.endpoint in rutas_libres:
+        return None
+
+    if not _admin_autenticado():
+        return redirect(url_for("admin.admin_login"))
+
+    return None
+
+
+@admin_bp.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    """
+    Login básico del panel de administración.
+    """
+    if _admin_autenticado():
+        return redirect(url_for("admin.admin"))
+
+    error = None
+    usuario = get_current_user()
+    centro = get_centro()
+
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        admin_password = current_app.config.get("ADMIN_PASSWORD", "")
+
+        if not admin_password:
+            error = "El panel de administración no está configurado. Falta ADMIN_PASSWORD en .env."
+        elif password == admin_password:
+            session["admin_ok"] = True
+            session.permanent = False
+            return redirect(url_for("admin.admin"))
+        else:
+            error = "Contraseña incorrecta."
+
+    return render_template(
+        "admin_login.html",
+        error=error,
+        usuario=usuario,
+        centro=centro,
+    )
+
+@admin_bp.route("/admin/logout", methods=["POST"])
+def admin_logout():
+    """
+    Cierra la sesión del panel admin.
+    """
+    session.pop("admin_ok", None)
+    return redirect(url_for("admin.admin_login"))
 
 def _as_bool(value):
     return 1 if str(value) == "1" else 0

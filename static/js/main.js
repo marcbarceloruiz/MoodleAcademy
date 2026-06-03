@@ -127,9 +127,23 @@ function abrirModalPerfil() {
       <button class="btn btn-secondary w-full"
               onclick="mostrarToast('Función: notificaciones', 'info')">🔔 Notificaciones</button>
       <button class="btn btn-danger w-full"
-              onclick="mostrarToast('Sesión cerrada', 'warning');cerrarModal()">→ Cerrar sesión</button>
+        onclick="cerrarSesion()">→ Cerrar sesión</button>
     </div>
   `);
+}
+
+function cerrarSesion() {
+  if (window.location.pathname.startsWith('/admin')) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/admin/logout';
+    document.body.appendChild(form);
+    form.submit();
+    return;
+  }
+
+  mostrarToast('Sesión cerrada', 'warning');
+  cerrarModal();
 }
 
 // ──────────────────────────────────────────────

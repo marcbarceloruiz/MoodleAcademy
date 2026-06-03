@@ -61,34 +61,36 @@ def create_app():
             "layout_eventos": layout_eventos,
         }
 
-    @app.route("/db-test")
-    def db_test():
-        """
-        Ruta temporal para comprobar que Flask conecta correctamente con MySQL.
-        """
-        try:
-            centro = Centro.query.first()
+    if app.config.get("DEBUG", False):
+        @app.route("/db-test")
+        def db_test():
+            """
+            Ruta temporal para comprobar que Flask conecta correctamente con MySQL.
+            Solo existe cuando FLASK_DEBUG=True.
+            """
+            try:
+                centro = Centro.query.first()
 
-            if not centro:
-                return """
-                <h1>Conexión correcta con MySQL</h1>
-                <p>Pero no hay datos en la tabla <strong>centro</strong>.</p>
-                <p>Revisa que hayas ejecutado el INSERT inicial en MySQL.</p>
+                if not centro:
+                    return """
+                    <h1>Conexión correcta con MySQL</h1>
+                    <p>Pero no hay datos en la tabla <strong>centro</strong>.</p>
+                    <p>Revisa que hayas ejecutado el INSERT inicial en MySQL.</p>
+                    """
+
+                return f"""
+                <h1>Conexión MySQL OK</h1>
+                <h2>{centro.nome_oficial}</h2>
+                <p><strong>Nombre corto:</strong> {centro.nome_curto}</p>
+                <p><strong>Ubicación:</strong> {centro.cidade}, {centro.pais}</p>
                 """
 
-            return f"""
-            <h1>Conexión MySQL OK</h1>
-            <h2>{centro.nome_oficial}</h2>
-            <p><strong>Nombre corto:</strong> {centro.nome_curto}</p>
-            <p><strong>Ubicación:</strong> {centro.cidade}, {centro.pais}</p>
-            """
-
-        except Exception as e:
-            return f"""
-            <h1>Error conectando con MySQL</h1>
-            <p>Revisa el archivo <strong>.env</strong>, MySQL y la tabla <strong>centro</strong>.</p>
-            <pre>{e}</pre>
-            """, 500
+            except Exception as e:
+                return f"""
+                <h1>Error conectando con MySQL</h1>
+                <p>Revisa el archivo <strong>.env</strong>, MySQL y la tabla <strong>centro</strong>.</p>
+                <pre>{e}</pre>
+                """, 500
 
     # Registro de Blueprints
     app.register_blueprint(dashboard_bp)
@@ -103,4 +105,4 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=app.config.get("DEBUG", False))

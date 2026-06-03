@@ -13,10 +13,14 @@ class Config:
 
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DATABASE_URL",
-        "mysql+pymysql://root:@localhost:3306/academia_profissional_albino_matos"
+        "mysql+pymysql://root:@127.0.0.1:3306/academia_profissional_albino_matos"
     )
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     DEBUG = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
     TEMPLATES_AUTO_RELOAD = True
+
+    # Contraseña simple para proteger el panel admin.
+    # Definir en .env: ADMIN_PASSWORD=tu_contraseña
+    ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")

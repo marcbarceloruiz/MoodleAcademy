@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Acceso Admin — Prof. Albino de Matos{% endblock %}
+{% block hero_title %}Panel de Administración{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <h1>Acceso al Panel</h1>
+    <p class="subtitle">
+      Academia Profissional Prof. Albino de Matos - Escola Profissional Vértice
+    </p>
+  </div>
+</div>
+
+<div style="max-width:420px;margin:40px auto">
+  <div class="card">
+    <div class="card-head">
+      <h3>Iniciar sesión</h3>
+    </div>
+
+    <div class="card-body">
+      {% if error %}
+        <div style="background:#fee2e2;color:#991b1b;border:1px solid #fecaca;padding:12px;border-radius:10px;margin-bottom:16px;font-size:13px">
+          {{ error }}
+        </div>
+      {% endif %}
+
+      <form method="post" action="{{ url_for('admin.admin_login') }}">
+        <div style="margin-bottom:14px">
+          <label class="text-sm text-muted">Contraseña de administrador</label>
+          <input
+            class="table-filter"
+            type="password"
+            name="password"
+            required
+            autofocus
+            placeholder="Introduce la contraseña"
+            style="width:100%;margin-top:6px"
+          >
+        </div>
+
+        <button class="btn btn-primary" type="submit" style="width:100%">
+          Entrar
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
