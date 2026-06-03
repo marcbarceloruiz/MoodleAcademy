@@ -116,7 +116,24 @@ def _load_ciclos():
     """)
 
 
-def _load_disciplinas(limit=80):
+def _load_anos_for_select():
+    """
+    Carga los años de cada ciclo para poder crear disciplinas desde el admin.
+    """
+    return _fetch_all("""
+        SELECT
+            a.id,
+            a.numero,
+            a.ano_escolar,
+            c.codigo AS ciclo_codigo,
+            c.nombre AS ciclo_nombre
+        FROM anos_ciclo a
+        JOIN ciclos_formativos c ON c.id = a.ciclo_id
+        ORDER BY c.orden ASC, c.id ASC, a.numero ASC
+    """)
+
+
+def _load_disciplinas(limit=300):
     return _fetch_all("""
         SELECT
             d.id,
@@ -136,7 +153,7 @@ def _load_disciplinas(limit=80):
     """, {"limit": limit})
 
 
-def _load_secciones(limit=150):
+def _load_secciones(limit=1000):
     """
     Carga secciones para la pestaña Admin > Secciones.
     Usa LEFT JOIN para que no falle si alguna relación está incompleta.
@@ -222,6 +239,7 @@ def admin():
     areas = _load_areas()
     documentos = _load_documentos()
     ciclos = _load_ciclos()
+    anos = _load_anos_for_select()
     disciplinas = _load_disciplinas()
     secciones_admin = _load_secciones()
     secciones = _load_secciones_for_select()
@@ -236,6 +254,7 @@ def admin():
         areas=areas,
         documentos=documentos,
         ciclos=ciclos,
+        anos=anos,
         disciplinas=disciplinas,
         secciones_admin=secciones_admin,
         secciones=secciones,
@@ -391,6 +410,68 @@ def delete_documento(documento_id):
     return redirect(url_for("admin.admin", tab="documentos"))
 
 
+@admin_bp.route("/admin/ciclos/create", methods=["POST"])
+def create_ciclo():
+    """
+    Crea un ciclo formativo y genera automáticamente sus 3 años:
+    10º ano, 11º ano y 12º ano.
+    """
+    try:
+        codigo = request.form.get("codigo", "").strip()
+        nombre = request.form.get("nombre", "").strip()
+
+        if codigo and nombre:
+            result = db.session.execute(
+                text("""
+                    INSERT INTO ciclos_formativos
+                    (codigo, nombre, area, nivel, duracion, descripcion, activo, orden)
+                    VALUES
+                    (:codigo, :nombre, :area, :nivel, :duracion, :descripcion, 1, :orden)
+                """),
+                {
+                    "codigo": codigo,
+                    "nombre": nombre,
+                    "area": request.form.get("area", "").strip(),
+                    "nivel": request.form.get("nivel", "Nível 4").strip(),
+                    "duracion": request.form.get("duracion", "3 anos").strip(),
+                    "descripcion": request.form.get("descripcion", "").strip(),
+                    "orden": _to_int(request.form.get("orden"), 999),
+                },
+            )
+
+            ciclo_id = result.lastrowid
+
+            if ciclo_id:
+                anos_base = [
+                    (1, "10º ano"),
+                    (2, "11º ano"),
+                    (3, "12º ano"),
+                ]
+
+                for numero, ano_escolar in anos_base:
+                    db.session.execute(
+                        text("""
+                            INSERT INTO anos_ciclo
+                            (ciclo_id, numero, ano_escolar)
+                            VALUES
+                            (:ciclo_id, :numero, :ano_escolar)
+                        """),
+                        {
+                            "ciclo_id": ciclo_id,
+                            "numero": numero,
+                            "ano_escolar": ano_escolar,
+                        },
+                    )
+
+            db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error creando ciclo formativo:", e)
+
+    return redirect(url_for("admin.admin", tab="ciclos"))
+
+
 @admin_bp.route("/admin/ciclos/<int:ciclo_id>/update", methods=["POST"])
 def update_ciclo(ciclo_id):
     try:
@@ -427,6 +508,101 @@ def update_ciclo(ciclo_id):
         print("Error actualizando ciclo formativo:", e)
 
     return redirect(url_for("admin.admin", tab="ciclos"))
+
+
+@admin_bp.route("/admin/disciplinas/create", methods=["POST"])
+def create_disciplina():
+    """
+    Crea una disciplina dentro de un año de ciclo.
+    También genera automáticamente sus secciones base:
+    Información General, Contenidos, Evaluación, Evidencias y Comunicación.
+    """
+    try:
+        ano_id = _to_int(request.form.get("ano_id"))
+        nombre = request.form.get("nombre", "").strip()
+
+        horas_raw = request.form.get("horas", "").strip()
+        horas = int(horas_raw) if horas_raw else None
+
+        if ano_id and nombre:
+            result = db.session.execute(
+                text("""
+                    INSERT INTO disciplinas_ciclo
+                    (ano_id, codigo, nombre, tipo, horas, descripcion, orden)
+                    VALUES
+                    (:ano_id, :codigo, :nombre, :tipo, :horas, :descripcion, :orden)
+                """),
+                {
+                    "ano_id": ano_id,
+                    "codigo": request.form.get("codigo", "").strip() or None,
+                    "nombre": nombre,
+                    "tipo": request.form.get("tipo", "disciplina").strip(),
+                    "horas": horas,
+                    "descripcion": request.form.get("descripcion", "").strip(),
+                    "orden": _to_int(request.form.get("orden"), 999),
+                },
+            )
+
+            disciplina_id = result.lastrowid
+
+            if disciplina_id:
+                secciones_base = [
+                    (
+                        "Información General",
+                        "informacion-general",
+                        "Presentación de la asignatura, criterios de evaluación, cronograma y contactos.",
+                        1,
+                    ),
+                    (
+                        "Contenidos",
+                        "contenidos",
+                        "Módulos, presentaciones, vídeos, lecturas y materiales de apoyo.",
+                        2,
+                    ),
+                    (
+                        "Evaluación",
+                        "evaluacion",
+                        "Pruebas, trabajos, foros, cuestionarios y criterios de evaluación.",
+                        3,
+                    ),
+                    (
+                        "Evidencias",
+                        "evidencias",
+                        "Portafolio, informes, trabajos y evidencias del aprendizaje.",
+                        4,
+                    ),
+                    (
+                        "Comunicación",
+                        "comunicacion",
+                        "Foro de avisos, foro de dudas y canales de contacto con el formador.",
+                        5,
+                    ),
+                ]
+
+                for titulo, slug, descripcion, orden in secciones_base:
+                    db.session.execute(
+                        text("""
+                            INSERT INTO secciones_disciplina
+                            (disciplina_id, titulo, slug, descripcion, orden, visible)
+                            VALUES
+                            (:disciplina_id, :titulo, :slug, :descripcion, :orden, 1)
+                        """),
+                        {
+                            "disciplina_id": disciplina_id,
+                            "titulo": titulo,
+                            "slug": slug,
+                            "descripcion": descripcion,
+                            "orden": orden,
+                        },
+                    )
+
+            db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error creando disciplina:", e)
+
+    return redirect(url_for("admin.admin", tab="disciplinas"))
 
 
 @admin_bp.route("/admin/disciplinas/<int:disciplina_id>/update", methods=["POST"])

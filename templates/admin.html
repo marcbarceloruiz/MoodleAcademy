@@ -361,6 +361,61 @@
         </span>
       </div>
 
+      <div class="card mb-20" style="box-shadow:none;border:1px solid var(--line)">
+        <div class="card-head">
+          <h3>Añadir ciclo formativo</h3>
+        </div>
+
+        <div class="card-body">
+          <form method="post"
+                action="{{ url_for('admin.create_ciclo') }}"
+                style="display:grid;grid-template-columns:120px 1fr 130px 120px 120px 90px auto;gap:10px;align-items:end">
+
+            <div>
+              <label class="text-sm text-muted">Código</label>
+              <input class="table-filter" name="codigo" placeholder="CP-XXX" required style="width:100%">
+            </div>
+
+            <div>
+              <label class="text-sm text-muted">Nombre</label>
+              <input class="table-filter" name="nombre" required style="width:100%">
+            </div>
+
+            <div>
+              <label class="text-sm text-muted">Área</label>
+              <input class="table-filter" name="area" placeholder="social" style="width:100%">
+            </div>
+
+            <div>
+              <label class="text-sm text-muted">Nivel</label>
+              <input class="table-filter" name="nivel" value="Nível 4" style="width:100%">
+            </div>
+
+            <div>
+              <label class="text-sm text-muted">Duración</label>
+              <input class="table-filter" name="duracion" value="3 anos" style="width:100%">
+            </div>
+
+            <div>
+              <label class="text-sm text-muted">Orden</label>
+              <input class="table-filter" type="number" name="orden" value="999" style="width:100%">
+            </div>
+
+            <button class="btn btn-primary btn-sm" type="submit">
+              Añadir
+            </button>
+
+            <div style="grid-column:1 / -1">
+              <label class="text-sm text-muted">Descripción</label>
+              <input class="table-filter"
+                     name="descripcion"
+                     placeholder="Descripción breve del ciclo formativo"
+                     style="width:100%">
+            </div>
+          </form>
+        </div>
+      </div>
+
       {% for c in ciclos %}
         <form method="post"
               action="{{ url_for('admin.update_ciclo', ciclo_id=c.id) }}"
@@ -414,6 +469,71 @@
         <span class="text-sm text-muted">
           Mostrando {{ disciplinas | length }} disciplinas
         </span>
+      </div>
+
+      <div class="card mb-20" style="box-shadow:none;border:1px solid var(--line)">
+        <div class="card-head">
+          <h3>Añadir disciplina</h3>
+        </div>
+
+        <div class="card-body">
+          <form method="post"
+                action="{{ url_for('admin.create_disciplina') }}"
+                style="display:grid;grid-template-columns:1.6fr 100px 1fr 130px 90px 80px auto;gap:10px;align-items:end">
+
+            <div>
+              <label class="text-sm text-muted">Año / ciclo</label>
+              <select class="table-filter" name="ano_id" required style="width:100%">
+                {% for a in anos %}
+                  <option value="{{ a.id }}">
+                    {{ a.ciclo_codigo }} · {{ a.ano_escolar }} · {{ a.ciclo_nombre }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div>
+              <label class="text-sm text-muted">Código</label>
+              <input class="table-filter" name="codigo" placeholder="PT" style="width:100%">
+            </div>
+
+            <div>
+              <label class="text-sm text-muted">Nombre</label>
+              <input class="table-filter" name="nombre" required style="width:100%">
+            </div>
+
+            <div>
+              <label class="text-sm text-muted">Tipo</label>
+              <select class="table-filter" name="tipo" style="width:100%">
+                <option value="disciplina">disciplina</option>
+                <option value="fct">fct</option>
+                <option value="pap">pap</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-sm text-muted">Horas</label>
+              <input class="table-filter" type="number" name="horas" style="width:100%">
+            </div>
+
+            <div>
+              <label class="text-sm text-muted">Orden</label>
+              <input class="table-filter" type="number" name="orden" value="999" style="width:100%">
+            </div>
+
+            <button class="btn btn-primary btn-sm" type="submit">
+              Añadir
+            </button>
+
+            <div style="grid-column:1 / -1">
+              <label class="text-sm text-muted">Descripción</label>
+              <input class="table-filter"
+                     name="descripcion"
+                     placeholder="Descripción breve de la disciplina"
+                     style="width:100%">
+            </div>
+          </form>
+        </div>
       </div>
 
       <div class="admin-table-wrap">
