@@ -349,165 +349,241 @@
         </table>
       </div>
 
-    {% elif tab == 'recursos' %}
-  <div class="table-toolbar">
-    <span class="text-sm text-muted">
-      Mostrando {{ recursos | length }} recursos de disciplinas
-    </span>
-  </div>
+            {% elif tab == 'recursos' %}
 
-  <div class="card mb-20" style="box-shadow:none;border:1px solid var(--line)">
-    <div class="card-head">
-      <h3>Añadir recurso a una disciplina</h3>
-    </div>
+      <style>
+        .admin-recursos-wrap {
+          width: 100%;
+          max-width: 100%;
+          overflow-x: auto;
+          border-top: 1px solid var(--line);
+        }
 
-    <div class="card-body">
-      <form method="post"
-            action="{{ url_for('admin.create_recurso') }}"
-            style="display:grid;grid-template-columns:1.7fr 1.2fr .8fr 1.6fr 1.2fr auto;gap:10px;align-items:end">
+        .admin-recursos-table {
+          min-width: 1500px;
+        }
 
-        <div>
-          <label class="text-sm text-muted">Sección</label>
-          <select class="table-filter" name="seccion_id" required style="width:100%">
-            {% for s in secciones %}
-              <option value="{{ s.id }}">
-                {{ s.ciclo_codigo }} · {{ s.ano_escolar }} · {{ s.disciplina_nombre }} · {{ s.titulo }}
-              </option>
-            {% endfor %}
-          </select>
+        .admin-recursos-table th:last-child,
+        .admin-recursos-table td:last-child {
+          position: sticky;
+          right: 0;
+          background: var(--surface);
+          z-index: 2;
+          box-shadow: -8px 0 14px rgba(15, 23, 42, .06);
+        }
+
+        .admin-recursos-actions {
+          display: flex;
+          gap: 6px;
+          align-items: center;
+          flex-wrap: nowrap;
+          min-width: 230px;
+        }
+
+        .admin-recursos-actions .btn {
+          white-space: nowrap;
+        }
+
+        .btn-danger-soft {
+          background: #fee2e2;
+          color: #991b1b;
+          border: 1px solid #fecaca;
+        }
+
+        .btn-danger-soft:hover {
+          background: #fecaca;
+          color: #7f1d1d;
+        }
+      </style>
+
+      <div class="table-toolbar">
+        <span class="text-sm text-muted">
+          Mostrando {{ recursos | length }} recursos de disciplinas
+        </span>
+      </div>
+
+      <div class="card mb-20" style="box-shadow:none;border:1px solid var(--line)">
+        <div class="card-head">
+          <h3>Añadir recurso a una disciplina</h3>
         </div>
 
-        <div>
-          <label class="text-sm text-muted">Título</label>
-          <input class="table-filter" name="titulo" required style="width:100%">
-        </div>
+        <div class="card-body">
+          <form method="post"
+                action="{{ url_for('admin.create_recurso') }}"
+                style="display:grid;grid-template-columns:1.7fr 1.2fr .8fr 1.6fr 1.2fr auto;gap:10px;align-items:end">
 
-        <div>
-          <label class="text-sm text-muted">Tipo</label>
-          <select class="table-filter" name="tipo" style="width:100%">
-            <option value="documento">documento</option>
-            <option value="video">video</option>
-            <option value="lectura">lectura</option>
-            <option value="tarea">tarea</option>
-            <option value="foro">foro</option>
-            <option value="cuestionario">cuestionario</option>
-            <option value="evidencia">evidencia</option>
-            <option value="enlace">enlace</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="text-sm text-muted">Descripción</label>
-          <input class="table-filter" name="descripcion" style="width:100%">
-        </div>
-
-        <div>
-          <label class="text-sm text-muted">URL</label>
-          <input class="table-filter" name="url" placeholder="https://..." style="width:100%">
-        </div>
-
-        <button class="btn btn-primary btn-sm" type="submit">
-          Añadir
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <div style="overflow-x:auto">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Disciplina</th>
-          <th>Sección</th>
-          <th>Recurso</th>
-          <th>Tipo</th>
-          <th>Descripción</th>
-          <th>URL</th>
-          <th>Orden</th>
-          <th>Visible</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        {% for r in recursos %}
-          <tr>
-            <td class="text-sm">{{ r.disciplina_nombre }}</td>
-            <td class="text-sm text-muted">{{ r.seccion_titulo }}</td>
-
-            <td>
-              <input form="recurso-form-{{ r.id }}"
-                     class="table-filter"
-                     name="titulo"
-                     value="{{ r.titulo }}"
-                     style="width:190px">
-            </td>
-
-            <td>
-              <select form="recurso-form-{{ r.id }}"
-                      class="table-filter"
-                      name="tipo"
-                      style="width:125px">
-                <option value="documento" {% if r.tipo == 'documento' %}selected{% endif %}>documento</option>
-                <option value="video" {% if r.tipo == 'video' %}selected{% endif %}>video</option>
-                <option value="lectura" {% if r.tipo == 'lectura' %}selected{% endif %}>lectura</option>
-                <option value="tarea" {% if r.tipo == 'tarea' %}selected{% endif %}>tarea</option>
-                <option value="foro" {% if r.tipo == 'foro' %}selected{% endif %}>foro</option>
-                <option value="cuestionario" {% if r.tipo == 'cuestionario' %}selected{% endif %}>cuestionario</option>
-                <option value="evidencia" {% if r.tipo == 'evidencia' %}selected{% endif %}>evidencia</option>
-                <option value="enlace" {% if r.tipo == 'enlace' %}selected{% endif %}>enlace</option>
+            <div>
+              <label class="text-sm text-muted">Sección</label>
+              <select class="table-filter" name="seccion_id" required style="width:100%">
+                {% for s in secciones %}
+                  <option value="{{ s.id }}">
+                    {{ s.ciclo_codigo }} · {{ s.ano_escolar }} · {{ s.disciplina_nombre }} · {{ s.titulo }}
+                  </option>
+                {% endfor %}
               </select>
-            </td>
+            </div>
 
-            <td>
-              <input form="recurso-form-{{ r.id }}"
-                     class="table-filter"
-                     name="descripcion"
-                     value="{{ r.descripcion or '' }}"
-                     style="width:260px">
-            </td>
+            <div>
+              <label class="text-sm text-muted">Título</label>
+              <input class="table-filter" name="titulo" required style="width:100%">
+            </div>
 
-            <td>
-              <input form="recurso-form-{{ r.id }}"
-                     class="table-filter"
-                     name="url"
-                     value="{{ r.url or '' }}"
-                     placeholder="https://..."
-                     style="width:170px">
-            </td>
+            <div>
+              <label class="text-sm text-muted">Tipo</label>
+              <select class="table-filter" name="tipo" style="width:100%">
+                <option value="documento">documento</option>
+                <option value="video">video</option>
+                <option value="lectura">lectura</option>
+                <option value="tarea">tarea</option>
+                <option value="foro">foro</option>
+                <option value="cuestionario">cuestionario</option>
+                <option value="evidencia">evidencia</option>
+                <option value="enlace">enlace</option>
+              </select>
+            </div>
 
-            <td>
-              <input form="recurso-form-{{ r.id }}"
-                     class="table-filter"
-                     type="number"
-                     name="orden"
-                     value="{{ r.orden }}"
-                     style="width:70px">
-            </td>
+            <div>
+              <label class="text-sm text-muted">Descripción</label>
+              <input class="table-filter" name="descripcion" style="width:100%">
+            </div>
 
-            <td>
-              <input form="recurso-form-{{ r.id }}" type="hidden" name="visible" value="0">
-              <input form="recurso-form-{{ r.id }}" type="checkbox" name="visible" value="1" {% if r.visible %}checked{% endif %}>
-            </td>
+            <div>
+              <label class="text-sm text-muted">URL</label>
+              <input class="table-filter" name="url" placeholder="https://..." style="width:100%">
+            </div>
 
-            <td>
-              <form id="recurso-form-{{ r.id }}"
-                    method="post"
-                    action="{{ url_for('admin.update_recurso', recurso_id=r.id) }}">
-              </form>
+            <button class="btn btn-primary btn-sm" type="submit">
+              Añadir
+            </button>
+          </form>
+        </div>
+      </div>
 
-              <button class="btn btn-secondary btn-sm"
-                      form="recurso-form-{{ r.id }}"
-                      type="submit">
-                Guardar
-              </button>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-{% endif %}
+      <div class="admin-recursos-wrap">
+        <table class="data-table admin-recursos-table">
+          <thead>
+            <tr>
+              <th>Disciplina</th>
+              <th>Sección</th>
+              <th>Recurso</th>
+              <th>Tipo</th>
+              <th>Descripción</th>
+              <th>URL</th>
+              <th>Orden</th>
+              <th>Visible</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for r in recursos %}
+              <tr>
+                <td class="text-sm">{{ r.disciplina_nombre }}</td>
+                <td class="text-sm text-muted">{{ r.seccion_titulo }}</td>
+
+                <td>
+                  <input form="recurso-form-{{ r.id }}"
+                         class="table-filter"
+                         name="titulo"
+                         value="{{ r.titulo }}"
+                         style="width:190px">
+                </td>
+
+                <td>
+                  <select form="recurso-form-{{ r.id }}"
+                          class="table-filter"
+                          name="tipo"
+                          style="width:125px">
+                    <option value="documento" {% if r.tipo == 'documento' %}selected{% endif %}>documento</option>
+                    <option value="video" {% if r.tipo == 'video' %}selected{% endif %}>video</option>
+                    <option value="lectura" {% if r.tipo == 'lectura' %}selected{% endif %}>lectura</option>
+                    <option value="tarea" {% if r.tipo == 'tarea' %}selected{% endif %}>tarea</option>
+                    <option value="foro" {% if r.tipo == 'foro' %}selected{% endif %}>foro</option>
+                    <option value="cuestionario" {% if r.tipo == 'cuestionario' %}selected{% endif %}>cuestionario</option>
+                    <option value="evidencia" {% if r.tipo == 'evidencia' %}selected{% endif %}>evidencia</option>
+                    <option value="enlace" {% if r.tipo == 'enlace' %}selected{% endif %}>enlace</option>
+                  </select>
+                </td>
+
+                <td>
+                  <input form="recurso-form-{{ r.id }}"
+                         class="table-filter"
+                         name="descripcion"
+                         value="{{ r.descripcion or '' }}"
+                         style="width:260px">
+                </td>
+
+                <td>
+                  <input form="recurso-form-{{ r.id }}"
+                         class="table-filter"
+                         name="url"
+                         value="{{ r.url or '' }}"
+                         placeholder="https://..."
+                         style="width:170px">
+                </td>
+
+                <td>
+                  <input form="recurso-form-{{ r.id }}"
+                         class="table-filter"
+                         type="number"
+                         name="orden"
+                         value="{{ r.orden }}"
+                         style="width:70px">
+                </td>
+
+                <td>
+                  <input form="recurso-form-{{ r.id }}" type="hidden" name="visible" value="0">
+                  <input form="recurso-form-{{ r.id }}" type="checkbox" name="visible" value="1" {% if r.visible %}checked{% endif %}>
+                </td>
+
+                <td>
+                  <form id="recurso-form-{{ r.id }}"
+                        method="post"
+                        action="{{ url_for('admin.update_recurso', recurso_id=r.id) }}">
+                  </form>
+
+                  <form id="recurso-toggle-{{ r.id }}"
+                        method="post"
+                        action="{{ url_for('admin.toggle_recurso', recurso_id=r.id) }}">
+                  </form>
+
+                  <form id="recurso-delete-{{ r.id }}"
+                        method="post"
+                        action="{{ url_for('admin.delete_recurso', recurso_id=r.id) }}">
+                  </form>
+
+                  <div class="admin-recursos-actions">
+                    <button class="btn btn-secondary btn-sm"
+                            form="recurso-form-{{ r.id }}"
+                            type="submit">
+                      Guardar
+                    </button>
+
+                    <button class="btn btn-secondary btn-sm"
+                            form="recurso-toggle-{{ r.id }}"
+                            type="submit">
+                      {% if r.visible %}
+                        Ocultar
+                      {% else %}
+                        Mostrar
+                      {% endif %}
+                    </button>
+
+                    <button class="btn btn-danger-soft btn-sm"
+                            form="recurso-delete-{{ r.id }}"
+                            type="submit"
+                            onclick="return confirm('¿Seguro que quieres eliminar este recurso? Esta acción no se puede deshacer.')">
+                      Eliminar
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    {% endif %}
   </div>
 </div>
 

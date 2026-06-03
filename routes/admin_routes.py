@@ -442,3 +442,48 @@ def update_recurso(recurso_id):
         print("Error actualizando recurso de disciplina:", e)
 
     return redirect(url_for("admin.admin", tab="recursos"))
+
+
+@admin_bp.route("/admin/recursos/<int:recurso_id>/toggle", methods=["POST"])
+def toggle_recurso(recurso_id):
+    """
+    Oculta o muestra un recurso de disciplina.
+    """
+    try:
+        db.session.execute(
+            text("""
+                UPDATE recursos_disciplina
+                SET visible = CASE WHEN visible = 1 THEN 0 ELSE 1 END
+                WHERE id = :recurso_id
+            """),
+            {"recurso_id": recurso_id},
+        )
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error cambiando visibilidad del recurso:", e)
+
+    return redirect(url_for("admin.admin", tab="recursos"))
+
+
+@admin_bp.route("/admin/recursos/<int:recurso_id>/delete", methods=["POST"])
+def delete_recurso(recurso_id):
+    """
+    Elimina definitivamente un recurso de disciplina.
+    """
+    try:
+        db.session.execute(
+            text("""
+                DELETE FROM recursos_disciplina
+                WHERE id = :recurso_id
+            """),
+            {"recurso_id": recurso_id},
+        )
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error eliminando recurso de disciplina:", e)
+
+    return redirect(url_for("admin.admin", tab="recursos"))
