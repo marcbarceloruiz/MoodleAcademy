@@ -367,9 +367,6 @@ def update_documento(documento_id):
 
 @admin_bp.route("/admin/documentos/<int:documento_id>/toggle", methods=["POST"])
 def toggle_documento(documento_id):
-    """
-    Oculta o muestra un documento institucional.
-    """
     try:
         db.session.execute(
             text("""
@@ -390,9 +387,6 @@ def toggle_documento(documento_id):
 
 @admin_bp.route("/admin/documentos/<int:documento_id>/delete", methods=["POST"])
 def delete_documento(documento_id):
-    """
-    Elimina definitivamente un documento institucional.
-    """
     try:
         db.session.execute(
             text("""
@@ -510,12 +504,76 @@ def update_ciclo(ciclo_id):
     return redirect(url_for("admin.admin", tab="ciclos"))
 
 
+@admin_bp.route("/admin/ciclos/<int:ciclo_id>/delete", methods=["POST"])
+def delete_ciclo(ciclo_id):
+    """
+    Elimina un ciclo completo:
+    recursos -> secciones -> disciplinas -> años -> ciclo.
+    """
+    try:
+        db.session.execute(
+            text("""
+                DELETE r
+                FROM recursos_disciplina r
+                JOIN secciones_disciplina s ON s.id = r.seccion_id
+                JOIN disciplinas_ciclo d ON d.id = s.disciplina_id
+                JOIN anos_ciclo a ON a.id = d.ano_id
+                WHERE a.ciclo_id = :ciclo_id
+            """),
+            {"ciclo_id": ciclo_id},
+        )
+
+        db.session.execute(
+            text("""
+                DELETE s
+                FROM secciones_disciplina s
+                JOIN disciplinas_ciclo d ON d.id = s.disciplina_id
+                JOIN anos_ciclo a ON a.id = d.ano_id
+                WHERE a.ciclo_id = :ciclo_id
+            """),
+            {"ciclo_id": ciclo_id},
+        )
+
+        db.session.execute(
+            text("""
+                DELETE d
+                FROM disciplinas_ciclo d
+                JOIN anos_ciclo a ON a.id = d.ano_id
+                WHERE a.ciclo_id = :ciclo_id
+            """),
+            {"ciclo_id": ciclo_id},
+        )
+
+        db.session.execute(
+            text("""
+                DELETE FROM anos_ciclo
+                WHERE ciclo_id = :ciclo_id
+            """),
+            {"ciclo_id": ciclo_id},
+        )
+
+        db.session.execute(
+            text("""
+                DELETE FROM ciclos_formativos
+                WHERE id = :ciclo_id
+            """),
+            {"ciclo_id": ciclo_id},
+        )
+
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error eliminando ciclo formativo:", e)
+
+    return redirect(url_for("admin.admin", tab="ciclos"))
+
+
 @admin_bp.route("/admin/disciplinas/create", methods=["POST"])
 def create_disciplina():
     """
     Crea una disciplina dentro de un año de ciclo.
-    También genera automáticamente sus secciones base:
-    Información General, Contenidos, Evaluación, Evidencias y Comunicación.
+    También genera automáticamente sus secciones base.
     """
     try:
         ano_id = _to_int(request.form.get("ano_id"))
@@ -640,11 +698,50 @@ def update_disciplina(disciplina_id):
     return redirect(url_for("admin.admin", tab="disciplinas"))
 
 
+@admin_bp.route("/admin/disciplinas/<int:disciplina_id>/delete", methods=["POST"])
+def delete_disciplina(disciplina_id):
+    """
+    Elimina una disciplina:
+    recursos -> secciones -> disciplina.
+    """
+    try:
+        db.session.execute(
+            text("""
+                DELETE r
+                FROM recursos_disciplina r
+                JOIN secciones_disciplina s ON s.id = r.seccion_id
+                WHERE s.disciplina_id = :disciplina_id
+            """),
+            {"disciplina_id": disciplina_id},
+        )
+
+        db.session.execute(
+            text("""
+                DELETE FROM secciones_disciplina
+                WHERE disciplina_id = :disciplina_id
+            """),
+            {"disciplina_id": disciplina_id},
+        )
+
+        db.session.execute(
+            text("""
+                DELETE FROM disciplinas_ciclo
+                WHERE id = :disciplina_id
+            """),
+            {"disciplina_id": disciplina_id},
+        )
+
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error eliminando disciplina:", e)
+
+    return redirect(url_for("admin.admin", tab="disciplinas"))
+
+
 @admin_bp.route("/admin/secciones/<int:seccion_id>/update", methods=["POST"])
 def update_seccion(seccion_id):
-    """
-    Actualiza una sección interna de una disciplina.
-    """
     try:
         db.session.execute(
             text("""
@@ -675,9 +772,6 @@ def update_seccion(seccion_id):
 
 @admin_bp.route("/admin/secciones/<int:seccion_id>/toggle", methods=["POST"])
 def toggle_seccion(seccion_id):
-    """
-    Oculta o muestra una sección de disciplina.
-    """
     try:
         db.session.execute(
             text("""
@@ -692,6 +786,37 @@ def toggle_seccion(seccion_id):
     except Exception as e:
         db.session.rollback()
         print("Error cambiando visibilidad de sección:", e)
+
+    return redirect(url_for("admin.admin", tab="secciones"))
+
+
+@admin_bp.route("/admin/secciones/<int:seccion_id>/delete", methods=["POST"])
+def delete_seccion(seccion_id):
+    """
+    Elimina una sección de disciplina y sus recursos.
+    """
+    try:
+        db.session.execute(
+            text("""
+                DELETE FROM recursos_disciplina
+                WHERE seccion_id = :seccion_id
+            """),
+            {"seccion_id": seccion_id},
+        )
+
+        db.session.execute(
+            text("""
+                DELETE FROM secciones_disciplina
+                WHERE id = :seccion_id
+            """),
+            {"seccion_id": seccion_id},
+        )
+
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print("Error eliminando sección de disciplina:", e)
 
     return redirect(url_for("admin.admin", tab="secciones"))
 
@@ -771,9 +896,6 @@ def update_recurso(recurso_id):
 
 @admin_bp.route("/admin/recursos/<int:recurso_id>/toggle", methods=["POST"])
 def toggle_recurso(recurso_id):
-    """
-    Oculta o muestra un recurso de disciplina.
-    """
     try:
         db.session.execute(
             text("""
@@ -794,9 +916,6 @@ def toggle_recurso(recurso_id):
 
 @admin_bp.route("/admin/recursos/<int:recurso_id>/delete", methods=["POST"])
 def delete_recurso(recurso_id):
-    """
-    Elimina definitivamente un recurso de disciplina.
-    """
     try:
         db.session.execute(
             text("""
@@ -812,110 +931,3 @@ def delete_recurso(recurso_id):
         print("Error eliminando recurso de disciplina:", e)
 
     return redirect(url_for("admin.admin", tab="recursos"))
-
-
-@admin_bp.route("/admin/ciclos/<int:ciclo_id>/delete", methods=["POST"])
-def delete_ciclo(ciclo_id):
-    """
-    Elimina un ciclo completo:
-    recursos -> secciones -> disciplinas -> años -> ciclo.
-    """
-    try:
-        db.session.execute(
-            text("""
-                DELETE r
-                FROM recursos_disciplina r
-                JOIN secciones_disciplina s ON s.id = r.seccion_id
-                JOIN disciplinas_ciclo d ON d.id = s.disciplina_id
-                JOIN anos_ciclo a ON a.id = d.ano_id
-                WHERE a.ciclo_id = :ciclo_id
-            """),
-            {"ciclo_id": ciclo_id},
-        )
-
-        db.session.execute(
-            text("""
-                DELETE s
-                FROM secciones_disciplina s
-                JOIN disciplinas_ciclo d ON d.id = s.disciplina_id
-                JOIN anos_ciclo a ON a.id = d.ano_id
-                WHERE a.ciclo_id = :ciclo_id
-            """),
-            {"ciclo_id": ciclo_id},
-        )
-
-        db.session.execute(
-            text("""
-                DELETE d
-                FROM disciplinas_ciclo d
-                JOIN anos_ciclo a ON a.id = d.ano_id
-                WHERE a.ciclo_id = :ciclo_id
-            """),
-            {"ciclo_id": ciclo_id},
-        )
-
-        db.session.execute(
-            text("""
-                DELETE FROM anos_ciclo
-                WHERE ciclo_id = :ciclo_id
-            """),
-            {"ciclo_id": ciclo_id},
-        )
-
-        db.session.execute(
-            text("""
-                DELETE FROM ciclos_formativos
-                WHERE id = :ciclo_id
-            """),
-            {"ciclo_id": ciclo_id},
-        )
-
-        db.session.commit()
-
-    except Exception as e:
-        db.session.rollback()
-        print("Error eliminando ciclo formativo:", e)
-
-    return redirect(url_for("admin.admin", tab="ciclos"))
-
-
-@admin_bp.route("/admin/disciplinas/<int:disciplina_id>/delete", methods=["POST"])
-def delete_disciplina(disciplina_id):
-    """
-    Elimina una disciplina:
-    recursos -> secciones -> disciplina.
-    """
-    try:
-        db.session.execute(
-            text("""
-                DELETE r
-                FROM recursos_disciplina r
-                JOIN secciones_disciplina s ON s.id = r.seccion_id
-                WHERE s.disciplina_id = :disciplina_id
-            """),
-            {"disciplina_id": disciplina_id},
-        )
-
-        db.session.execute(
-            text("""
-                DELETE FROM secciones_disciplina
-                WHERE disciplina_id = :disciplina_id
-            """),
-            {"disciplina_id": disciplina_id},
-        )
-
-        db.session.execute(
-            text("""
-                DELETE FROM disciplinas_ciclo
-                WHERE id = :disciplina_id
-            """),
-            {"disciplina_id": disciplina_id},
-        )
-
-        db.session.commit()
-
-    except Exception as e:
-        db.session.rollback()
-        print("Error eliminando disciplina:", e)
-
-    return redirect(url_for("admin.admin", tab="disciplinas"))

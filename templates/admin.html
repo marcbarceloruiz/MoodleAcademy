@@ -15,11 +15,75 @@
 </div>
 
 <style>
+  /* Fix tabla de disciplinas */
+.admin-disciplinas-table {
+  min-width: 1250px;
+}
+
+.admin-disciplinas-table th:last-child,
+.admin-disciplinas-table td:last-child {
+  min-width: 210px;
+  width: 210px;
+}
+
+.admin-disciplinas-table td:last-child {
+  background: var(--surface);
+}
+
+.admin-disciplinas-table td:last-child button,
+.admin-disciplinas-table td:last-child a {
+  margin: 2px;
+}
+
+.admin-disciplinas-table td:last-child .btn-danger-soft {
+  display: inline-flex;
+}
+  .admin-kpis {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(120px, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .kpi-card {
+    text-decoration: none;
+  }
+
+  .table-toolbar {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+
   .admin-table-wrap {
     width: 100%;
     max-width: 100%;
     overflow-x: auto;
     border-top: 1px solid var(--line);
+    scrollbar-width: thin;
+  }
+
+  .admin-table-wrap::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .admin-table-wrap::-webkit-scrollbar-thumb {
+    background: rgba(15, 23, 42, .18);
+    border-radius: 999px;
+  }
+
+  .data-table {
+    width: 100%;
+  }
+
+  .data-table th,
+  .data-table td {
+    vertical-align: middle;
+  }
+
+  .data-table input.table-filter,
+  .data-table select.table-filter,
+  .data-table textarea.table-filter {
+    max-width: 100%;
   }
 
   .admin-table-sticky-actions th:last-child,
@@ -35,11 +99,13 @@
     display: flex;
     gap: 6px;
     align-items: center;
+    justify-content: flex-start;
     flex-wrap: nowrap;
   }
 
   .admin-actions .btn {
     white-space: nowrap;
+    min-height: 34px;
   }
 
   .btn-danger-soft {
@@ -57,12 +123,134 @@
     min-width: 1350px;
   }
 
+  .admin-disciplinas-table {
+    min-width: 1180px;
+  }
+
   .admin-secciones-table {
-    min-width: 1200px;
+    min-width: 1400px;
   }
 
   .admin-recursos-table {
     min-width: 1500px;
+  }
+
+  #admin-tab-content form[style*="grid-template-columns"] {
+    max-width: 100%;
+  }
+
+  @media (max-width: 1200px) {
+    .admin-kpis {
+      grid-template-columns: repeat(3, minmax(140px, 1fr));
+    }
+
+    .tabs {
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .tabs .tab {
+      flex: 0 0 auto;
+    }
+
+    #admin-tab-content form[style*="grid-template-columns"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    #admin-tab-content form[style*="grid-template-columns"] button[type="submit"] {
+      width: fit-content;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .view-header h1 {
+      font-size: 24px;
+    }
+
+    .view-header .subtitle {
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .admin-kpis {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .kpi-card {
+      padding: 14px 10px;
+    }
+
+    .kpi-num {
+      font-size: 26px;
+    }
+
+    .kpi-lbl {
+      font-size: 10px;
+    }
+
+    .tabs {
+      padding: 0 8px;
+    }
+
+    .tabs .tab {
+      padding: 13px 12px;
+      font-size: 13px;
+    }
+
+    #admin-tab-content form[style*="grid-template-columns"] {
+      grid-template-columns: 1fr !important;
+    }
+
+    #admin-tab-content form[style*="grid-template-columns"] > div {
+      grid-column: auto !important;
+    }
+
+    .card-head {
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .card-head h3 {
+      font-size: 16px;
+    }
+
+    .admin-documentos-table,
+    .admin-disciplinas-table,
+    .admin-secciones-table,
+    .admin-recursos-table {
+      min-width: 1050px;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 10px 12px;
+    }
+
+    .admin-actions {
+      flex-direction: column;
+      align-items: stretch;
+      min-width: 120px !important;
+    }
+
+    .admin-actions .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .admin-kpis {
+      grid-template-columns: 1fr;
+    }
+
+    .table-toolbar {
+      padding: 12px;
+    }
+
+    .card-body {
+      padding: 14px;
+    }
   }
 </style>
 
@@ -255,9 +443,7 @@
           <tbody>
             {% for d in documentos %}
               <tr>
-                <td class="text-sm text-muted">
-                  {{ d.area_titulo }}
-                </td>
+                <td class="text-sm text-muted">{{ d.area_titulo }}</td>
 
                 <td>
                   <input form="documento-form-{{ d.id }}"
@@ -332,11 +518,7 @@
                     <button class="btn btn-secondary btn-sm"
                             form="documento-toggle-{{ d.id }}"
                             type="submit">
-                      {% if d.visible %}
-                        Ocultar
-                      {% else %}
-                        Mostrar
-                      {% endif %}
+                      {% if d.visible %}Ocultar{% else %}Mostrar{% endif %}
                     </button>
 
                     <button class="btn btn-danger-soft btn-sm"
@@ -454,8 +636,8 @@
               </button>
 
               <a class="btn btn-secondary btn-sm"
-                  href="{{ url_for('courses.ciclo_detail', ciclo_id=c.id) }}"
-                  target="_blank">
+                 href="{{ url_for('courses.ciclo_detail', ciclo_id=c.id) }}"
+                 target="_blank">
                 Ver ciclo →
               </a>
 
@@ -545,9 +727,9 @@
       </div>
 
       <div class="admin-table-wrap">
-        <table class="data-table">
+        <table class="data-table admin-disciplinas-table admin-table-sticky-actions">
           <thead>
-            <tr>
+            <tr>s
               <th>Ciclo</th>
               <th>Año</th>
               <th>Código</th>
@@ -562,50 +744,68 @@
           <tbody>
             {% for d in disciplinas %}
               <tr>
-                <form method="post"
-                      action="{{ url_for('admin.update_disciplina', disciplina_id=d.id) }}">
-                  <td class="text-sm text-muted">{{ d.ciclo_codigo }}</td>
-                  <td class="text-sm">{{ d.ano_escolar }}</td>
+                <td class="text-sm text-muted">{{ d.ciclo_codigo }}</td>
+                <td class="text-sm">{{ d.ano_escolar }}</td>
 
-                  <td>
-                    <input class="table-filter"
-                           name="codigo"
-                           value="{{ d.codigo or '' }}"
-                           style="width:80px">
-                  </td>
+                <td>
+                  <input form="disciplina-form-{{ d.id }}"
+                         class="table-filter"
+                         name="codigo"
+                         value="{{ d.codigo or '' }}"
+                         style="width:80px">
+                </td>
 
-                  <td>
-                    <input class="table-filter"
-                           name="nombre"
-                           value="{{ d.nombre }}"
-                           style="width:210px">
-                  </td>
+                <td>
+                  <input form="disciplina-form-{{ d.id }}"
+                         class="table-filter"
+                         name="nombre"
+                         value="{{ d.nombre }}"
+                         style="width:210px">
+                </td>
 
-                  <td>
-                    <select class="table-filter" name="tipo" style="width:115px">
-                      <option value="disciplina" {% if d.tipo == 'disciplina' %}selected{% endif %}>disciplina</option>
-                      <option value="fct" {% if d.tipo == 'fct' %}selected{% endif %}>fct</option>
-                      <option value="pap" {% if d.tipo == 'pap' %}selected{% endif %}>pap</option>
-                    </select>
-                  </td>
+                <td>
+                  <select form="disciplina-form-{{ d.id }}"
+                          class="table-filter"
+                          name="tipo"
+                          style="width:115px">
+                    <option value="disciplina" {% if d.tipo == 'disciplina' %}selected{% endif %}>disciplina</option>
+                    <option value="fct" {% if d.tipo == 'fct' %}selected{% endif %}>fct</option>
+                    <option value="pap" {% if d.tipo == 'pap' %}selected{% endif %}>pap</option>
+                  </select>
+                </td>
 
-                  <td>
-                    <input class="table-filter"
-                           type="number"
-                           name="horas"
-                           value="{{ d.horas or '' }}"
-                           style="width:80px">
-                  </td>
+                <td>
+                  <input form="disciplina-form-{{ d.id }}"
+                         class="table-filter"
+                         type="number"
+                         name="horas"
+                         value="{{ d.horas or '' }}"
+                         style="width:80px">
+                </td>
 
-                  <td>
-                    <input class="table-filter"
-                           name="descripcion"
-                           value="{{ d.descripcion or '' }}"
-                           style="width:270px">
-                  </td>
+                <td>
+                  <input form="disciplina-form-{{ d.id }}"
+                         class="table-filter"
+                         name="descripcion"
+                         value="{{ d.descripcion or '' }}"
+                         style="width:270px">
+                </td>
 
-                  <td>
-                    <button class="btn btn-secondary btn-sm" type="submit">
+                <td>
+                  <form id="disciplina-form-{{ d.id }}"
+                        method="post"
+                        action="{{ url_for('admin.update_disciplina', disciplina_id=d.id) }}">
+                  </form>
+
+                  <form id="disciplina-delete-{{ d.id }}"
+                        method="post"
+                        action="{{ url_for('admin.delete_disciplina', disciplina_id=d.id) }}">
+                  </form>
+
+                  <div class="admin-actions" style="min-width:180px">
+                    <button class="btn btn-secondary btn-sm"
+                            form="disciplina-form-{{ d.id }}"
+                            type="submit">
                       Guardar
                     </button>
 
@@ -616,14 +816,13 @@
                     </a>
 
                     <button class="btn btn-danger-soft btn-sm"
+                            form="disciplina-delete-{{ d.id }}"
                             type="submit"
-                            formaction="{{ url_for('admin.delete_disciplina', disciplina_id=d.id) }}"
-                            formmethod="post"
                             onclick="return confirm('¿Seguro que quieres eliminar esta disciplina? Se borrarán también sus secciones y recursos.')">
                       Eliminar
                     </button>
-                  </td>
-                </form>
+                  </div>
+                </td>
               </tr>
             {% endfor %}
           </tbody>
@@ -703,7 +902,12 @@
                         action="{{ url_for('admin.toggle_seccion', seccion_id=s.id) }}">
                   </form>
 
-                  <div class="admin-actions" style="min-width:150px">
+                  <form id="seccion-delete-{{ s.id }}"
+                        method="post"
+                        action="{{ url_for('admin.delete_seccion', seccion_id=s.id) }}">
+                  </form>
+
+                  <div class="admin-actions" style="min-width:230px">
                     <button class="btn btn-secondary btn-sm"
                             form="seccion-form-{{ s.id }}"
                             type="submit">
@@ -713,11 +917,14 @@
                     <button class="btn btn-secondary btn-sm"
                             form="seccion-toggle-{{ s.id }}"
                             type="submit">
-                      {% if s.visible %}
-                        Ocultar
-                      {% else %}
-                        Mostrar
-                      {% endif %}
+                      {% if s.visible %}Ocultar{% else %}Mostrar{% endif %}
+                    </button>
+
+                    <button class="btn btn-danger-soft btn-sm"
+                            form="seccion-delete-{{ s.id }}"
+                            type="submit"
+                            onclick="return confirm('¿Seguro que quieres eliminar esta sección? Se borrarán también sus recursos.')">
+                      Eliminar
                     </button>
                   </div>
                 </td>
@@ -895,11 +1102,7 @@
                     <button class="btn btn-secondary btn-sm"
                             form="recurso-toggle-{{ r.id }}"
                             type="submit">
-                      {% if r.visible %}
-                        Ocultar
-                      {% else %}
-                        Mostrar
-                      {% endif %}
+                      {% if r.visible %}Ocultar{% else %}Mostrar{% endif %}
                     </button>
 
                     <button class="btn btn-danger-soft btn-sm"
