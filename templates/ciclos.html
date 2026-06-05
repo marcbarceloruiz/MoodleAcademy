@@ -71,7 +71,7 @@
           </div>
 
           <p style="font-size:12px;color:var(--muted);line-height:1.6;margin:10px 0">
-            {{ c.descripcion or 'Ciclo formativo profissional.' }}
+            {{ (c.descripcion or 'Ciclo formativo profissional.')|truncate(170, true, '...') }}
           </p>
 
           <div style="font-size:12px;color:var(--text-2);margin-bottom:12px">
