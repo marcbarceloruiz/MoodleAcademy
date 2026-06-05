@@ -190,6 +190,48 @@ def _save_uploaded_file(field_name, subfolder):
     return f"/static/uploads/{subfolder}/{unique_name}"
 
 
+def _delete_uploaded_file(url):
+    """
+    Borra un archivo local de /static/uploads si existe.
+
+    Solo elimina rutas internas que empiecen por /static/uploads/.
+    No toca URLs externas tipo https://...
+    """
+    if not url:
+        return
+
+    if not str(url).startswith("/static/uploads/"):
+        return
+
+    try:
+        relative_path = str(url).lstrip("/").replace("/", os.sep)
+        file_path = os.path.abspath(
+            os.path.join(current_app.root_path, relative_path)
+        )
+
+        uploads_root = os.path.abspath(
+            os.path.join(current_app.root_path, "static", "uploads")
+        )
+
+        # Seguridad: evita borrar fuera de static/uploads
+        if not file_path.startswith(uploads_root):
+            return
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+    except Exception as e:
+        print("Error eliminando archivo subido:", e)
+
+
+def _delete_uploaded_files(urls):
+    """
+    Borra una lista de archivos locales subidos.
+    """
+    for url in urls or []:
+        _delete_uploaded_file(url)
+
+
 def _admin_stats():
     stats = {}
 
@@ -484,6 +526,15 @@ def create_documento():
 @admin_bp.route("/admin/documentos/<int:documento_id>/update", methods=["POST"])
 def update_documento(documento_id):
     try:
+        documento = _fetch_one("""
+            SELECT url
+            FROM documentos_institucionais
+            WHERE id = :documento_id
+            LIMIT 1
+        """, {"documento_id": documento_id})
+
+        old_url = documento["url"] if documento else None
+
         uploaded_url = _save_uploaded_file("archivo", "documentos")
         url = uploaded_url or request.form.get("url", "").strip() or None
 
@@ -511,12 +562,14 @@ def update_documento(documento_id):
         )
         db.session.commit()
 
+        if uploaded_url and old_url:
+            _delete_uploaded_file(old_url)
+
     except Exception as e:
         db.session.rollback()
         print("Error actualizando documento institucional:", e)
 
     return redirect(url_for("admin.admin", tab="documentos"))
-
 
 @admin_bp.route("/admin/documentos/<int:documento_id>/toggle", methods=["POST"])
 def toggle_documento(documento_id):
@@ -541,6 +594,15 @@ def toggle_documento(documento_id):
 @admin_bp.route("/admin/documentos/<int:documento_id>/delete", methods=["POST"])
 def delete_documento(documento_id):
     try:
+        documento = _fetch_one("""
+            SELECT url
+            FROM documentos_institucionais
+            WHERE id = :documento_id
+            LIMIT 1
+        """, {"documento_id": documento_id})
+
+        old_url = documento["url"] if documento else None
+
         db.session.execute(
             text("""
                 DELETE FROM documentos_institucionais
@@ -550,12 +612,13 @@ def delete_documento(documento_id):
         )
         db.session.commit()
 
+        _delete_uploaded_file(old_url)
+
     except Exception as e:
         db.session.rollback()
         print("Error eliminando documento institucional:", e)
 
     return redirect(url_for("admin.admin", tab="documentos"))
-
 
 @admin_bp.route("/admin/ciclos/create", methods=["POST"])
 def create_ciclo():
@@ -662,8 +725,20 @@ def delete_ciclo(ciclo_id):
     """
     Elimina un ciclo completo:
     recursos -> secciones -> disciplinas -> años -> ciclo.
+    También borra los archivos físicos de los recursos asociados.
     """
     try:
+        recursos = _fetch_all("""
+            SELECT r.url
+            FROM recursos_disciplina r
+            JOIN secciones_disciplina s ON s.id = r.seccion_id
+            JOIN disciplinas_ciclo d ON d.id = s.disciplina_id
+            JOIN anos_ciclo a ON a.id = d.ano_id
+            WHERE a.ciclo_id = :ciclo_id
+        """, {"ciclo_id": ciclo_id})
+
+        urls_to_delete = [r["url"] for r in recursos if r.get("url")]
+
         db.session.execute(
             text("""
                 DELETE r
@@ -714,13 +789,13 @@ def delete_ciclo(ciclo_id):
         )
 
         db.session.commit()
+        _delete_uploaded_files(urls_to_delete)
 
     except Exception as e:
         db.session.rollback()
         print("Error eliminando ciclo formativo:", e)
 
     return redirect(url_for("admin.admin", tab="ciclos"))
-
 
 @admin_bp.route("/admin/disciplinas/create", methods=["POST"])
 def create_disciplina():
@@ -856,8 +931,18 @@ def delete_disciplina(disciplina_id):
     """
     Elimina una disciplina:
     recursos -> secciones -> disciplina.
+    También borra los archivos físicos de los recursos asociados.
     """
     try:
+        recursos = _fetch_all("""
+            SELECT r.url
+            FROM recursos_disciplina r
+            JOIN secciones_disciplina s ON s.id = r.seccion_id
+            WHERE s.disciplina_id = :disciplina_id
+        """, {"disciplina_id": disciplina_id})
+
+        urls_to_delete = [r["url"] for r in recursos if r.get("url")]
+
         db.session.execute(
             text("""
                 DELETE r
@@ -885,13 +970,13 @@ def delete_disciplina(disciplina_id):
         )
 
         db.session.commit()
+        _delete_uploaded_files(urls_to_delete)
 
     except Exception as e:
         db.session.rollback()
         print("Error eliminando disciplina:", e)
 
     return redirect(url_for("admin.admin", tab="disciplinas"))
-
 
 @admin_bp.route("/admin/secciones/<int:seccion_id>/update", methods=["POST"])
 def update_seccion(seccion_id):
@@ -947,8 +1032,17 @@ def toggle_seccion(seccion_id):
 def delete_seccion(seccion_id):
     """
     Elimina una sección de disciplina y sus recursos.
+    También borra los archivos físicos de los recursos asociados.
     """
     try:
+        recursos = _fetch_all("""
+            SELECT url
+            FROM recursos_disciplina
+            WHERE seccion_id = :seccion_id
+        """, {"seccion_id": seccion_id})
+
+        urls_to_delete = [r["url"] for r in recursos if r.get("url")]
+
         db.session.execute(
             text("""
                 DELETE FROM recursos_disciplina
@@ -966,13 +1060,13 @@ def delete_seccion(seccion_id):
         )
 
         db.session.commit()
+        _delete_uploaded_files(urls_to_delete)
 
     except Exception as e:
         db.session.rollback()
         print("Error eliminando sección de disciplina:", e)
 
     return redirect(url_for("admin.admin", tab="secciones"))
-
 
 @admin_bp.route("/admin/recursos/create", methods=["POST"])
 def create_recurso():
@@ -1019,6 +1113,15 @@ def create_recurso():
 @admin_bp.route("/admin/recursos/<int:recurso_id>/update", methods=["POST"])
 def update_recurso(recurso_id):
     try:
+        recurso = _fetch_one("""
+            SELECT url
+            FROM recursos_disciplina
+            WHERE id = :recurso_id
+            LIMIT 1
+        """, {"recurso_id": recurso_id})
+
+        old_url = recurso["url"] if recurso else None
+
         uploaded_url = _save_uploaded_file("archivo", "recursos")
         url = uploaded_url or request.form.get("url", "").strip() or None
 
@@ -1046,12 +1149,14 @@ def update_recurso(recurso_id):
         )
         db.session.commit()
 
+        if uploaded_url and old_url:
+            _delete_uploaded_file(old_url)
+
     except Exception as e:
         db.session.rollback()
         print("Error actualizando recurso de disciplina:", e)
 
     return redirect(url_for("admin.admin", tab="recursos"))
-
 
 @admin_bp.route("/admin/recursos/<int:recurso_id>/toggle", methods=["POST"])
 def toggle_recurso(recurso_id):
@@ -1076,6 +1181,15 @@ def toggle_recurso(recurso_id):
 @admin_bp.route("/admin/recursos/<int:recurso_id>/delete", methods=["POST"])
 def delete_recurso(recurso_id):
     try:
+        recurso = _fetch_one("""
+            SELECT url
+            FROM recursos_disciplina
+            WHERE id = :recurso_id
+            LIMIT 1
+        """, {"recurso_id": recurso_id})
+
+        old_url = recurso["url"] if recurso else None
+
         db.session.execute(
             text("""
                 DELETE FROM recursos_disciplina
@@ -1085,8 +1199,11 @@ def delete_recurso(recurso_id):
         )
         db.session.commit()
 
+        _delete_uploaded_file(old_url)
+
     except Exception as e:
         db.session.rollback()
         print("Error eliminando recurso de disciplina:", e)
 
     return redirect(url_for("admin.admin", tab="recursos"))
+
