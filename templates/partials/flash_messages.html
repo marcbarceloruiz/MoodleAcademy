@@ -1,11 +1,26 @@
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-    <div class="flash-messages" style="padding:0 24px">
+    <div class="flash-messages" style="padding: 0 24px 8px">
       {% for category, message in messages %}
-        <div class="toast {{ category }}" style="position:relative;margin-bottom:8px">
+        <div class="toast {{ category }}"
+             style="position:relative; margin-bottom: 8px; cursor: pointer; padding-right: 40px;"
+             onclick="this.remove()"
+             title="Clic para cerrar">
           {{ message }}
+          <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); opacity:.7; font-size:18px; line-height:1;" aria-hidden="true">×</span>
         </div>
       {% endfor %}
     </div>
+    <script>
+      (function () {
+        document.querySelectorAll('.flash-messages .toast').forEach(function (t) {
+          setTimeout(function () {
+            t.style.transition = 'opacity .4s';
+            t.style.opacity = '0';
+            setTimeout(function () { if (t.parentNode) t.remove(); }, 400);
+          }, 5000);
+        });
+      })();
+    </script>
   {% endif %}
 {% endwith %}

@@ -178,3 +178,4 @@
 .profile-email { font-size: 12px; color: var(--muted); }
 .profile-role { font-size: 12px; color: var(--cyan-dark); font-weight: 500; margin-top: 2px; }
 .profile-actions { display: flex; flex-direction: column; gap: 8px; }
+.toast.danger  { background: var(--danger); }

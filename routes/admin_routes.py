@@ -17,6 +17,7 @@ from flask import (
     url_for,
     session,
     current_app,
+    flash,              # ← AÑADIDO para mensajes de feedback
 )
 from sqlalchemy import text
 from werkzeug.utils import secure_filename
@@ -451,6 +452,10 @@ def admin():
     )
 
 
+# ──────────────────────────────────────────────
+# PORTAL — Áreas institucionales
+# ──────────────────────────────────────────────
+
 @admin_bp.route("/admin/areas/<int:area_id>/update", methods=["POST"])
 def update_area(area_id):
     try:
@@ -473,13 +478,19 @@ def update_area(area_id):
             },
         )
         db.session.commit()
+        flash("Sección del portal actualizada.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error actualizando área institucional:", e)
+        flash("Error al actualizar la sección del portal.", "danger")
 
     return redirect(url_for("admin.admin", tab="portal"))
 
+
+# ──────────────────────────────────────────────
+# DOCUMENTOS
+# ──────────────────────────────────────────────
 
 @admin_bp.route("/admin/documentos/create", methods=["POST"])
 def create_documento():
@@ -515,10 +526,14 @@ def create_documento():
                 },
             )
             db.session.commit()
+            flash("Documento creado correctamente.", "success")
+        else:
+            flash("Faltan datos obligatorios (título y área).", "warning")
 
     except Exception as e:
         db.session.rollback()
         print("Error creando documento institucional:", e)
+        flash("Error al crear el documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
 
@@ -565,11 +580,15 @@ def update_documento(documento_id):
         if uploaded_url and old_url:
             _delete_uploaded_file(old_url)
 
+        flash("Documento actualizado correctamente.", "success")
+
     except Exception as e:
         db.session.rollback()
         print("Error actualizando documento institucional:", e)
+        flash("Error al actualizar el documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
+
 
 @admin_bp.route("/admin/documentos/<int:documento_id>/toggle", methods=["POST"])
 def toggle_documento(documento_id):
@@ -583,10 +602,12 @@ def toggle_documento(documento_id):
             {"documento_id": documento_id},
         )
         db.session.commit()
+        flash("Visibilidad del documento actualizada.", "info")
 
     except Exception as e:
         db.session.rollback()
         print("Error cambiando visibilidad del documento institucional:", e)
+        flash("Error al cambiar la visibilidad del documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
 
@@ -613,12 +634,19 @@ def delete_documento(documento_id):
         db.session.commit()
 
         _delete_uploaded_file(old_url)
+        flash("Documento eliminado.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error eliminando documento institucional:", e)
+        flash("Error al eliminar el documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
+
+
+# ──────────────────────────────────────────────
+# CICLOS FORMATIVOS
+# ──────────────────────────────────────────────
 
 @admin_bp.route("/admin/ciclos/create", methods=["POST"])
 def create_ciclo():
@@ -674,10 +702,14 @@ def create_ciclo():
                     )
 
             db.session.commit()
+            flash("Ciclo formativo creado con sus 3 años (10.º, 11.º y 12.º).", "success")
+        else:
+            flash("Faltan datos obligatorios (código y nombre).", "warning")
 
     except Exception as e:
         db.session.rollback()
         print("Error creando ciclo formativo:", e)
+        flash("Error al crear el ciclo formativo.", "danger")
 
     return redirect(url_for("admin.admin", tab="ciclos"))
 
@@ -712,10 +744,12 @@ def update_ciclo(ciclo_id):
             },
         )
         db.session.commit()
+        flash("Ciclo formativo actualizado.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error actualizando ciclo formativo:", e)
+        flash("Error al actualizar el ciclo formativo.", "danger")
 
     return redirect(url_for("admin.admin", tab="ciclos"))
 
@@ -790,12 +824,19 @@ def delete_ciclo(ciclo_id):
 
         db.session.commit()
         _delete_uploaded_files(urls_to_delete)
+        flash("Ciclo formativo y todos sus datos eliminados.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error eliminando ciclo formativo:", e)
+        flash("Error al eliminar el ciclo formativo.", "danger")
 
     return redirect(url_for("admin.admin", tab="ciclos"))
+
+
+# ──────────────────────────────────────────────
+# DISCIPLINAS
+# ──────────────────────────────────────────────
 
 @admin_bp.route("/admin/disciplinas/create", methods=["POST"])
 def create_disciplina():
@@ -883,10 +924,14 @@ def create_disciplina():
                     )
 
             db.session.commit()
+            flash("Disciplina creada con sus 5 secciones base.", "success")
+        else:
+            flash("Faltan datos obligatorios (año de ciclo y nombre).", "warning")
 
     except Exception as e:
         db.session.rollback()
         print("Error creando disciplina:", e)
+        flash("Error al crear la disciplina.", "danger")
 
     return redirect(url_for("admin.admin", tab="disciplinas"))
 
@@ -918,10 +963,12 @@ def update_disciplina(disciplina_id):
             },
         )
         db.session.commit()
+        flash("Disciplina actualizada.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error actualizando disciplina:", e)
+        flash("Error al actualizar la disciplina.", "danger")
 
     return redirect(url_for("admin.admin", tab="disciplinas"))
 
@@ -971,12 +1018,19 @@ def delete_disciplina(disciplina_id):
 
         db.session.commit()
         _delete_uploaded_files(urls_to_delete)
+        flash("Disciplina y sus secciones eliminadas.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error eliminando disciplina:", e)
+        flash("Error al eliminar la disciplina.", "danger")
 
     return redirect(url_for("admin.admin", tab="disciplinas"))
+
+
+# ──────────────────────────────────────────────
+# SECCIONES DE DISCIPLINA
+# ──────────────────────────────────────────────
 
 @admin_bp.route("/admin/secciones/<int:seccion_id>/update", methods=["POST"])
 def update_seccion(seccion_id):
@@ -1000,10 +1054,12 @@ def update_seccion(seccion_id):
             },
         )
         db.session.commit()
+        flash("Sección actualizada.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error actualizando sección de disciplina:", e)
+        flash("Error al actualizar la sección.", "danger")
 
     return redirect(url_for("admin.admin", tab="secciones"))
 
@@ -1020,10 +1076,12 @@ def toggle_seccion(seccion_id):
             {"seccion_id": seccion_id},
         )
         db.session.commit()
+        flash("Visibilidad de la sección actualizada.", "info")
 
     except Exception as e:
         db.session.rollback()
         print("Error cambiando visibilidad de sección:", e)
+        flash("Error al cambiar la visibilidad de la sección.", "danger")
 
     return redirect(url_for("admin.admin", tab="secciones"))
 
@@ -1061,12 +1119,19 @@ def delete_seccion(seccion_id):
 
         db.session.commit()
         _delete_uploaded_files(urls_to_delete)
+        flash("Sección y sus recursos eliminados.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error eliminando sección de disciplina:", e)
+        flash("Error al eliminar la sección.", "danger")
 
     return redirect(url_for("admin.admin", tab="secciones"))
+
+
+# ──────────────────────────────────────────────
+# RECURSOS DE DISCIPLINA
+# ──────────────────────────────────────────────
 
 @admin_bp.route("/admin/recursos/create", methods=["POST"])
 def create_recurso():
@@ -1102,10 +1167,14 @@ def create_recurso():
                 },
             )
             db.session.commit()
+            flash("Recurso creado correctamente.", "success")
+        else:
+            flash("Faltan datos obligatorios (sección y título).", "warning")
 
     except Exception as e:
         db.session.rollback()
         print("Error creando recurso de disciplina:", e)
+        flash("Error al crear el recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
 
@@ -1152,11 +1221,15 @@ def update_recurso(recurso_id):
         if uploaded_url and old_url:
             _delete_uploaded_file(old_url)
 
+        flash("Recurso actualizado correctamente.", "success")
+
     except Exception as e:
         db.session.rollback()
         print("Error actualizando recurso de disciplina:", e)
+        flash("Error al actualizar el recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
+
 
 @admin_bp.route("/admin/recursos/<int:recurso_id>/toggle", methods=["POST"])
 def toggle_recurso(recurso_id):
@@ -1170,10 +1243,12 @@ def toggle_recurso(recurso_id):
             {"recurso_id": recurso_id},
         )
         db.session.commit()
+        flash("Visibilidad del recurso actualizada.", "info")
 
     except Exception as e:
         db.session.rollback()
         print("Error cambiando visibilidad del recurso:", e)
+        flash("Error al cambiar la visibilidad del recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
 
@@ -1200,10 +1275,11 @@ def delete_recurso(recurso_id):
         db.session.commit()
 
         _delete_uploaded_file(old_url)
+        flash("Recurso eliminado.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error eliminando recurso de disciplina:", e)
+        flash("Error al eliminar el recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
-
