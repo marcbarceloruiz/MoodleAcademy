@@ -12,38 +12,9 @@
       Panel provisional de gestión del campus de la Academia Profissional Prof. Albino de Matos
     </p>
   </div>
-
-  <form method="post" action="{{ url_for('admin.admin_logout') }}">
-    <button class="btn btn-secondary btn-sm" type="submit">
-      Cerrar sesión
-    </button>
-  </form>
 </div>
 
 <style>
-  /* Fix tabla de disciplinas */
-.admin-disciplinas-table {
-  min-width: 1250px;
-}
-
-.admin-disciplinas-table th:last-child,
-.admin-disciplinas-table td:last-child {
-  min-width: 210px;
-  width: 210px;
-}
-
-.admin-disciplinas-table td:last-child {
-  background: var(--surface);
-}
-
-.admin-disciplinas-table td:last-child button,
-.admin-disciplinas-table td:last-child a {
-  margin: 2px;
-}
-
-.admin-disciplinas-table td:last-child .btn-danger-soft {
-  display: inline-flex;
-}
   .admin-kpis {
     display: grid;
     grid-template-columns: repeat(6, minmax(120px, 1fr));
@@ -126,7 +97,7 @@
   }
 
   .admin-documentos-table {
-    min-width: 1350px;
+    min-width: 1500px;
   }
 
   .admin-disciplinas-table {
@@ -138,7 +109,7 @@
   }
 
   .admin-recursos-table {
-    min-width: 1500px;
+    min-width: 1680px;
   }
 
   #admin-tab-content form[style*="grid-template-columns"] {
@@ -392,8 +363,9 @@
 
         <div class="card-body">
           <form method="post"
+                enctype="multipart/form-data"
                 action="{{ url_for('admin.create_documento') }}"
-                style="display:grid;grid-template-columns:1.2fr 1.4fr .8fr 2fr 1.4fr auto;gap:10px;align-items:end">
+                style="display:grid;grid-template-columns:1.2fr 1.4fr .8fr 2fr 1.4fr 1.4fr auto;gap:10px;align-items:end">
 
             <div>
               <label class="text-sm text-muted">Área</label>
@@ -424,6 +396,11 @@
               <input class="table-filter" name="url" placeholder="https://..." style="width:100%">
             </div>
 
+            <div>
+              <label class="text-sm text-muted">Archivo</label>
+              <input class="table-filter" type="file" name="archivo" style="width:100%">
+            </div>
+
             <button class="btn btn-primary btn-sm" type="submit">
               Añadir
             </button>
@@ -440,6 +417,7 @@
               <th>Tipo</th>
               <th>Descripción</th>
               <th>URL</th>
+              <th>Archivo</th>
               <th>Orden</th>
               <th>Visible</th>
               <th>Acción</th>
@@ -487,6 +465,14 @@
                 <td>
                   <input form="documento-form-{{ d.id }}"
                          class="table-filter"
+                         type="file"
+                         name="archivo"
+                         style="width:170px">
+                </td>
+
+                <td>
+                  <input form="documento-form-{{ d.id }}"
+                         class="table-filter"
                          type="number"
                          name="orden"
                          value="{{ d.orden }}"
@@ -501,6 +487,7 @@
                 <td>
                   <form id="documento-form-{{ d.id }}"
                         method="post"
+                        enctype="multipart/form-data"
                         action="{{ url_for('admin.update_documento', documento_id=d.id) }}">
                   </form>
 
@@ -733,9 +720,9 @@
       </div>
 
       <div class="admin-table-wrap">
-        <table class="data-table admin-disciplinas-table admin-table-sticky-actions">
+        <table class="data-table admin-disciplinas-table">
           <thead>
-            <tr>s
+            <tr>
               <th>Ciclo</th>
               <th>Año</th>
               <th>Código</th>
@@ -955,8 +942,9 @@
 
         <div class="card-body">
           <form method="post"
+                enctype="multipart/form-data"
                 action="{{ url_for('admin.create_recurso') }}"
-                style="display:grid;grid-template-columns:1.7fr 1.2fr .8fr 1.6fr 1.2fr auto;gap:10px;align-items:end">
+                style="display:grid;grid-template-columns:1.7fr 1.2fr .8fr 1.6fr 1.2fr 1.4fr auto;gap:10px;align-items:end">
 
             <div>
               <label class="text-sm text-muted">Sección</label>
@@ -998,6 +986,11 @@
               <input class="table-filter" name="url" placeholder="https://..." style="width:100%">
             </div>
 
+            <div>
+              <label class="text-sm text-muted">Archivo</label>
+              <input class="table-filter" type="file" name="archivo" style="width:100%">
+            </div>
+
             <button class="btn btn-primary btn-sm" type="submit">
               Añadir
             </button>
@@ -1015,6 +1008,7 @@
               <th>Tipo</th>
               <th>Descripción</th>
               <th>URL</th>
+              <th>Archivo</th>
               <th>Orden</th>
               <th>Visible</th>
               <th>Acción</th>
@@ -1071,6 +1065,14 @@
                 <td>
                   <input form="recurso-form-{{ r.id }}"
                          class="table-filter"
+                         type="file"
+                         name="archivo"
+                         style="width:170px">
+                </td>
+
+                <td>
+                  <input form="recurso-form-{{ r.id }}"
+                         class="table-filter"
                          type="number"
                          name="orden"
                          value="{{ r.orden }}"
@@ -1085,6 +1087,7 @@
                 <td>
                   <form id="recurso-form-{{ r.id }}"
                         method="post"
+                        enctype="multipart/form-data"
                         action="{{ url_for('admin.update_recurso', recurso_id=r.id) }}">
                   </form>
 

@@ -24,3 +24,27 @@ class Config:
     # Contraseña simple para proteger el panel admin.
     # Definir en .env: ADMIN_PASSWORD=tu_contraseña
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
+
+        # Subida de archivos
+    UPLOAD_FOLDER = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "static",
+        "uploads",
+    )
+
+    MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10 MB
+
+    ALLOWED_UPLOAD_EXTENSIONS = {
+        "pdf",
+        "doc",
+        "docx",
+        "xls",
+        "xlsx",
+        "ppt",
+        "pptx",
+        "txt",
+        "png",
+        "jpg",
+        "jpeg",
+        "webp",
+    }

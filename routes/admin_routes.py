@@ -6,6 +6,9 @@ Panel provisional de administración del campus.
 De momento no hay login real, así que esta zona es solo para desarrollo.
 """
 
+import os
+import uuid
+
 from flask import (
     Blueprint,
     render_template,
@@ -15,13 +18,14 @@ from flask import (
     session,
     current_app,
 )
-
 from sqlalchemy import text
+from werkzeug.utils import secure_filename
 
 from extensions import db
 from services.data_service import get_current_user, get_centro
 
 admin_bp = Blueprint("admin", __name__)
+
 
 # ──────────────────────────────────────────────
 # AUTENTICACIÓN SIMPLE DEL ADMIN
@@ -38,12 +42,6 @@ def _admin_autenticado():
 def proteger_admin():
     """
     Protege todas las rutas del blueprint admin.
-
-    Permite acceder solo a:
-    - /admin/login
-    - /admin/logout
-
-    El resto de rutas requieren sesión admin_ok=True.
     """
     rutas_libres = {
         "admin.admin_login",
@@ -91,6 +89,7 @@ def admin_login():
         centro=centro,
     )
 
+
 @admin_bp.route("/admin/logout", methods=["POST"])
 def admin_logout():
     """
@@ -98,6 +97,7 @@ def admin_logout():
     """
     session.pop("admin_ok", None)
     return redirect(url_for("admin.admin_login"))
+
 
 def _as_bool(value):
     return 1 if str(value) == "1" else 0
@@ -125,6 +125,69 @@ def _fetch_all(sql, params=None):
 
 def _fetch_one(sql, params=None):
     return db.session.execute(text(sql), params or {}).mappings().first()
+
+
+def _allowed_upload(filename):
+    """
+    Comprueba si el archivo tiene una extensión permitida.
+    """
+    if not filename or "." not in filename:
+        return False
+
+    extension = filename.rsplit(".", 1)[1].lower()
+    allowed = current_app.config.get(
+        "ALLOWED_UPLOAD_EXTENSIONS",
+        {
+            "pdf",
+            "doc",
+            "docx",
+            "xls",
+            "xlsx",
+            "ppt",
+            "pptx",
+            "txt",
+            "png",
+            "jpg",
+            "jpeg",
+            "webp",
+        },
+    )
+
+    return extension in allowed
+
+
+def _save_uploaded_file(field_name, subfolder):
+    """
+    Guarda un archivo subido desde un formulario del admin.
+
+    Devuelve una URL pública tipo:
+    /static/uploads/documentos/archivo.pdf
+
+    Si no se sube ningún archivo, devuelve None.
+    """
+    uploaded_file = request.files.get(field_name)
+
+    if not uploaded_file or not uploaded_file.filename:
+        return None
+
+    if not _allowed_upload(uploaded_file.filename):
+        raise ValueError("Tipo de archivo no permitido.")
+
+    original_name = secure_filename(uploaded_file.filename)
+    extension = original_name.rsplit(".", 1)[1].lower()
+    unique_name = f"{uuid.uuid4().hex}.{extension}"
+
+    upload_root = current_app.config.get("UPLOAD_FOLDER")
+    if not upload_root:
+        upload_root = os.path.join(current_app.root_path, "static", "uploads")
+
+    destination_folder = os.path.join(upload_root, subfolder)
+    os.makedirs(destination_folder, exist_ok=True)
+
+    destination_path = os.path.join(destination_folder, unique_name)
+    uploaded_file.save(destination_path)
+
+    return f"/static/uploads/{subfolder}/{unique_name}"
 
 
 def _admin_stats():
@@ -383,6 +446,9 @@ def create_documento():
         titulo = request.form.get("titulo", "").strip()
 
         if titulo and area_id:
+            uploaded_url = _save_uploaded_file("archivo", "documentos")
+            url = uploaded_url or request.form.get("url", "").strip() or None
+
             db.session.execute(
                 text("""
                     INSERT IGNORE INTO documentos_institucionais
@@ -403,7 +469,7 @@ def create_documento():
                     "titulo": titulo,
                     "tipo": request.form.get("tipo", "Documento").strip(),
                     "descricao": request.form.get("descricao", "").strip(),
-                    "url": request.form.get("url", "").strip() or None,
+                    "url": url,
                 },
             )
             db.session.commit()
@@ -418,6 +484,9 @@ def create_documento():
 @admin_bp.route("/admin/documentos/<int:documento_id>/update", methods=["POST"])
 def update_documento(documento_id):
     try:
+        uploaded_url = _save_uploaded_file("archivo", "documentos")
+        url = uploaded_url or request.form.get("url", "").strip() or None
+
         db.session.execute(
             text("""
                 UPDATE documentos_institucionais
@@ -435,7 +504,7 @@ def update_documento(documento_id):
                 "titulo": request.form.get("titulo", "").strip(),
                 "tipo": request.form.get("tipo", "Documento").strip(),
                 "descricao": request.form.get("descricao", "").strip(),
-                "url": request.form.get("url", "").strip() or None,
+                "url": url,
                 "orden": _to_int(request.form.get("orden"), 0),
                 "visible": _checkbox_value("visible"),
             },
@@ -912,6 +981,9 @@ def create_recurso():
         titulo = request.form.get("titulo", "").strip()
 
         if seccion_id and titulo:
+            uploaded_url = _save_uploaded_file("archivo", "recursos")
+            url = uploaded_url or request.form.get("url", "").strip() or None
+
             db.session.execute(
                 text("""
                     INSERT INTO recursos_disciplina
@@ -932,7 +1004,7 @@ def create_recurso():
                     "titulo": titulo,
                     "tipo": request.form.get("tipo", "documento").strip(),
                     "descripcion": request.form.get("descripcion", "").strip(),
-                    "url": request.form.get("url", "").strip() or None,
+                    "url": url,
                 },
             )
             db.session.commit()
@@ -947,6 +1019,9 @@ def create_recurso():
 @admin_bp.route("/admin/recursos/<int:recurso_id>/update", methods=["POST"])
 def update_recurso(recurso_id):
     try:
+        uploaded_url = _save_uploaded_file("archivo", "recursos")
+        url = uploaded_url or request.form.get("url", "").strip() or None
+
         db.session.execute(
             text("""
                 UPDATE recursos_disciplina
@@ -964,7 +1039,7 @@ def update_recurso(recurso_id):
                 "titulo": request.form.get("titulo", "").strip(),
                 "tipo": request.form.get("tipo", "documento").strip(),
                 "descripcion": request.form.get("descripcion", "").strip(),
-                "url": request.form.get("url", "").strip() or None,
+                "url": url,
                 "orden": _to_int(request.form.get("orden"), 0),
                 "visible": _checkbox_value("visible"),
             },
