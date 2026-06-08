@@ -1,18 +1,17 @@
 """
 Academia Profissional Prof. Albino de Matos - Escola Profissional Vértice
-Campus Virtual
-
-Punto de entrada principal de la aplicación Flask.
+Campus Virtual — Ponto de entrada Flask.
 """
 
-from flask import Flask
+from flask import Flask, session
 from config import Config
 from extensions import db, migrate
 
 from routes.dashboard_routes import dashboard_bp
-from routes.courses_routes import courses_bp
-from routes.admin_routes import admin_bp
-from routes.portal_routes import portal_bp
+from routes.courses_routes   import courses_bp
+from routes.admin_routes     import admin_bp
+from routes.portal_routes    import portal_bp
+from routes.auth_routes      import auth_bp
 
 from services.data_service import (
     get_user_courses,
@@ -20,7 +19,6 @@ from services.data_service import (
     calculate_course_progress,
     format_date_short,
 )
-
 from models import Centro
 
 
@@ -28,81 +26,77 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Inicializar base de datos y migraciones
     db.init_app(app)
     migrate.init_app(app, db)
 
+    # ── Context processor: dados de layout e sidebar ──────────
     @app.context_processor
     def inject_layout_data():
-        """
-        Datos comunes para el layout y el sidebar.
-
-        De momento estos datos pueden venir del data_service.
-        Más adelante los conectaremos completamente a MySQL.
-        """
         try:
             layout_mis_cursos = get_user_courses()
-
-            for curso in layout_mis_cursos:
-                curso["_progreso"] = calculate_course_progress(curso)
-
+            for c in layout_mis_cursos:
+                c["_progreso"] = calculate_course_progress(c)
             layout_eventos = get_events(limit=3)
-
-            for evento in layout_eventos:
-                evento["_fecha_corta"] = format_date_short(evento["fecha"])
-
+            for e in layout_eventos:
+                e["_fecha_corta"] = format_date_short(e["fecha"])
         except Exception:
-            # Evita que toda la web se caiga si falla algún dato del sidebar
             layout_mis_cursos = []
-            layout_eventos = []
-
+            layout_eventos    = []
         return {
             "layout_mis_cursos": layout_mis_cursos,
-            "layout_eventos": layout_eventos,
+            "layout_eventos":    layout_eventos,
         }
 
+    # ── Context processor: dados de sessão para templates ─────
+    @app.context_processor
+    def inject_session_data():
+        """
+        Disponibiliza variáveis de sessão em todos os templates:
+          session_autenticado   → bool
+          session_is_admin      → bool
+          session_is_docente    → bool
+          session_is_aluno      → bool
+          session_usuario_nome  → str
+          session_roles         → list[str]
+        """
+        roles        = session.get("usuario_roles", [])
+        legacy_admin = session.get("admin_ok") is True
+        autenticado  = bool(session.get("usuario_id")) or legacy_admin
+
+        return {
+            "session_autenticado":      autenticado,
+            "session_is_admin":         ("admin" in roles) or legacy_admin,
+            "session_is_docente":       "docente" in roles,
+            "session_is_aluno":         "aluno"   in roles,
+            "session_usuario_nome":     session.get("usuario_nome", ""),
+            "session_usuario_username": session.get("usuario_username", ""),
+            "session_roles":            roles,
+        }
+
+    # ── Rota de diagnóstico (apenas em DEBUG) ─────────────────
     if app.config.get("DEBUG", False):
         @app.route("/db-test")
         def db_test():
-            """
-            Ruta temporal para comprobar que Flask conecta correctamente con MySQL.
-            Solo existe cuando FLASK_DEBUG=True.
-            """
             try:
                 centro = Centro.query.first()
-
                 if not centro:
-                    return """
-                    <h1>Conexión correcta con MySQL</h1>
-                    <p>Pero no hay datos en la tabla <strong>centro</strong>.</p>
-                    <p>Revisa que hayas ejecutado el INSERT inicial en MySQL.</p>
-                    """
-
-                return f"""
-                <h1>Conexión MySQL OK</h1>
-                <h2>{centro.nome_oficial}</h2>
-                <p><strong>Nombre corto:</strong> {centro.nome_curto}</p>
-                <p><strong>Ubicación:</strong> {centro.cidade}, {centro.pais}</p>
-                """
-
+                    return "<h1>MySQL OK</h1><p>Tabela centro sem dados.</p>"
+                return (f"<h1>MySQL OK</h1><h2>{centro.nome_oficial}</h2>"
+                        f"<p>{centro.cidade}, {centro.pais}</p>")
             except Exception as e:
-                return f"""
-                <h1>Error conectando con MySQL</h1>
-                <p>Revisa el archivo <strong>.env</strong>, MySQL y la tabla <strong>centro</strong>.</p>
-                <pre>{e}</pre>
-                """, 500
+                return f"<h1>Erro MySQL</h1><pre>{e}</pre>", 500
 
-    # Registro de Blueprints
+    # ── Registar blueprints ───────────────────────────────────
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(courses_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(portal_bp)
+    app.register_blueprint(auth_bp)
 
     return app
 
 
 app = create_app()
-
 
 if __name__ == "__main__":
     app.run(debug=app.config.get("DEBUG", False))

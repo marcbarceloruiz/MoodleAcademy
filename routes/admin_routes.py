@@ -94,9 +94,11 @@ def admin_login():
 @admin_bp.route("/admin/logout", methods=["POST"])
 def admin_logout():
     """
-    Cierra la sesión del panel admin.
+    Cierra la sesión del panel admin (legacy y nuevo sistema).
     """
-    session.pop("admin_ok", None)
+    for key in ("admin_ok", "usuario_id", "usuario_username",
+                "usuario_nome", "usuario_roles"):
+        session.pop(key, None)
     return redirect(url_for("admin.admin_login"))
 
 

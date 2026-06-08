@@ -31,12 +31,50 @@ from data.mock_data import (
 
 def get_current_user():
     """
-    Usuario actual de demo.
-
-    De momento no hay login real, así que se mantiene el usuario mock.
-    Más adelante esta función leerá del usuario autenticado.
+    Devolve o utilizador autenticado a partir da sessão Flask.
+    Se não há sessão, devolve dict de visitante (nunca None).
     """
-    return USUARIO
+    try:
+        from flask import session
+
+        if session.get("usuario_id"):
+            nome = session.get("usuario_nome", "")
+            username = session.get("usuario_username", "")
+            roles = session.get("usuario_roles", [])
+            nome_display = nome or username
+            return {
+                "id": session.get("usuario_id"),
+                "nombre": nome_display,
+                "nome": nome_display,
+                "email": "",
+                "iniciales": (nome_display[0].upper() if nome_display else "U"),
+                "rol": roles[0] if roles else "utilizador",
+                "matriculas": [],
+            }
+
+        if session.get("admin_ok") is True:
+            return {
+                "id": 0,
+                "nombre": "Administrador",
+                "nome": "Administrador",
+                "email": "",
+                "iniciales": "A",
+                "rol": "admin",
+                "matriculas": [],
+            }
+    except Exception:
+        pass
+
+    # Visitante não autenticado
+    return {
+        "id": None,
+        "nombre": "",
+        "nome": "",
+        "email": "",
+        "iniciales": "V",
+        "rol": "visitante",
+        "matriculas": [],
+    }
 
 
 # ──────────────────────────────────────────────
@@ -962,7 +1000,8 @@ def _get_ciclo_fallback_by_id(ciclo_id):
 
     return ciclo
 
-    # ──────────────────────────────────────────────
+
+# ──────────────────────────────────────────────
 # DETALLE DE DISCIPLINA / ASIGNATURA
 # ──────────────────────────────────────────────
 
@@ -1079,6 +1118,7 @@ def get_disciplina_by_id(disciplina_id):
                     "orden": recurso_row["orden"],
                     "_icono": recurso_icono(tipo),
                     "_badge": recurso_badge(tipo),
+                    "_action_label": url_action_label(recurso_row["url"], tipo),
                 })
 
             disciplina["secciones"].append(seccion)
@@ -1114,3 +1154,26 @@ def recurso_badge(tipo):
         "evidencia": "EVIDENCIA",
         "enlace": "ENLACE",
     }.get(tipo, tipo.upper() if tipo else "RECURSO")
+
+
+def url_action_label(url, tipo=None):
+    """
+    Etiqueta de ação para botão de documento/recurso baseada na extensão da URL.
+    Usada em portal.html e disciplina_detail.html.
+    """
+    if not url:
+        return "Sem arquivo"
+    ul = url.lower().split("?")[0]
+    if ul.endswith(".pdf"):                              return "Abrir PDF"
+    if ul.endswith((".doc", ".docx")):                  return "Abrir documento"
+    if ul.endswith((".xls", ".xlsx")):                  return "Abrir folha de cálculo"
+    if ul.endswith((".ppt", ".pptx")):                  return "Abrir apresentação"
+    if ul.endswith((".jpg", ".jpeg", ".png", ".webp")): return "Ver imagem"
+    if ul.endswith((".mp4", ".avi", ".mov", ".webm")):  return "Ver vídeo"
+    if ul.startswith("http"):                           return "Abrir ligação"
+    if ul.startswith("/static/uploads/"):
+        ext = ul.rsplit(".", 1)[-1] if "." in ul else ""
+        if ext == "pdf":          return "Abrir PDF"
+        if ext in ("doc","docx"): return "Abrir documento"
+        return "Abrir arquivo"
+    return "Abrir arquivo"

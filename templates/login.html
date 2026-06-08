@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Acesso ao Campus Virtual — Academia Profissional Prof. Albino de Matos{% endblock %}
+{% block hero_title %}Campus Virtual{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <h1>Acesso ao Campus Virtual</h1>
+    <p class="subtitle">Academia Profissional Prof. Albino de Matos — Escola Profissional Vértice</p>
+  </div>
+</div>
+
+<div style="max-width:420px;margin:32px auto">
+  <div class="card">
+    <div class="card-head">
+      <h3>Entrar no campus</h3>
+      <span class="text-sm text-muted">Utilizador e palavra-passe</span>
+    </div>
+
+    <div class="card-body">
+
+      {% if error %}
+        <div style="background:var(--danger);color:#fff;border-radius:var(--radius-sm);
+                    padding:11px 14px;margin-bottom:16px;font-size:13px;font-weight:500">
+          {{ error }}
+        </div>
+      {% endif %}
+
+      <form method="post" action="{{ url_for('auth.login') }}">
+        <input type="hidden" name="next" value="{{ next or '' }}">
+
+        <div style="margin-bottom:14px">
+          <label class="text-sm text-muted" for="username">Utilizador</label>
+          <input
+            id="username"
+            class="table-filter"
+            type="text"
+            name="username"
+            required
+            autofocus
+            autocomplete="username"
+            placeholder="nome de utilizador"
+            style="width:100%;margin-top:6px;padding:8px 12px"
+          >
+        </div>
+
+        <div style="margin-bottom:20px">
+          <label class="text-sm text-muted" for="password">Palavra-passe</label>
+          <input
+            id="password"
+            class="table-filter"
+            type="password"
+            name="password"
+            required
+            autocomplete="current-password"
+            placeholder="••••••••"
+            style="width:100%;margin-top:6px;padding:8px 12px"
+          >
+        </div>
+
+        <button class="btn btn-primary" type="submit" style="width:100%;padding:10px">
+          Entrar
+        </button>
+      </form>
+
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);
+                  font-size:12px;color:var(--muted);text-align:center;line-height:1.7">
+        Acesso ao campus restrito a utilizadores registados.<br>
+        Contacto: <a href="mailto:geral@academiaprofissional.pt">geral@academiaprofissional.pt</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login admin legacy -->
+  <div style="text-align:center;margin-top:14px">
+    <a href="{{ url_for('admin.admin_login') }}"
+       style="font-size:12px;color:var(--muted)">
+      ⚙ Acesso ao painel de administração
+    </a>
+  </div>
+</div>
+
+{% endblock %}

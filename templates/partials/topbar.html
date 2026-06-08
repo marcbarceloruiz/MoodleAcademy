@@ -1,75 +1,103 @@
 <header class="topbar" role="banner">
 
-  <!-- Marca institucional: logo oficial APPAM -->
   <div class="brand brand-appam">
     <button class="icon-btn" id="menu-toggle"
             title="Menú" aria-label="Abrir menú" style="display:none">
       <span>☰</span>
     </button>
-
     <a href="{{ url_for('dashboard.dashboard') }}"
        class="brand-link-appam"
-       aria-label="Ir al Campus Virtual de la Academia Profissional Prof. Albino de Matos">
+       aria-label="Campus Virtual — Academia Profissional Prof. Albino de Matos">
       <img src="{{ url_for('static', filename='img/logo-appam.webp') }}"
            alt="Academia Profissional Prof. Albino de Matos"
            class="brand-logo-appam">
     </a>
   </div>
 
-  <!-- Navegación principal -->
-  <nav class="top-nav" aria-label="Navegación principal">
+  <nav class="top-nav" aria-label="Navegação principal">
     <a class="top-link {% if request.endpoint == 'dashboard.dashboard' %}active{% endif %}"
        href="{{ url_for('dashboard.dashboard') }}">
-      <span class="link-icon">▦</span>
-      <span>Mi plan formativo</span>
+      <span class="link-icon">▦</span><span>Início</span>
     </a>
 
-    <a class="top-link {% if request.endpoint == 'courses.courses' or request.endpoint == 'courses.course_detail' %}active{% endif %}"
-       href="{{ url_for('courses.courses') }}">
-      <span class="link-icon">☰</span>
-      <span>Mis cursos</span>
-    </a>
-
-    <a class="top-link {% if request.endpoint == 'courses.ciclos' or request.endpoint == 'courses.ciclo_detail' %}active{% endif %}"
+    <a class="top-link {% if request.endpoint in ('courses.ciclos','courses.ciclo_detail') %}active{% endif %}"
        href="{{ url_for('courses.ciclos') }}">
-      <span class="link-icon">🎓</span>
-      <span>Ciclos formativos</span>
+      <span class="link-icon">🎓</span><span>Ciclos Formativos</span>
     </a>
 
+    <a class="top-link {% if request.endpoint in ('portal.portal','portal.portal_area') %}active{% endif %}"
+       href="{{ url_for('portal.portal') }}">
+      <span class="link-icon">⌂</span><span>Portal</span>
+    </a>
+
+    {# Admin: só visível para admin #}
+    {% if session_is_admin %}
     <a class="top-link {% if request.endpoint == 'admin.admin' %}active{% endif %}"
        href="{{ url_for('admin.admin') }}">
-      <span class="link-icon">⚙</span>
-      <span>Administración del sitio</span>
+      <span class="link-icon">⚙</span><span>Administração</span>
     </a>
+    {% endif %}
 
-    <a class="top-link {% if request.endpoint == 'portal.portal' or request.endpoint == 'portal.portal_area' %}active{% endif %}"
-       href="{{ url_for('portal.portal') }}">
-      <span class="link-icon">⌂</span>
-      <span>Portal</span>
+    {# Área Docente: visível para admin e docente #}
+    {% if session_is_admin or session_is_docente %}
+    <a class="top-link {% if active_area_slug == 'area-docente' %}active{% endif %}"
+       href="{{ url_for('portal.portal_area', area_slug='area-docente') }}">
+      <span class="link-icon">🔒</span><span>Área Docente</span>
     </a>
+    {% endif %}
   </nav>
 
-  <!-- Acciones de usuario -->
   <div class="top-actions">
-    <button class="icon-btn" title="Notificaciones" aria-label="Notificaciones"
-            onclick="abrirModal('Notificaciones', '<p class=&quot;modal-text&quot;>No tienes notificaciones nuevas.</p>')">
+    <button class="icon-btn" title="Notificações" aria-label="Notificações"
+            onclick="_msgFutura()">
       <span>🔔</span>
-      <span class="badge-dot"></span>
     </button>
 
-    <button class="icon-btn" title="Mensajes" aria-label="Mensajes"
-            onclick="abrirModal('Mensajes', '<p class=&quot;modal-text&quot;>No tienes mensajes nuevos.</p>')">
-      <span>✉</span>
-    </button>
+    {% if session_autenticado %}
+      {# Utilizador autenticado #}
+      <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.2">
+        <span class="user-name" style="font-size:13px;font-weight:600">
+          {% if session_is_admin %}Administrador
+          {% elif session_is_docente %}Formador{% if session_usuario_nome %} · {{ session_usuario_nome }}{% endif %}
+          {% elif session_is_aluno %}{{ session_usuario_nome or 'Aluno' }}
+          {% else %}{{ session_usuario_nome or 'Utilizador' }}
+          {% endif %}
+        </span>
+        {% if session_is_admin %}
+          <span style="font-size:10px;color:var(--muted)">Administrador</span>
+        {% elif session_is_docente %}
+          <span style="font-size:10px;color:var(--muted)">Docente</span>
+        {% elif session_is_aluno %}
+          <span style="font-size:10px;color:var(--muted)">Aluno</span>
+        {% endif %}
+      </div>
 
-    <span class="user-name">{{ usuario.nombre }}</span>
+      <div class="avatar" title="Sessão activa"
+           onclick="abrirModalPerfil()"
+           role="button" tabindex="0"
+           onkeydown="if(event.key==='Enter')abrirModalPerfil()">
+        {% if session_is_admin %}A
+        {% elif session_usuario_nome %}{{ session_usuario_nome[0] | upper }}
+        {% else %}U
+        {% endif %}
+      </div>
 
-    <div class="avatar" title="Mi perfil"
-         onclick="abrirModalPerfil()"
-         role="button" tabindex="0"
-         onkeydown="if(event.key==='Enter')abrirModalPerfil()">
-      {{ usuario.iniciales }}
-    </div>
+      <form method="post" action="{{ url_for('auth.logout') }}" style="margin:0">
+        <button type="submit" class="btn btn-secondary btn-sm" title="Terminar sessão">
+          Sair
+        </button>
+      </form>
+
+    {% else %}
+      {# Não autenticado — sempre Visitante #}
+      <span class="user-name" style="font-size:13px;color:var(--muted)">
+        Visitante
+      </span>
+
+      <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-sm">
+        Entrar
+      </a>
+    {% endif %}
   </div>
 
 </header>

@@ -1,15 +1,31 @@
 {% extends 'base.html' %}
 
-{% block title %}Mi Plan Formativo — Academia Vertice{% endblock %}
-{% block hero_title %}Mi Plan Formativo{% endblock %}
+{% block title %}O Meu Plano Formativo — Academia Prof. Albino de Matos{% endblock %}
+{% block hero_title %}O Meu Plano Formativo{% endblock %}
 
 {% block content %}
 
-<!-- BIENVENIDA -->
+<!-- BENVINDO -->
 <div class="welcome-banner">
   <div class="welcome-text">
-    <h2>¡Bienvenida, {{ usuario.nombre }}! 👋</h2>
-    <p>Tienes {{ total_proximos }} eventos próximos. Sigue así.</p>
+    {% if session_autenticado %}
+      {% if session_is_admin %}
+        <h2>Bem-vindo, Administrador! 👋</h2>
+        <p>Tens acesso total ao campus. <a href="{{ url_for('admin.admin') }}" style="color:inherit;text-decoration:underline">Abrir painel de administração →</a></p>
+      {% elif session_is_docente %}
+        <h2>Bem-vindo, Formador{% if session_usuario_nome %} {{ session_usuario_nome }}{% endif %}! 👋</h2>
+        <p>Tens {{ total_proximos }} evento(s) próximo(s). Acede à <a href="{{ url_for('portal.portal_area', area_slug='area-docente') }}" style="color:inherit;text-decoration:underline">Área Docente →</a></p>
+      {% elif session_is_aluno %}
+        <h2>Bem-vindo{% if session_usuario_nome %}, {{ session_usuario_nome }}{% endif %}! 👋</h2>
+        <p>Tens {{ total_proximos }} evento(s) próximo(s). Continua assim.</p>
+      {% else %}
+        <h2>Bem-vindo ao Campus Virtual! 👋</h2>
+        <p>Tens {{ total_proximos }} evento(s) próximo(s).</p>
+      {% endif %}
+    {% else %}
+      <h2>Bem-vindo ao Campus Virtual</h2>
+      <p>Explore a oferta formativa e os recursos institucionais da Academia Profissional Prof. Albino de Matos — Escola Profissional Vértice.</p>
+    {% endif %}
   </div>
   <div class="welcome-meta">
     <div class="welcome-stat">
@@ -18,7 +34,7 @@
     </div>
     <div class="welcome-stat">
       <div class="num">{{ mis_cursos | selectattr('estado', 'equalto', 'en-progreso') | list | length }}</div>
-      <div class="lbl">En progreso</div>
+      <div class="lbl">Em curso</div>
     </div>
     <div class="welcome-stat">
       <div class="num">{{ total_proximos }}</div>
@@ -27,14 +43,14 @@
   </div>
 </div>
 
-<!-- CURSOS RECIENTES + EVENTOS -->
+<!-- CURSOS RECENTES + EVENTOS -->
 <div class="grid-2 mb-20">
 
-  <!-- Cursos recientes -->
+  <!-- Cursos recentes -->
   <div class="card">
     <div class="card-head">
-      <h3>Cursos recientes</h3>
-      <a href="{{ url_for('courses.courses') }}" class="btn btn-secondary btn-sm">Ver todos</a>
+      <h3>Cursos recentes</h3>
+      <a href="{{ url_for('courses.ciclos') }}" class="btn btn-secondary btn-sm">Ver todos</a>
     </div>
     <div class="card-body">
       {% for c in mis_cursos %}
@@ -43,7 +59,7 @@
         <div class="mini-thumb">{{ c.titulo[:2] | upper }}</div>
         <div style="flex:1;min-width:0">
           <div class="mini-title">{{ c.titulo }}</div>
-          <div class="mini-sub">{{ c._progreso }}% completado · {{ c.tutor }}</div>
+          <div class="mini-sub">{{ c._progreso }}% concluído · {{ c.tutor }}</div>
         </div>
         <div class="mini-progress">
           <div class="mini-prog-num">{{ c._progreso }}%</div>
@@ -52,13 +68,21 @@
           </div>
         </div>
       </a>
+      {% else %}
+      <p style="font-size:13px;color:var(--muted)">
+        {% if session_autenticado %}
+          Ainda não tens cursos ativos.
+        {% else %}
+          <a href="{{ url_for('auth.login') }}">Inicia sessão</a> para ver os teus cursos.
+        {% endif %}
+      </p>
       {% endfor %}
     </div>
   </div>
 
-  <!-- Tareas y eventos -->
+  <!-- Tarefas e eventos -->
   <div class="card">
-    <div class="card-head"><h3>Tareas y eventos próximos</h3></div>
+    <div class="card-head"><h3>Tarefas e eventos próximos</h3></div>
     <div class="card-body">
       {% for ev in eventos %}
       {% set parts = ev.fecha.split('-') %}
@@ -78,31 +102,28 @@
 
 </div>
 
-<!-- ACCESOS RÁPIDOS -->
+<!-- ACESSOS RÁPIDOS -->
 <div class="card mb-20">
-  <div class="card-head"><h3>Accesos rápidos</h3></div>
+  <div class="card-head"><h3>Acessos rápidos</h3></div>
   <div class="card-body">
     <div class="quick-grid">
-      <a class="quick-btn" href="{{ url_for('courses.courses') }}">
-        <span class="quick-icon qi-cyan">📚</span> Mis cursos
+      <a class="quick-btn" href="{{ url_for('courses.ciclos') }}">
+        <span class="quick-icon qi-cyan">📚</span> Os meus cursos
       </a>
-      <button class="quick-btn"
-              onclick="mostrarToast('Calificaciones — próximamente', 'info')">
-        <span class="quick-icon qi-green">📊</span> Mis calificaciones
+      <button class="quick-btn" onclick="_msgFutura()">
+        <span class="quick-icon qi-green">📊</span> As minhas classificações
       </button>
-      <button class="quick-btn"
-              onclick="mostrarToast('Calendario — próximamente', 'info')">
-        <span class="quick-icon qi-orange">📅</span> Calendario
+      <button class="quick-btn" onclick="_msgFutura()">
+        <span class="quick-icon qi-orange">📅</span> Calendário
       </button>
-      <button class="quick-btn"
-              onclick="abrirModal('Mensajes', '<p style=\'color:var(--muted);font-size:13px\'>No tienes mensajes nuevos.</p>')">
-        <span class="quick-icon qi-blue">✉</span> Mensajes
+      <button class="quick-btn" onclick="_msgFutura()">
+        <span class="quick-icon qi-blue">✉</span> Mensagens
       </button>
       <a class="quick-btn" href="{{ url_for('portal.portal') }}">
-        <span class="quick-icon qi-purple">🏛</span> Portal Vertice
+        <span class="quick-icon qi-purple">🏛</span> Portal Institucional
       </a>
       <button class="quick-btn" onclick="abrirModalSoporte()">
-        <span class="quick-icon qi-red">🆘</span> Soporte técnico
+        <span class="quick-icon qi-red">🆘</span> Suporte técnico
       </button>
     </div>
   </div>
@@ -110,7 +131,7 @@
 
 <!-- AVISOS -->
 <div class="card">
-  <div class="card-head"><h3>📢 Avisos del centro</h3></div>
+  <div class="card-head"><h3>📢 Avisos da escola</h3></div>
   <div class="card-body">
     {% set colores = {'info': 'ad-info', 'normativa': 'ad-normativa', 'sistema': 'ad-sistema'} %}
     {% for a in avisos %}

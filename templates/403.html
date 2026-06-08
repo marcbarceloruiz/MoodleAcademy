@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Acesso Negado — Academia Profissional Prof. Albino de Matos{% endblock %}
+{% block hero_title %}Acesso Restrito{% endblock %}
+
+{% block content %}
+
+<div style="max-width:500px;margin:60px auto;text-align:center">
+  <div style="font-size:64px;margin-bottom:16px">🔒</div>
+
+  <h1 style="font-size:24px;font-weight:700;margin-bottom:10px">
+    Acesso não autorizado
+  </h1>
+
+  <p style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:28px">
+    Não tens permissão para aceder a esta área.<br>
+    Se acreditas que se trata de um erro, contacta o administrador do campus.
+  </p>
+
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-primary">
+      ← Voltar ao campus
+    </a>
+
+    <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">
+      Iniciar sessão
+    </a>
+  </div>
+
+  <p style="margin-top:28px;font-size:12px;color:var(--muted)">
+    Academia Profissional Prof. Albino de Matos — Escola Profissional Vértice
+  </p>
+</div>
+
+{% endblock %}

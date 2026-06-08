@@ -22,7 +22,7 @@ function abrirModal(titulo, htmlContenido, footerHtml = '') {
   overlay.querySelector('.modal-head h3').textContent = titulo;
   overlay.querySelector('.modal-body').innerHTML = htmlContenido;
   overlay.querySelector('.modal-footer').innerHTML =
-    footerHtml + `<button class="btn btn-secondary" onclick="cerrarModal()">Cerrar</button>`;
+    footerHtml + `<button class="btn btn-secondary" onclick="cerrarModal()">Fechar</button>`;
   overlay.classList.add('open');
 }
 
@@ -50,7 +50,7 @@ function mostrarToast(mensaje, tipo = 'info') {
   if (!container) return;
   const toast = document.createElement('div');
   toast.className = `toast ${tipo}`;
-  const iconos = { success: '✓', warning: '⚠', info: 'ℹ' };
+  const iconos = { success: '✓', warning: '⚠', info: 'ℹ', danger: '✕' };
   toast.innerHTML = `<span>${iconos[tipo] || 'ℹ'}</span> ${mensaje}`;
   container.appendChild(toast);
   setTimeout(() => toast.remove(), 3600);
@@ -86,64 +86,61 @@ document.addEventListener('DOMContentLoaded', () => {
 // ──────────────────────────────────────────────
 
 function abrirModalSoporte() {
-  abrirModal('Soporte técnico', `
+  abrirModal('Suporte técnico', `
     <p style="font-size:13px;color:var(--muted);margin-bottom:14px">
-      ¿Tienes algún problema técnico? Contacta con nuestro equipo de soporte.
+      Tens algum problema técnico? Contacta a equipa de suporte do campus.
     </p>
     <div style="display:flex;flex-direction:column;gap:8px">
       <div style="display:flex;gap:8px;align-items:center;font-size:13px">
-        📧 <a href="mailto:soporte@academiavertice.es">soporte@academiavertice.es</a>
+        📧 <a href="mailto:geral@academiaprofissional.pt">geral@academiaprofissional.pt</a>
       </div>
       <div style="display:flex;gap:8px;align-items:center;font-size:13px">
-        📞 <span>900 123 456 (L-V, 9:00-18:00)</span>
+        🕐 <span>Seg–Sex, 9:00–18:00</span>
       </div>
       <div style="display:flex;gap:8px;align-items:center;font-size:13px">
-        💬 <span>Chat en vivo disponible en horario lectivo</span>
+        💬 <span>Chat em direto disponível em horário letivo</span>
       </div>
     </div>
   `);
 }
 
-function abrirModalPerfil() {
-  // Los datos del usuario llegan por atributos data- del DOM para no depender de JS global
-  const avatarEl = document.querySelector('.avatar');
-  const nameEl   = document.querySelector('.user-name');
-  const nombre   = nameEl ? nameEl.textContent.trim() : 'Usuario';
-  const iniciales = avatarEl ? avatarEl.textContent.trim() : '??';
+function _msgFutura() {
+  mostrarToast('Funcionalidade preparada para futura integração.', 'info');
+}
 
-  abrirModal('Mi perfil', `
+function abrirModalPerfil() {
+  const avatarEl  = document.querySelector('.avatar');
+  const nameEl    = document.querySelector('.user-name');
+  const nombre    = nameEl    ? nameEl.textContent.trim()    : 'Utilizador';
+  const iniciales = avatarEl  ? avatarEl.textContent.trim()  : '?';
+
+  abrirModal('O meu perfil', `
     <div class="profile-card">
       <div class="profile-avatar">${iniciales}</div>
       <div class="profile-info">
         <div class="profile-name">${nombre}</div>
-        <div class="profile-role">Professora · Academia Vertice</div>
+        <div class="profile-role">Academia Profissional Prof. Albino de Matos</div>
       </div>
     </div>
     <div class="profile-actions">
       <button class="btn btn-secondary w-full"
-              onclick="mostrarToast('Función: editar perfil', 'info')">✏ Editar perfil</button>
+              onclick="_msgFutura()">✏ Editar perfil</button>
       <button class="btn btn-secondary w-full"
-              onclick="mostrarToast('Función: cambiar contraseña', 'info')">🔒 Cambiar contraseña</button>
+              onclick="_msgFutura()">🔒 Alterar palavra-passe</button>
       <button class="btn btn-secondary w-full"
-              onclick="mostrarToast('Función: notificaciones', 'info')">🔔 Notificaciones</button>
+              onclick="_msgFutura()">🔔 Notificações</button>
       <button class="btn btn-danger w-full"
-        onclick="cerrarSesion()">→ Cerrar sesión</button>
+              onclick="cerrarSesion()">→ Terminar sessão</button>
     </div>
   `);
 }
 
 function cerrarSesion() {
-  if (window.location.pathname.startsWith('/admin')) {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '/admin/logout';
-    document.body.appendChild(form);
-    form.submit();
-    return;
-  }
-
-  mostrarToast('Sesión cerrada', 'warning');
-  cerrarModal();
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '/logout';
+  document.body.appendChild(form);
+  form.submit();
 }
 
 // ──────────────────────────────────────────────

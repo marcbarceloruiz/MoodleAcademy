@@ -129,11 +129,11 @@
                    href="{{ recurso.url }}"
                    target="_blank"
                    rel="noopener">
-                  {{ recurso._badge }}
+                  {{ recurso._action_label or recurso._badge }}
                 </a>
               {% else %}
                 <span class="act-badge ab-pendiente">
-                  {{ recurso._badge }}
+                  Sem arquivo
                 </span>
               {% endif %}
             </div>
