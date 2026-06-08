@@ -480,12 +480,12 @@ def update_area(area_id):
             },
         )
         db.session.commit()
-        flash("Sección del portal actualizada.", "success")
+        flash("Secção do portal atualizada.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error actualizando área institucional:", e)
-        flash("Error al actualizar la sección del portal.", "danger")
+        flash("Erro ao atualizar a secção do portal.", "danger")
 
     return redirect(url_for("admin.admin", tab="portal"))
 
@@ -528,14 +528,14 @@ def create_documento():
                 },
             )
             db.session.commit()
-            flash("Documento creado correctamente.", "success")
+            flash("Documento criado com sucesso.", "success")
         else:
-            flash("Faltan datos obligatorios (título y área).", "warning")
+            flash("Faltam dados obrigatórios (título e área).", "warning")
 
     except Exception as e:
         db.session.rollback()
         print("Error creando documento institucional:", e)
-        flash("Error al crear el documento.", "danger")
+        flash("Erro ao criar o documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
 
@@ -582,12 +582,12 @@ def update_documento(documento_id):
         if uploaded_url and old_url:
             _delete_uploaded_file(old_url)
 
-        flash("Documento actualizado correctamente.", "success")
+        flash("Documento atualizado com sucesso.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error actualizando documento institucional:", e)
-        flash("Error al actualizar el documento.", "danger")
+        flash("Erro ao atualizar o documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
 
@@ -604,12 +604,12 @@ def toggle_documento(documento_id):
             {"documento_id": documento_id},
         )
         db.session.commit()
-        flash("Visibilidad del documento actualizada.", "info")
+        flash("Visibilidade do documento atualizada.", "info")
 
     except Exception as e:
         db.session.rollback()
         print("Error cambiando visibilidad del documento institucional:", e)
-        flash("Error al cambiar la visibilidad del documento.", "danger")
+        flash("Erro ao alterar a visibilidade do documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
 
@@ -636,12 +636,12 @@ def delete_documento(documento_id):
         db.session.commit()
 
         _delete_uploaded_file(old_url)
-        flash("Documento eliminado.", "success")
+        flash("Documento eliminado com sucesso.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error eliminando documento institucional:", e)
-        flash("Error al eliminar el documento.", "danger")
+        flash("Erro ao eliminar o documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
 
@@ -704,14 +704,14 @@ def create_ciclo():
                     )
 
             db.session.commit()
-            flash("Ciclo formativo creado con sus 3 años (10.º, 11.º y 12.º).", "success")
+            flash("Ciclo formativo criado com os 3 anos (10.º, 11.º e 12.º).", "success")
         else:
-            flash("Faltan datos obligatorios (código y nombre).", "warning")
+            flash("Faltam dados obrigatórios (código e nome).", "warning")
 
     except Exception as e:
         db.session.rollback()
         print("Error creando ciclo formativo:", e)
-        flash("Error al crear el ciclo formativo.", "danger")
+        flash("Erro ao criar o ciclo formativo.", "danger")
 
     return redirect(url_for("admin.admin", tab="ciclos"))
 
@@ -746,12 +746,12 @@ def update_ciclo(ciclo_id):
             },
         )
         db.session.commit()
-        flash("Ciclo formativo actualizado.", "success")
+        flash("Ciclo formativo atualizado.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error actualizando ciclo formativo:", e)
-        flash("Error al actualizar el ciclo formativo.", "danger")
+        flash("Erro ao atualizar o ciclo formativo.", "danger")
 
     return redirect(url_for("admin.admin", tab="ciclos"))
 
@@ -826,12 +826,12 @@ def delete_ciclo(ciclo_id):
 
         db.session.commit()
         _delete_uploaded_files(urls_to_delete)
-        flash("Ciclo formativo y todos sus datos eliminados.", "success")
+        flash("Ciclo formativo e todos os seus dados eliminados.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error eliminando ciclo formativo:", e)
-        flash("Error al eliminar el ciclo formativo.", "danger")
+        flash("Erro ao eliminar o ciclo formativo.", "danger")
 
     return redirect(url_for("admin.admin", tab="ciclos"))
 
@@ -926,14 +926,14 @@ def create_disciplina():
                     )
 
             db.session.commit()
-            flash("Disciplina creada con sus 5 secciones base.", "success")
+            flash("Disciplina criada com as 5 secções base.", "success")
         else:
-            flash("Faltan datos obligatorios (año de ciclo y nombre).", "warning")
+            flash("Faltam dados obrigatórios (ano de ciclo e nome).", "warning")
 
     except Exception as e:
         db.session.rollback()
         print("Error creando disciplina:", e)
-        flash("Error al crear la disciplina.", "danger")
+        flash("Erro ao criar a disciplina.", "danger")
 
     return redirect(url_for("admin.admin", tab="disciplinas"))
 
@@ -965,12 +965,12 @@ def update_disciplina(disciplina_id):
             },
         )
         db.session.commit()
-        flash("Disciplina actualizada.", "success")
+        flash("Disciplina atualizada.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error actualizando disciplina:", e)
-        flash("Error al actualizar la disciplina.", "danger")
+        flash("Erro ao atualizar a disciplina.", "danger")
 
     return redirect(url_for("admin.admin", tab="disciplinas"))
 
@@ -1020,12 +1020,12 @@ def delete_disciplina(disciplina_id):
 
         db.session.commit()
         _delete_uploaded_files(urls_to_delete)
-        flash("Disciplina y sus secciones eliminadas.", "success")
+        flash("Disciplina e as suas secções eliminadas.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error eliminando disciplina:", e)
-        flash("Error al eliminar la disciplina.", "danger")
+        flash("Erro ao eliminar a disciplina.", "danger")
 
     return redirect(url_for("admin.admin", tab="disciplinas"))
 
@@ -1056,12 +1056,12 @@ def update_seccion(seccion_id):
             },
         )
         db.session.commit()
-        flash("Sección actualizada.", "success")
+        flash("Secção atualizada.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error actualizando sección de disciplina:", e)
-        flash("Error al actualizar la sección.", "danger")
+        flash("Erro ao atualizar a secção.", "danger")
 
     return redirect(url_for("admin.admin", tab="secciones"))
 
@@ -1078,12 +1078,12 @@ def toggle_seccion(seccion_id):
             {"seccion_id": seccion_id},
         )
         db.session.commit()
-        flash("Visibilidad de la sección actualizada.", "info")
+        flash("Visibilidade da secção atualizada.", "info")
 
     except Exception as e:
         db.session.rollback()
         print("Error cambiando visibilidad de sección:", e)
-        flash("Error al cambiar la visibilidad de la sección.", "danger")
+        flash("Erro ao alterar a visibilidade da secção.", "danger")
 
     return redirect(url_for("admin.admin", tab="secciones"))
 
@@ -1121,12 +1121,12 @@ def delete_seccion(seccion_id):
 
         db.session.commit()
         _delete_uploaded_files(urls_to_delete)
-        flash("Sección y sus recursos eliminados.", "success")
+        flash("Secção e os seus recursos eliminados.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error eliminando sección de disciplina:", e)
-        flash("Error al eliminar la sección.", "danger")
+        flash("Erro ao eliminar a secção.", "danger")
 
     return redirect(url_for("admin.admin", tab="secciones"))
 
@@ -1169,14 +1169,14 @@ def create_recurso():
                 },
             )
             db.session.commit()
-            flash("Recurso creado correctamente.", "success")
+            flash("Recurso criado com sucesso.", "success")
         else:
-            flash("Faltan datos obligatorios (sección y título).", "warning")
+            flash("Faltam dados obrigatórios (secção e título).", "warning")
 
     except Exception as e:
         db.session.rollback()
         print("Error creando recurso de disciplina:", e)
-        flash("Error al crear el recurso.", "danger")
+        flash("Erro ao criar o recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
 
@@ -1223,12 +1223,12 @@ def update_recurso(recurso_id):
         if uploaded_url and old_url:
             _delete_uploaded_file(old_url)
 
-        flash("Recurso actualizado correctamente.", "success")
+        flash("Recurso atualizado com sucesso.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error actualizando recurso de disciplina:", e)
-        flash("Error al actualizar el recurso.", "danger")
+        flash("Erro ao atualizar o recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
 
@@ -1245,12 +1245,12 @@ def toggle_recurso(recurso_id):
             {"recurso_id": recurso_id},
         )
         db.session.commit()
-        flash("Visibilidad del recurso actualizada.", "info")
+        flash("Visibilidade do recurso atualizada.", "info")
 
     except Exception as e:
         db.session.rollback()
         print("Error cambiando visibilidad del recurso:", e)
-        flash("Error al cambiar la visibilidad del recurso.", "danger")
+        flash("Erro ao alterar a visibilidade do recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
 
@@ -1277,11 +1277,11 @@ def delete_recurso(recurso_id):
         db.session.commit()
 
         _delete_uploaded_file(old_url)
-        flash("Recurso eliminado.", "success")
+        flash("Recurso eliminado com sucesso.", "success")
 
     except Exception as e:
         db.session.rollback()
         print("Error eliminando recurso de disciplina:", e)
-        flash("Error al eliminar el recurso.", "danger")
+        flash("Erro ao eliminar o recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
