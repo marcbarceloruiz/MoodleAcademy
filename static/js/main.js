@@ -109,17 +109,26 @@ function _msgFutura() {
 }
 
 function abrirModalPerfil() {
-  const avatarEl  = document.querySelector('.avatar');
-  const nameEl    = document.querySelector('.user-name');
-  const nombre    = nameEl    ? nameEl.textContent.trim()    : 'Utilizador';
-  const iniciales = avatarEl  ? avatarEl.textContent.trim()  : '?';
+  const avatarEl = document.querySelector('.avatar');
+  const nameEl   = document.querySelector('.user-name');
+  const roleEl   = nameEl ? nameEl.closest('div')?.querySelector('span:last-child') : null;
+
+  const nombre    = nameEl   ? nameEl.textContent.trim()   : '';
+  const iniciais  = avatarEl ? avatarEl.textContent.trim() : '?';
+  const role      = roleEl   ? roleEl.textContent.trim()   : '';
+
+  if (!nombre) {
+    // Visitante — não devia chegar aqui, mas por segurança
+    _msgFutura();
+    return;
+  }
 
   abrirModal('O meu perfil', `
     <div class="profile-card">
-      <div class="profile-avatar">${iniciales}</div>
+      <div class="profile-avatar">${iniciais}</div>
       <div class="profile-info">
         <div class="profile-name">${nombre}</div>
-        <div class="profile-role">Academia Profissional Prof. Albino de Matos</div>
+        <div class="profile-role">${role ? role + ' · ' : ''}Academia Profissional Prof. Albino de Matos</div>
       </div>
     </div>
     <div class="profile-actions">

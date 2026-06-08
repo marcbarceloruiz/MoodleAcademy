@@ -62,6 +62,7 @@ INSERT IGNORE INTO roles (id, nombre) VALUES
 --   aluno   → aluno123
 --
 -- ATENÇÃO: Alterar em produção antes de publicar.
+-- Nomes genéricos — sem nomes pessoais inventados.
 
 INSERT INTO usuarios (username, email, password_hash, nome, apelido, activo)
 SELECT
@@ -76,7 +77,7 @@ SELECT
     'docente',
     'docente@academiaprofissional.pt',
     'scrypt:32768:8:1$Q7pik1T7bPmvd8G9$330838ecbf4ec6a73dc1e199bd067b25f7e7fa8fbb59671ac4abe8287c2a7d43d9899f8b4b3c4792d61b8b1c80dd1c58344cd91766824487304ccf013914a129',
-    'Formador', 'Demo', 1
+    'Docente', '', 1
 WHERE NOT EXISTS (SELECT 1 FROM usuarios WHERE username = 'docente');
 
 INSERT INTO usuarios (username, email, password_hash, nome, apelido, activo)
@@ -84,7 +85,7 @@ SELECT
     'aluno',
     'aluno@academiaprofissional.pt',
     'scrypt:32768:8:1$FYkDJljPbEeY3rlo$d78c0dfc232ece44762c2a680cc7d6073eb9cc60cb2eca168dace6985ec89476e1a8959e98f62942996b1ee0d25382c68de462084943a80aadfd2a4d93d1bbda',
-    'Aluno', 'Demo', 1
+    'Aluno', '', 1
 WHERE NOT EXISTS (SELECT 1 FROM usuarios WHERE username = 'aluno');
 
 

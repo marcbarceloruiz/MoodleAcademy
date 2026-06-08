@@ -57,27 +57,23 @@
       {# Utilizador autenticado #}
       <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.2">
         <span class="user-name" style="font-size:13px;font-weight:600">
+          {{ session_usuario_nome or ('Administrador' if session_is_admin else 'Docente' if session_is_docente else 'Aluno' if session_is_aluno else 'Utilizador') }}
+        </span>
+        <span style="font-size:10px;color:var(--muted)">
           {% if session_is_admin %}Administrador
-          {% elif session_is_docente %}Formador{% if session_usuario_nome %} · {{ session_usuario_nome }}{% endif %}
-          {% elif session_is_aluno %}{{ session_usuario_nome or 'Aluno' }}
-          {% else %}{{ session_usuario_nome or 'Utilizador' }}
+          {% elif session_is_docente %}Docente
+          {% elif session_is_aluno %}Aluno
+          {% else %}Utilizador
           {% endif %}
         </span>
-        {% if session_is_admin %}
-          <span style="font-size:10px;color:var(--muted)">Administrador</span>
-        {% elif session_is_docente %}
-          <span style="font-size:10px;color:var(--muted)">Docente</span>
-        {% elif session_is_aluno %}
-          <span style="font-size:10px;color:var(--muted)">Aluno</span>
-        {% endif %}
       </div>
 
-      <div class="avatar" title="Sessão activa"
+      <div class="avatar" title="Perfil"
            onclick="abrirModalPerfil()"
            role="button" tabindex="0"
            onkeydown="if(event.key==='Enter')abrirModalPerfil()">
-        {% if session_is_admin %}A
-        {% elif session_usuario_nome %}{{ session_usuario_nome[0] | upper }}
+        {% if session_usuario_nome %}{{ session_usuario_nome[0] | upper }}
+        {% elif session_is_admin %}A
         {% else %}U
         {% endif %}
       </div>
