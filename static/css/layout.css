@@ -64,12 +64,10 @@
 }
 
 .brand-appam {
-  width: 245px;
-  min-width: 245px;
+  flex: 1;
   height: 68px;
   display: flex;
   align-items: center;
-  flex-shrink: 0;
 }
 
 .brand-link-appam {
@@ -128,7 +126,6 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: 0 auto;
 }
 
 .top-link {
@@ -172,7 +169,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-left: auto;
+  flex: 1;
+  justify-content: flex-end;
   flex-shrink: 0;
 }
 
@@ -498,11 +496,6 @@ a:hover {
    ========================================================= */
 
 @media (max-width: 1180px) {
-  .brand-appam {
-    width: 210px;
-    min-width: 210px;
-  }
-
   .brand-logo-appam {
     width: 165px;
     max-width: 165px;

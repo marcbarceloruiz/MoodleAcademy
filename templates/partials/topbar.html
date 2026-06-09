@@ -25,7 +25,7 @@
       <span class="link-icon">🎓</span><span>Ciclos Formativos</span>
     </a>
 
-    <a class="top-link {% if request.endpoint in ('portal.portal','portal.portal_area') %}active{% endif %}"
+    <a class="top-link {% if request.endpoint == 'portal.portal' or (request.endpoint == 'portal.portal_area' and (active_area_slug if active_area_slug is defined else request.view_args.get('area_slug')) != 'area-docente') %}active{% endif %}"
        href="{{ url_for('portal.portal') }}">
       <span class="link-icon">⌂</span><span>Portal</span>
     </a>

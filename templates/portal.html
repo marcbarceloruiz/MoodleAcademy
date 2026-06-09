@@ -104,9 +104,13 @@
 
     <div class="card-body">
       <p style="font-size:13px;color:var(--muted);line-height:1.7">
-        Esta secção já está ligada à base de dados. Quando forem adicionados login,
-        roles e upload de ficheiros, estes itens poderão abrir PDFs, formulários,
-        recursos internos e documentos reais da academia.
+        {% if area_activa.restrito %}
+          Esta secção está protegida por permissões de acesso para docentes e administradores.
+        {% else %}
+          Esta secção já está ligada à base de dados. Quando forem adicionados login,
+          roles e upload de ficheiros, estes itens poderão abrir PDFs, formulários,
+          recursos internos e documentos reais da academia.
+        {% endif %}
       </p>
     </div>
   </div>
@@ -123,6 +127,7 @@
 
   <div class="portal-grid mb-20">
     {% for c in portal_cards %}
+      {% if not c.restrito or session_is_admin or session_is_docente %}
       <a class="portal-card" href="{{ url_for('portal.portal_area', area_slug=c.slug) }}">
         <div class="portal-card-icon {{ c.cls }}">{{ c.icono }}</div>
         <h3>{{ c.titulo }}</h3>
@@ -132,6 +137,7 @@
           <span class="portal-card-badge">Restrito</span>
         {% endif %}
       </a>
+      {% endif %}
     {% endfor %}
   </div>
 
@@ -167,7 +173,7 @@
 
     <div class="card">
       <div class="card-head">
-        <h3>🔗 Enlaces de interés</h3>
+        <h3>🔗 Ligações de interesse</h3>
       </div>
 
       <div class="card-body">

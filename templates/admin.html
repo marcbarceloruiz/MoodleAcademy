@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 
-{% block title %}Administración — Prof. Albino de Matos{% endblock %}
-{% block hero_title %}Administración del Sitio{% endblock %}
+{% block title %}Administração — Prof. Albino de Matos{% endblock %}
+{% block hero_title %}Administração do Campus{% endblock %}
 
 {% block content %}
 
 <div class="view-header">
   <div>
-    <h1>Administración del Sitio</h1>
+    <h1>Administração do Campus</h1>
     <p class="subtitle">
-      Panel provisional de gestión del campus de la Academia Profissional Prof. Albino de Matos
+      Painel de administração do campus da Academia Profissional Prof. Albino de Matos
     </p>
   </div>
 </div>
@@ -254,7 +254,7 @@
 
   <a class="kpi-card" href="{{ url_for('admin.admin', tab='secciones') }}">
     <div class="kpi-num">{{ stats.total_secciones or 0 }}</div>
-    <div class="kpi-lbl">Secciones</div>
+    <div class="kpi-lbl">Secções</div>
   </a>
 
   <a class="kpi-card" href="{{ url_for('admin.admin', tab='recursos') }}">
@@ -270,7 +270,7 @@
       ('documentos','Documentos'),
       ('ciclos','Ciclos formativos'),
       ('disciplinas','Disciplinas'),
-      ('secciones','Secciones'),
+      ('secciones','Secções'),
       ('recursos','Recursos')
     ] %}
       <a class="tab {% if tab == t %}active{% endif %}"
@@ -286,7 +286,7 @@
 
       <div class="table-toolbar">
         <span class="text-sm text-muted">
-          {{ areas | length }} áreas institucionales conectadas a MySQL
+          {{ areas | length }} áreas institucionais ligadas à base de dados
         </span>
       </div>
 
@@ -319,14 +319,14 @@
               </div>
 
               <div>
-                <label class="text-sm text-muted">Descripción corta</label>
+                <label class="text-sm text-muted">Descrição curta</label>
                 <textarea class="table-filter"
                           style="width:100%;min-height:70px"
                           name="descricao">{{ area.descricao or '' }}</textarea>
               </div>
 
               <div>
-                <label class="text-sm text-muted">Contenido principal</label>
+                <label class="text-sm text-muted">Conteúdo principal</label>
                 <textarea class="table-filter"
                           style="width:100%;min-height:150px"
                           name="conteudo">{{ area.conteudo or '' }}</textarea>
@@ -352,13 +352,13 @@
 
       <div class="table-toolbar">
         <span class="text-sm text-muted">
-          {{ documentos | length }} documentos institucionales
+          {{ documentos | length }} documentos institucionais
         </span>
       </div>
 
       <div class="card mb-20" style="box-shadow:none;border:1px solid var(--line)">
         <div class="card-head">
-          <h3>Añadir documento institucional</h3>
+          <h3>Adicionar documento institucional</h3>
         </div>
 
         <div class="card-body">
@@ -387,7 +387,7 @@
             </div>
 
             <div>
-              <label class="text-sm text-muted">Descripción</label>
+              <label class="text-sm text-muted">Descrição</label>
               <input class="table-filter" name="descricao" style="width:100%">
             </div>
 
@@ -397,12 +397,12 @@
             </div>
 
             <div>
-              <label class="text-sm text-muted">Archivo</label>
+              <label class="text-sm text-muted">Ficheiro</label>
               <input class="table-filter" type="file" name="archivo" style="width:100%">
             </div>
 
             <button class="btn btn-primary btn-sm" type="submit">
-              Añadir
+              Adicionar
             </button>
           </form>
         </div>
@@ -415,12 +415,12 @@
               <th>Área</th>
               <th>Documento</th>
               <th>Tipo</th>
-              <th>Descripción</th>
+              <th>Descrição</th>
               <th>URL</th>
-              <th>Archivo</th>
-              <th>Orden</th>
-              <th>Visible</th>
-              <th>Acción</th>
+              <th>Ficheiro</th>
+              <th>Ordem</th>
+              <th>Visível</th>
+              <th>Ação</th>
             </tr>
           </thead>
 
@@ -517,7 +517,7 @@
                     <button class="btn btn-danger-soft btn-sm"
                             form="documento-delete-{{ d.id }}"
                             type="submit"
-                            onclick="return confirm('¿Seguro que quieres eliminar este documento? Esta acción no se puede deshacer.')">
+                            onclick="return confirm('Tem a certeza de que pretende eliminar este documento? Esta ação não pode ser desfeita.')">
                       Eliminar
                     </button>
                   </div>
@@ -538,7 +538,7 @@
 
       <div class="card mb-20" style="box-shadow:none;border:1px solid var(--line)">
         <div class="card-head">
-          <h3>Añadir ciclo formativo</h3>
+          <h3>Adicionar ciclo formativo</h3>
         </div>
 
         <div class="card-body">
@@ -552,7 +552,7 @@
             </div>
 
             <div>
-              <label class="text-sm text-muted">Nombre</label>
+              <label class="text-sm text-muted">Nome</label>
               <input class="table-filter" name="nombre" required style="width:100%">
             </div>
 
@@ -567,7 +567,7 @@
             </div>
 
             <div>
-              <label class="text-sm text-muted">Duración</label>
+              <label class="text-sm text-muted">Duração</label>
               <input class="table-filter" name="duracion" value="3 anos" style="width:100%">
             </div>
 
@@ -577,14 +577,14 @@
             </div>
 
             <button class="btn btn-primary btn-sm" type="submit">
-              Añadir
+              Adicionar
             </button>
 
             <div style="grid-column:1 / -1">
-              <label class="text-sm text-muted">Descripción</label>
+              <label class="text-sm text-muted">Descrição</label>
               <input class="table-filter"
                      name="descripcion"
-                     placeholder="Descripción breve del ciclo formativo"
+                     placeholder="Descrição breve do ciclo formativo"
                      style="width:100%">
             </div>
           </form>
@@ -605,7 +605,7 @@
             <label class="text-sm text-muted">
               <input type="hidden" name="activo" value="0">
               <input type="checkbox" name="activo" value="1" {% if c.activo %}checked{% endif %}>
-              Activo
+              Ativo
             </label>
           </div>
 
@@ -638,7 +638,7 @@
                       type="submit"
                       formaction="{{ url_for('admin.delete_ciclo', ciclo_id=c.id) }}"
                       formmethod="post"
-                      onclick="return confirm('¿Seguro que quieres eliminar este ciclo? Se borrarán también sus años, disciplinas, secciones y recursos.')">
+                      onclick="return confirm('Tem a certeza de que pretende eliminar este ciclo? Serão também eliminados os anos, disciplinas, secções e recursos associados.')">
                 Eliminar ciclo
               </button>
             </div>
@@ -650,13 +650,13 @@
 
       <div class="table-toolbar">
         <span class="text-sm text-muted">
-          Mostrando {{ disciplinas | length }} disciplinas
+          A mostrar {{ disciplinas | length }} disciplinas
         </span>
       </div>
 
       <div class="card mb-20" style="box-shadow:none;border:1px solid var(--line)">
         <div class="card-head">
-          <h3>Añadir disciplina</h3>
+          <h3>Adicionar disciplina</h3>
         </div>
 
         <div class="card-body">
@@ -665,7 +665,7 @@
                 style="display:grid;grid-template-columns:1.6fr 100px 1fr 130px 90px 80px auto;gap:10px;align-items:end">
 
             <div>
-              <label class="text-sm text-muted">Año / ciclo</label>
+              <label class="text-sm text-muted">Ano / ciclo</label>
               <select class="table-filter" name="ano_id" required style="width:100%">
                 {% for a in anos %}
                   <option value="{{ a.id }}">
@@ -681,7 +681,7 @@
             </div>
 
             <div>
-              <label class="text-sm text-muted">Nombre</label>
+              <label class="text-sm text-muted">Nome</label>
               <input class="table-filter" name="nombre" required style="width:100%">
             </div>
 
@@ -705,14 +705,14 @@
             </div>
 
             <button class="btn btn-primary btn-sm" type="submit">
-              Añadir
+              Adicionar
             </button>
 
             <div style="grid-column:1 / -1">
-              <label class="text-sm text-muted">Descripción</label>
+              <label class="text-sm text-muted">Descrição</label>
               <input class="table-filter"
                      name="descripcion"
-                     placeholder="Descripción breve de la disciplina"
+                     placeholder="Descrição breve da disciplina"
                      style="width:100%">
             </div>
           </form>
@@ -724,13 +724,13 @@
           <thead>
             <tr>
               <th>Ciclo</th>
-              <th>Año</th>
+              <th>Ano</th>
               <th>Código</th>
               <th>Disciplina</th>
               <th>Tipo</th>
               <th>Horas</th>
-              <th>Descripción</th>
-              <th>Acción</th>
+              <th>Descrição</th>
+              <th>Ação</th>
             </tr>
           </thead>
 
@@ -811,7 +811,7 @@
                     <button class="btn btn-danger-soft btn-sm"
                             form="disciplina-delete-{{ d.id }}"
                             type="submit"
-                            onclick="return confirm('¿Seguro que quieres eliminar esta disciplina? Se borrarán también sus secciones y recursos.')">
+                            onclick="return confirm('Tem a certeza de que pretende eliminar esta disciplina? Serão também eliminadas as secções e recursos associados.')">
                       Eliminar
                     </button>
                   </div>
@@ -826,7 +826,7 @@
 
       <div class="table-toolbar">
         <span class="text-sm text-muted">
-          Mostrando {{ secciones_admin | length }} secciones de disciplinas
+          A mostrar {{ secciones_admin | length }} secções de disciplinas
         </span>
       </div>
 
@@ -835,14 +835,14 @@
           <thead>
             <tr>
               <th>Ciclo</th>
-              <th>Año</th>
+              <th>Ano</th>
               <th>Disciplina</th>
               <th>Slug</th>
               <th>Título</th>
-              <th>Descripción</th>
-              <th>Orden</th>
-              <th>Visible</th>
-              <th>Acción</th>
+              <th>Descrição</th>
+              <th>Ordem</th>
+              <th>Visível</th>
+              <th>Ação</th>
             </tr>
           </thead>
 
@@ -916,7 +916,7 @@
                     <button class="btn btn-danger-soft btn-sm"
                             form="seccion-delete-{{ s.id }}"
                             type="submit"
-                            onclick="return confirm('¿Seguro que quieres eliminar esta sección? Se borrarán también sus recursos.')">
+                            onclick="return confirm('Tem a certeza de que pretende eliminar esta secção? Serão também eliminados os recursos associados.')">
                       Eliminar
                     </button>
                   </div>
@@ -931,13 +931,13 @@
 
       <div class="table-toolbar">
         <span class="text-sm text-muted">
-          Mostrando {{ recursos | length }} recursos de disciplinas
+          A mostrar {{ recursos | length }} recursos de disciplinas
         </span>
       </div>
 
       <div class="card mb-20" style="box-shadow:none;border:1px solid var(--line)">
         <div class="card-head">
-          <h3>Añadir recurso a una disciplina</h3>
+          <h3>Adicionar recurso a uma disciplina</h3>
         </div>
 
         <div class="card-body">
@@ -947,7 +947,7 @@
                 style="display:grid;grid-template-columns:1.7fr 1.2fr .8fr 1.6fr 1.2fr 1.4fr auto;gap:10px;align-items:end">
 
             <div>
-              <label class="text-sm text-muted">Sección</label>
+              <label class="text-sm text-muted">Secção</label>
               <select class="table-filter" name="seccion_id" required style="width:100%">
                 {% for s in secciones %}
                   <option value="{{ s.id }}">
@@ -977,7 +977,7 @@
             </div>
 
             <div>
-              <label class="text-sm text-muted">Descripción</label>
+              <label class="text-sm text-muted">Descrição</label>
               <input class="table-filter" name="descripcion" style="width:100%">
             </div>
 
@@ -987,12 +987,12 @@
             </div>
 
             <div>
-              <label class="text-sm text-muted">Archivo</label>
+              <label class="text-sm text-muted">Ficheiro</label>
               <input class="table-filter" type="file" name="archivo" style="width:100%">
             </div>
 
             <button class="btn btn-primary btn-sm" type="submit">
-              Añadir
+              Adicionar
             </button>
           </form>
         </div>
@@ -1003,15 +1003,15 @@
           <thead>
             <tr>
               <th>Disciplina</th>
-              <th>Sección</th>
+              <th>Secção</th>
               <th>Recurso</th>
               <th>Tipo</th>
-              <th>Descripción</th>
+              <th>Descrição</th>
               <th>URL</th>
-              <th>Archivo</th>
-              <th>Orden</th>
-              <th>Visible</th>
-              <th>Acción</th>
+              <th>Ficheiro</th>
+              <th>Ordem</th>
+              <th>Visível</th>
+              <th>Ação</th>
             </tr>
           </thead>
 
@@ -1117,7 +1117,7 @@
                     <button class="btn btn-danger-soft btn-sm"
                             form="recurso-delete-{{ r.id }}"
                             type="submit"
-                            onclick="return confirm('¿Seguro que quieres eliminar este recurso? Esta acción no se puede deshacer.')">
+                            onclick="return confirm('Tem a certeza de que pretende eliminar este recurso? Esta ação não pode ser desfeita.')">
                       Eliminar
                     </button>
                   </div>

@@ -92,7 +92,7 @@
 
 /* ── FLOATING HELP ──────────────────────────────── */
 .floating-help {
-  position: fixed; bottom: 24px; left: 24px;
+  position: fixed; bottom: 24px; right: 24px;
   width: 40px; height: 40px; border-radius: 50%;
   background: var(--cyan); color: #fff;
   border: none; font-size: 18px; font-weight: 700;

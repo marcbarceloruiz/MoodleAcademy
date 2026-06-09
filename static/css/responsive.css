@@ -82,7 +82,7 @@
   .modal-container { width: 95%; margin: 20px auto; }
 
   /* Botão flutuante: mover para não tapar conteúdo */
-  .floating-help { bottom: 16px; left: 16px; width: 36px; height: 36px; font-size: 16px; }
+  .floating-help { bottom: 16px; right: 16px; width: 36px; height: 36px; font-size: 16px; }
 }
 
 /* ── Helpers gerais ──────────────────────────────────────── */
