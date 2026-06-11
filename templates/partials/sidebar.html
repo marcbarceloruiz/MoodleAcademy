@@ -35,6 +35,26 @@
       {% endif %}
     </div>
 
+    <!-- ── O MEU PERCURSO (aluno) ─────────────── -->
+    {% if session_is_aluno %}
+    <div class="sidebar-section">
+      <div class="sidebar-group-title">O meu percurso</div>
+
+      <a class="sidebar-item {% if request.endpoint == 'dashboard.classificacoes' %}active{% endif %}"
+         href="{{ url_for('dashboard.classificacoes') }}">
+        <span class="item-icon">📊</span> As minhas classificações
+      </a>
+      <a class="sidebar-item {% if request.endpoint == 'dashboard.tarefas' %}active{% endif %}"
+         href="{{ url_for('dashboard.tarefas') }}">
+        <span class="item-icon">📤</span> As minhas tarefas
+      </a>
+      <a class="sidebar-item {% if request.endpoint == 'dashboard.calendario' %}active{% endif %}"
+         href="{{ url_for('dashboard.calendario') }}">
+        <span class="item-icon">📅</span> Calendário
+      </a>
+    </div>
+    {% endif %}
+
     <!-- ── ÁREA INSTITUCIONAL ─────────────────────── -->
     <div class="sidebar-section">
       <div class="sidebar-group-title">Área Institucional</div>

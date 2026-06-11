@@ -49,9 +49,27 @@
 
   <div class="top-actions">
     <button class="icon-btn" title="Notificações" aria-label="Notificações"
-            onclick="_msgFutura()">
+            onclick="abrirNotificacoes()">
       <span>🔔</span>
+      {% if layout_notificacoes %}<span class="badge-dot"></span>{% endif %}
     </button>
+
+    <div id="notif-data" style="display:none">
+      {% if layout_notificacoes %}
+        {% for n in layout_notificacoes %}
+        <div class="notif-item">
+          <span class="notif-icon">{{ n._icone }}</span>
+          <div class="notif-body">
+            <div class="notif-title">{{ n.titulo }}</div>
+            {% if n.mensagem %}<div class="notif-msg">{{ n.mensagem }}</div>{% endif %}
+            {% if n._data_fmt %}<div class="notif-date">{{ n._data_fmt }}</div>{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="modal-text">Sem notificações novas.</p>
+      {% endif %}
+    </div>
 
     {% if session_autenticado %}
       {# Utilizador autenticado #}

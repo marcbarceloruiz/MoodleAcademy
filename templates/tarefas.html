@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}As minhas tarefas — Campus Virtual{% endblock %}
+{% block hero_title %}As minhas tarefas{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <h1>📤 As minhas tarefas</h1>
+    <p class="subtitle">Trabalhos, entregas e prazos do teu percurso</p>
+  </div>
+  <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary btn-sm">← Voltar ao início</a>
+</div>
+
+{% if total == 0 %}
+<div class="card">
+  <div class="card-body">
+    <div class="empty-state">
+      <div style="font-size:40px;margin-bottom:10px">📤</div>
+      <p style="font-weight:600;color:var(--text-1);margin-bottom:4px">
+        Não tens tarefas atribuídas de momento.
+      </p>
+      <p>As tarefas e os prazos de entrega aparecerão aqui.</p>
+    </div>
+  </div>
+</div>
+
+{% else %}
+
+<!-- ── PENDENTES ─────────────────────────────────────────── -->
+<div class="card mb-20">
+  <div class="card-head">
+    <h3>⏳ Pendentes</h3>
+    <span class="text-sm text-muted">{{ tarefas_pendentes | length }} tarefa(s)</span>
+  </div>
+  <div class="card-body">
+    {% for t in tarefas_pendentes %}
+    <div class="task-item" style="align-items:flex-start">
+      <div class="task-date">
+        {{ t._dia }}
+        <span class="month">{{ t._mes }}</span>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="task-title">{{ t.titulo }}</div>
+        <div class="task-sub">
+          {{ t.disciplina or 'Geral' }} · prazo: {{ t._limite_fmt }}
+        </div>
+        {% if t.descricao %}
+        <div class="text-sm text-muted" style="margin-top:4px;line-height:1.5">
+          {{ t.descricao }}
+        </div>
+        {% endif %}
+      </div>
+      <span class="act-badge {{ t._estado_css }}">{{ t._estado_label }}</span>
+    </div>
+    {% else %}
+    <p class="text-sm text-muted">Sem tarefas pendentes. Bom trabalho! 🎉</p>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ── ENTREGUES / AVALIADAS ─────────────────────────────── -->
+<div class="card">
+  <div class="card-head">
+    <h3>✅ Entregues e avaliadas</h3>
+    <span class="text-sm text-muted">{{ tarefas_feitas | length }} tarefa(s)</span>
+  </div>
+  <div class="card-body">
+    {% for t in tarefas_feitas %}
+    <div class="task-item" style="align-items:flex-start">
+      <div class="task-date">
+        {{ t._dia }}
+        <span class="month">{{ t._mes }}</span>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="task-title">{{ t.titulo }}</div>
+        <div class="task-sub">
+          {{ t.disciplina or 'Geral' }}
+          {% if t.ficheiro_url %}
+            · <a href="{{ t.ficheiro_url }}" target="_blank" rel="noopener">ver ficheiro</a>
+          {% else %}
+            · sem ficheiro
+          {% endif %}
+          {% if t._nota_fmt %}
+            · nota: <strong>{{ t._nota_fmt }}/20</strong>
+          {% endif %}
+        </div>
+      </div>
+      <span class="act-badge {{ t._estado_css }}">{{ t._estado_label }}</span>
+    </div>
+    {% else %}
+    <p class="text-sm text-muted">Ainda não tens entregas registadas.</p>
+    {% endfor %}
+  </div>
+</div>
+
+{% endif %}
+
+{% endblock %}

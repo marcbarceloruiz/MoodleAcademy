@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Calendário — Campus Virtual{% endblock %}
+{% block hero_title %}Calendário do campus{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <h1>📅 Calendário</h1>
+    <p class="subtitle">Avaliações, entregas, FCT, PAP e eventos da escola</p>
+  </div>
+  <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary btn-sm">← Voltar ao início</a>
+</div>
+
+<div class="grid-2 mb-20">
+
+  <!-- ── EVENTOS DO CAMPUS ───────────────────────────────── -->
+  <div class="card">
+    <div class="card-head">
+      <h3>Próximos eventos</h3>
+      <span class="text-sm text-muted">{{ eventos | length }} evento(s)</span>
+    </div>
+    <div class="card-body">
+      {% for ev in eventos %}
+      <div class="task-item" style="align-items:flex-start">
+        <div class="task-date">
+          {{ ev._dia }}
+          <span class="month">{{ ev._mes }}</span>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div class="task-title">{{ ev._icone }} {{ ev.titulo }}</div>
+          <div class="task-sub">
+            {{ ev._tipo_label }}
+            {% if ev.hora %} · {{ ev.hora }}{% endif %}
+          </div>
+          {% if ev.descricao %}
+          <div class="text-sm text-muted" style="margin-top:3px">{{ ev.descricao }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% else %}
+      <p class="text-sm text-muted">Não há eventos agendados de momento.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ── PRAZOS DE TAREFAS (aluno) ───────────────────────── -->
+  <div class="card">
+    <div class="card-head">
+      <h3>Prazos de tarefas</h3>
+      {% if tarefas_cal %}
+      <a href="{{ url_for('dashboard.tarefas') }}" class="btn btn-secondary btn-sm">Ver tarefas</a>
+      {% endif %}
+    </div>
+    <div class="card-body">
+      {% for t in tarefas_cal %}
+      <div class="task-item">
+        <div class="task-date">
+          {{ t._dia }}
+          <span class="month">{{ t._mes }}</span>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div class="task-title">{{ t.titulo }}</div>
+          <div class="task-sub">{{ t.disciplina or 'Geral' }} · até {{ t._limite_fmt }}</div>
+        </div>
+        <span class="act-badge {{ t._estado_css }}">{{ t._estado_label }}</span>
+      </div>
+      {% else %}
+      <p class="text-sm text-muted">
+        {% if session_is_aluno %}
+          Sem prazos pendentes. 🎉
+        {% else %}
+          Os prazos de tarefas são apresentados aos alunos matriculados.
+        {% endif %}
+      </p>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
+<div class="card">
+  <div class="card-body" style="font-size:12px;color:var(--muted);line-height:1.6">
+    <strong>Legenda:</strong>
+    📝 Avaliação &nbsp;·&nbsp; 📤 Entrega &nbsp;·&nbsp; 🏢 FCT — Formação em Contexto de Trabalho
+    &nbsp;·&nbsp; 🎓 PAP — Prova de Aptidão Profissional &nbsp;·&nbsp; 📅 Evento da escola
+  </div>
+</div>
+
+{% endblock %}

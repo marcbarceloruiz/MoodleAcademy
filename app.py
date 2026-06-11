@@ -42,9 +42,18 @@ def create_app():
         except Exception:
             layout_mis_cursos = []
             layout_eventos    = []
+        try:
+            from services.moodle_service import get_notificacoes_usuario
+            from flask import session as _s
+            layout_notificacoes = get_notificacoes_usuario(
+                _s.get("usuario_id"), limit=6)
+        except Exception:
+            layout_notificacoes = []
+
         return {
             "layout_mis_cursos": layout_mis_cursos,
             "layout_eventos":    layout_eventos,
+            "layout_notificacoes": layout_notificacoes,
         }
 
     # ── Context processor: dados de sessão para templates ─────

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}As minhas classificações — Campus Virtual{% endblock %}
+{% block hero_title %}As minhas classificações{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <h1>📊 As minhas classificações</h1>
+    <p class="subtitle">Avaliações registadas no teu percurso formativo</p>
+  </div>
+  <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary btn-sm">← Voltar ao início</a>
+</div>
+
+{% if notas %}
+<div class="card">
+  <div class="card-head">
+    <h3>Histórico de avaliações</h3>
+    <span class="text-sm text-muted">{{ notas | length }} registo(s)</span>
+  </div>
+  <div class="card-body">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Disciplina</th>
+            <th>Tipo</th>
+            <th>Nota</th>
+            <th>Data</th>
+            <th>Observação</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for n in notas %}
+          <tr>
+            <td class="td-name">{{ n.disciplina }}</td>
+            <td><span class="status-pill sp-activo" style="text-transform:none">{{ n.tipo_avaliacao }}</span></td>
+            <td>
+              <span class="nota-badge {{ n._nota_css }}">{{ n._nota_fmt }}</span>
+              <span class="text-sm text-muted">/ 20</span>
+            </td>
+            <td class="text-sm">{{ n._data_fmt }}</td>
+            <td class="text-sm text-muted">{{ n.observacao or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% else %}
+<div class="card">
+  <div class="card-body">
+    <div class="empty-state">
+      <div style="font-size:40px;margin-bottom:10px">📊</div>
+      <p style="font-weight:600;color:var(--text-1);margin-bottom:4px">
+        Ainda não tens classificações registadas.
+      </p>
+      <p>As tuas avaliações aparecerão aqui assim que forem lançadas pelos docentes.</p>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

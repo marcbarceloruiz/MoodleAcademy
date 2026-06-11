@@ -104,6 +104,24 @@ function abrirModalSoporte() {
   `);
 }
 
+function abrirNotificacoes() {
+  const data = document.getElementById('notif-data');
+  const html = data ? data.innerHTML
+                    : '<p class="modal-text">Sem notificações novas.</p>';
+  abrirModal('Notificações', `<div class="notif-list">${html}</div>`);
+}
+
+function abrirMensagens() {
+  abrirModal('Mensagens', `
+    <p class="modal-text" style="margin-bottom:8px">
+      A mensagería interna está preparada para futura integração.
+    </p>
+    <p class="modal-text" style="font-size:12px;color:var(--muted)">
+      Entretanto, podes contactar a escola em
+      <a href="mailto:geral@academiaprofissional.pt">geral@academiaprofissional.pt</a>.
+    </p>`);
+}
+
 function _msgFutura() {
   mostrarToast('Funcionalidade preparada para futura integração.', 'info');
 }
@@ -137,7 +155,7 @@ function abrirModalPerfil() {
       <button class="btn btn-secondary w-full"
               onclick="_msgFutura()">🔒 Alterar palavra-passe</button>
       <button class="btn btn-secondary w-full"
-              onclick="_msgFutura()">🔔 Notificações</button>
+              onclick="cerrarModal(); abrirNotificacoes()">🔔 Notificações</button>
       <button class="btn btn-danger w-full"
               onclick="cerrarSesion()">→ Terminar sessão</button>
     </div>

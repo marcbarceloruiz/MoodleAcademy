@@ -62,8 +62,8 @@
       {% set parts = ev.fecha.split('-') %}
       <div class="task-item">
         <div class="task-date">
-          {{ parts[2] | int }}
-          <span class="month">{{ ev._fecha_corta[-3:] }}</span>
+          {{ ev._dia if ev._dia is defined else parts[2] | int }}
+          <span class="month">{{ ev._mes if ev._mes is defined else (ev._fecha_corta or '')[-3:] }}</span>
         </div>
         <div>
           <div class="task-title">{{ ev.titulo }}</div>
@@ -152,8 +152,8 @@
       {% set parts = ev.fecha.split('-') %}
       <div class="task-item">
         <div class="task-date">
-          {{ parts[2] | int }}
-          <span class="month">{{ ev._fecha_corta[-3:] }}</span>
+          {{ ev._dia if ev._dia is defined else parts[2] | int }}
+          <span class="month">{{ ev._mes if ev._mes is defined else (ev._fecha_corta or '')[-3:] }}</span>
         </div>
         <div>
           <div class="task-title">{{ ev.titulo }}</div>
@@ -214,7 +214,7 @@
     </div>
     <div class="card-body">
       {% for c in mis_cursos %}
-      <a class="course-mini" href="{{ url_for('courses.course_detail', course_id=c.id) }}"
+      <a class="course-mini" href="{{ url_for('courses.ciclo_detail', ciclo_id=c.id) if c._real else url_for('courses.course_detail', course_id=c.id) }}"
          style="text-decoration:none">
         <div class="mini-thumb">{{ c.titulo[:2] | upper }}</div>
         <div style="flex:1;min-width:0">
@@ -239,8 +239,8 @@
       {% set parts = ev.fecha.split('-') %}
       <div class="task-item">
         <div class="task-date">
-          {{ parts[2] | int }}
-          <span class="month">{{ ev._fecha_corta[-3:] }}</span>
+          {{ ev._dia if ev._dia is defined else parts[2] | int }}
+          <span class="month">{{ ev._mes if ev._mes is defined else (ev._fecha_corta or '')[-3:] }}</span>
         </div>
         <div>
           <div class="task-title">{{ ev.titulo }}</div>
@@ -252,6 +252,54 @@
   </div>
 </div>
 
+{% if classificacoes or tarefas_pendentes %}
+<div class="grid-2 mb-20">
+  <div class="card">
+    <div class="card-head">
+      <h3>📊 Últimas classificações</h3>
+      <a href="{{ url_for('dashboard.classificacoes') }}" class="btn btn-secondary btn-sm">Ver todas</a>
+    </div>
+    <div class="card-body">
+      {% for n in classificacoes %}
+      <div class="task-item">
+        <span class="nota-badge {{ n._nota_css }}">{{ n._nota_fmt }}</span>
+        <div style="flex:1;min-width:0">
+          <div class="task-title">{{ n.disciplina }}</div>
+          <div class="task-sub">{{ n.tipo_avaliacao }} · {{ n._data_fmt }}</div>
+        </div>
+      </div>
+      {% else %}
+      <p class="text-sm text-muted">Ainda não tens classificações lançadas.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h3>📤 Tarefas pendentes</h3>
+      <a href="{{ url_for('dashboard.tarefas') }}" class="btn btn-secondary btn-sm">Ver tarefas</a>
+    </div>
+    <div class="card-body">
+      {% for t in tarefas_pendentes %}
+      <div class="task-item">
+        <div class="task-date">
+          {{ t._dia }}
+          <span class="month">{{ t._mes }}</span>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div class="task-title">{{ t.titulo }}</div>
+          <div class="task-sub">{{ t.disciplina or 'Geral' }} · até {{ t._limite_fmt }}</div>
+        </div>
+        <span class="act-badge {{ t._estado_css }}">{{ t._estado_label }}</span>
+      </div>
+      {% else %}
+      <p class="text-sm text-muted">Sem tarefas pendentes. 🎉</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
 <div class="card mb-20">
   <div class="card-head"><h3>Acessos rápidos</h3></div>
   <div class="card-body">
@@ -259,15 +307,15 @@
       <a class="quick-btn" href="{{ url_for('courses.ciclos') }}">
         <span class="quick-icon qi-cyan">📚</span> Os meus cursos
       </a>
-      <button class="quick-btn" onclick="_msgFutura()">
+      <a class="quick-btn" href="{{ url_for('dashboard.classificacoes') }}">
         <span class="quick-icon qi-green">📊</span> As minhas classificações
-      </button>
-      <button class="quick-btn" onclick="_msgFutura()">
+      </a>
+      <a class="quick-btn" href="{{ url_for('dashboard.calendario') }}">
         <span class="quick-icon qi-orange">📅</span> Calendário
-      </button>
-      <button class="quick-btn" onclick="_msgFutura()">
-        <span class="quick-icon qi-blue">✉</span> Mensagens
-      </button>
+      </a>
+      <a class="quick-btn" href="{{ url_for('dashboard.tarefas') }}">
+        <span class="quick-icon qi-blue">📤</span> As minhas tarefas
+      </a>
       <a class="quick-btn" href="{{ url_for('portal.portal') }}">
         <span class="quick-icon qi-purple">🏛</span> Portal Institucional
       </a>

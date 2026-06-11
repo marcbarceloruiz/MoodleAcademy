@@ -123,11 +123,19 @@ def _to_int(value, default=0):
 
 
 def _fetch_all(sql, params=None):
-    return db.session.execute(text(sql), params or {}).mappings().all()
+    try:
+        return db.session.execute(text(sql), params or {}).mappings().all()
+    except Exception as e:
+        print("[admin] Aviso _fetch_all:", e)
+        return []
 
 
 def _fetch_one(sql, params=None):
-    return db.session.execute(text(sql), params or {}).mappings().first()
+    try:
+        return db.session.execute(text(sql), params or {}).mappings().first()
+    except Exception as e:
+        print("[admin] Aviso _fetch_one:", e)
+        return None
 
 
 def _allowed_upload(filename):
