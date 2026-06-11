@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 
-{% block title %}Mis Cursos — Academia Vertice{% endblock %}
-{% block hero_title %}Mis Cursos{% endblock %}
+{% block title %}Os meus cursos — Academia Vértice{% endblock %}
+{% block hero_title %}Os meus cursos{% endblock %}
 
 {% block content %}
 
 <div class="view-header">
   <div>
-    <h1>Mis Cursos</h1>
-    <p class="subtitle">{{ total }} cursos disponibles en el catálogo</p>
+    <h1>Os meus cursos</h1>
+    <p class="subtitle">{{ total }} cursos disponíveis no catálogo</p>
   </div>
 </div>
 
@@ -19,16 +19,16 @@
   <a class="filter-btn {% if filtro_activo == 'idiomas' %}active{% endif %}"
      href="{{ url_for('courses.courses', categoria='idiomas') }}">Idiomas</a>
   <a class="filter-btn {% if filtro_activo == 'sanitario' %}active{% endif %}"
-     href="{{ url_for('courses.courses', categoria='sanitario') }}">Sanitario</a>
+     href="{{ url_for('courses.courses', categoria='sanitario') }}">Saúde</a>
   <a class="filter-btn {% if filtro_activo == 'fp' %}active{% endif %}"
      href="{{ url_for('courses.courses', categoria='fp') }}">FP</a>
   <a class="filter-btn {% if filtro_activo == 'en-progreso' %}active{% endif %}"
-     href="{{ url_for('courses.courses', estado='en-progreso') }}">En progreso</a>
+     href="{{ url_for('courses.courses', estado='en-progreso') }}">Em curso</a>
 
-  <!-- Búsqueda: envía GET al mismo endpoint -->
+  <!-- Pesquisa: envia GET ao mesmo endpoint -->
   <form class="filter-search" method="get" action="{{ url_for('courses.courses') }}"
         style="display:flex;gap:4px">
-    <input type="text" name="q" placeholder="Buscar curso..."
+    <input type="text" name="q" placeholder="Procurar curso..."
            value="{{ query }}" id="curso-search">
     <button type="submit">🔍</button>
   </form>
@@ -42,7 +42,7 @@
     {% endfor %}
   {% else %}
     <div class="empty-state" style="grid-column:1/-1">
-      <p>No se encontraron cursos.</p>
+      <p>Não foram encontrados cursos.</p>
     </div>
   {% endif %}
 </div>

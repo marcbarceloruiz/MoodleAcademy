@@ -24,7 +24,6 @@ from services.moodle_service import (
     get_classificacoes_usuario,
     get_tarefas_usuario,
     get_eventos_campus,
-    get_notificacoes_usuario,
 )
 
 dashboard_bp = Blueprint('dashboard', __name__)

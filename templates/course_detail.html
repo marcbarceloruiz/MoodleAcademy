@@ -6,7 +6,7 @@
 {% block hero_extra %}
 <div class="hero-progress-box" id="hero-prog-box">
   <div class="progress-label">
-    <span>Progreso del curso</span>
+    <span>Progresso do curso</span>
     <span class="prog-pct">{{ progreso }}%</span>
   </div>
   <div class="progress-track">
@@ -20,7 +20,7 @@
 <div class="view-header">
   <div>
     <a href="{{ url_for('courses.courses') }}" class="btn btn-secondary btn-sm"
-       style="margin-bottom:8px">← Volver a cursos</a>
+       style="margin-bottom:8px">← Voltar a cursos</a>
     <h1>{{ curso.titulo }}</h1>
     <p class="subtitle">{{ curso.descripcion }}</p>
   </div>
@@ -36,23 +36,23 @@
     </div>
     <div style="margin-left:auto">
       <button class="btn btn-secondary btn-sm"
-              onclick="mostrarToast('Función: contactar tutor', 'info')">
+              onclick="mostrarToast('Funcionalidade: contactar tutor', 'info')">
         ✉ Contactar tutor
       </button>
     </div>
   </div>
 </div>
 
-<!-- TABS DE NAVEGACIÓN -->
+<!-- TABS DE NAVEGAÇÃO -->
 <div class="tabs" id="curso-tabs">
-  <button class="tab active" onclick="cambiarTabCurso('contenido', this)">Contenido</button>
-  <button class="tab" onclick="cambiarTabCurso('criterios', this)">Criterios</button>
+  <button class="tab active" onclick="cambiarTabCurso('contenido', this)">Conteúdo</button>
+  <button class="tab" onclick="cambiarTabCurso('criterios', this)">Critérios</button>
   <button class="tab" onclick="cambiarTabCurso('participantes', this)">Participantes</button>
   <button class="tab" onclick="cambiarTabCurso('tutor', this)">Tutor</button>
-  <button class="tab" onclick="cambiarTabCurso('guia', this)">Guía del curso</button>
+  <button class="tab" onclick="cambiarTabCurso('guia', this)">Guia do curso</button>
 </div>
 
-<!-- TAB: CONTENIDO -->
+<!-- TAB: CONTEÚDO -->
 <div id="tab-contenido" class="tab-panel">
   {% for modulo in curso.modulos %}
   <div class="modulo-block card mb-16">
@@ -77,29 +77,29 @@
           {% if act.estado != 'bloqueado' %}
             {% if act.tipo == 'tarea' %}
               <button class="btn btn-primary btn-sm"
-                      onclick="mostrarToast('Tarea: {{ act.titulo }}', 'info')">
+                      onclick="mostrarToast('Tarefa: {{ act.titulo }}', 'info')">
                 Entregar
               </button>
             {% elif act.tipo == 'test' %}
               <button class="btn btn-primary btn-sm"
-                      onclick="mostrarToast('Test: {{ act.titulo }}', 'info')">
-                Iniciar test
+                      onclick="mostrarToast('Teste: {{ act.titulo }}', 'info')">
+                Iniciar teste
               </button>
             {% elif act.tipo == 'foro' %}
               <button class="btn btn-secondary btn-sm"
-                      onclick="mostrarToast('Foro: {{ act.titulo }}', 'info')">
+                      onclick="mostrarToast('Fórum: {{ act.titulo }}', 'info')">
                 Participar
               </button>
             {% else %}
               <button class="btn btn-secondary btn-sm"
-                      onclick="mostrarToast('Abriendo: {{ act.titulo }}', 'info')">
+                      onclick="mostrarToast('A abrir: {{ act.titulo }}', 'info')">
                 Ver recurso
               </button>
             {% endif %}
             {% if act.estado == 'pendiente' or act.estado == 'no-comenzado' %}
               <button class="btn btn-secondary btn-sm"
-                      onclick="mostrarToast('Marcado como completado', 'success')">
-                ✓ Completar
+                      onclick="mostrarToast('Marcado como concluído', 'success')">
+                ✓ Concluir
               </button>
             {% endif %}
           {% else %}
@@ -116,61 +116,61 @@
   {% endfor %}
 </div>
 
-<!-- TAB: CRITERIOS (simulado) -->
+<!-- TAB: CRITÉRIOS (demo) -->
 <div id="tab-criterios" class="tab-panel" style="display:none">
   <div class="card">
     <div class="card-body">
       <p style="font-size:13px;color:var(--muted);line-height:1.7">
-        Los criterios de evaluación del curso se basan en la participación activa,
-        la entrega puntual de tareas y la superación de los tests de cada módulo.
-        La nota mínima para aprobar cada test es de 60 sobre 100.
+        Os critérios de avaliação do curso baseiam-se na participação ativa,
+        na entrega pontual de tarefas e na aprovação nos testes de cada módulo.
+        A nota mínima para aprovar cada teste é de 60 em 100.
       </p>
     </div>
   </div>
 </div>
 
-<!-- TAB: PARTICIPANTES (simulado) -->
+<!-- TAB: PARTICIPANTES (demo) -->
 <div id="tab-participantes" class="tab-panel" style="display:none">
   <div class="card">
     <div class="card-body">
       <p style="font-size:13px;color:var(--muted)">
-        Lista de participantes matriculados en este curso.
-        (Funcionalidad disponible en próxima versión.)
+        Lista de participantes matriculados neste curso.
+        (Funcionalidade preparada para futura integração.)
       </p>
     </div>
   </div>
 </div>
 
-<!-- TAB: TUTOR (simulado) -->
+<!-- TAB: TUTOR (demo) -->
 <div id="tab-tutor" class="tab-panel" style="display:none">
   <div class="card">
     <div class="card-body" style="font-size:13px;line-height:1.8">
       <div style="font-weight:700;font-size:15px;margin-bottom:8px">
         {{ curso.tutor }}
       </div>
-      <div>📧 Correo disponible en la plataforma</div>
-      <div>🕐 Horario de tutoría: Lunes a Viernes, 10:00–14:00</div>
+      <div>📧 E-mail disponível na plataforma</div>
+      <div>🕐 Horário de atendimento: segunda a sexta, 10:00–14:00</div>
       <div style="margin-top:12px">
         <button class="btn btn-primary btn-sm"
-                onclick="mostrarToast('Función: enviar mensaje al tutor', 'info')">
-          ✉ Enviar mensaje
+                onclick="mostrarToast('Funcionalidade: enviar mensagem ao tutor', 'info')">
+          ✉ Enviar mensagem
         </button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- TAB: GUÍA DEL CURSO (simulado) -->
+<!-- TAB: GUIA DO CURSO (demo) -->
 <div id="tab-guia" class="tab-panel" style="display:none">
   <div class="card">
     <div class="card-body">
       <p style="font-size:13px;color:var(--muted);line-height:1.7">
-        La guía didáctica del curso incluye los objetivos de aprendizaje, metodología,
-        recursos necesarios y el cronograma de actividades previsto para el trimestre.
+        O guia didático do curso inclui os objetivos de aprendizagem, a metodologia,
+        os recursos necessários e o cronograma de atividades previsto para o trimestre.
       </p>
       <button class="btn btn-secondary btn-sm" style="margin-top:12px"
-              onclick="mostrarToast('Descargando guía del curso…', 'info')">
-        📄 Descargar guía PDF
+              onclick="mostrarToast('A descarregar o guia do curso…', 'info')">
+        📄 Descarregar guia PDF
       </button>
     </div>
   </div>

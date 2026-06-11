@@ -15,7 +15,7 @@ SESSÃO:
 
 from flask import (
     Blueprint, render_template, request,
-    redirect, url_for, session, flash, current_app,
+    redirect, url_for, session, flash,
 )
 from sqlalchemy import text
 from werkzeug.security import check_password_hash
