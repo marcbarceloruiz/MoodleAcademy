@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ──────────────────────────────────────────────
-// SOPORTE Y PERFIL (modales simulados)
+// SUPORTE E PERFIL
 // ──────────────────────────────────────────────
 
 function abrirModalSoporte() {
@@ -114,7 +114,7 @@ function abrirNotificacoes() {
 function abrirMensagens() {
   abrirModal('Mensagens', `
     <p class="modal-text" style="margin-bottom:8px">
-      A mensagería interna está preparada para futura integração.
+      A mensageria interna ainda não está disponível nesta versão do campus.
     </p>
     <p class="modal-text" style="font-size:12px;color:var(--muted)">
       Entretanto, podes contactar a escola em
@@ -123,7 +123,7 @@ function abrirMensagens() {
 }
 
 function _msgFutura() {
-  mostrarToast('Funcionalidade preparada para futura integração.', 'info');
+  mostrarToast('Esta funcionalidade ainda não está disponível.', 'info');
 }
 
 function abrirModalPerfil() {

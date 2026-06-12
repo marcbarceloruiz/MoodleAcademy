@@ -1162,7 +1162,7 @@ def url_action_label(url, tipo=None):
     Usada em portal.html e disciplina_detail.html.
     """
     if not url:
-        return "Sem arquivo"
+        return "Sem ficheiro"
     ul = url.lower().split("?")[0]
     if ul.endswith(".pdf"):                              return "Abrir PDF"
     if ul.endswith((".doc", ".docx")):                  return "Abrir documento"
@@ -1175,5 +1175,5 @@ def url_action_label(url, tipo=None):
         ext = ul.rsplit(".", 1)[-1] if "." in ul else ""
         if ext == "pdf":          return "Abrir PDF"
         if ext in ("doc","docx"): return "Abrir documento"
-        return "Abrir arquivo"
-    return "Abrir arquivo"
+        return "Abrir ficheiro"
+    return "Abrir ficheiro"
