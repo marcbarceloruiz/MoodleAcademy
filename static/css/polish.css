@@ -1,0 +1,693 @@
+/*
+ * polish.css — Refinamento visual APPAM (carregado após styles.css)
+ * Academia Profissional Prof. Albino de Matos - Escola Profissional Vértice
+ *
+ * Regras: usa APENAS as variáveis de base.css (paleta original mantida),
+ * não remove nem renomeia classes — só refina. Aditivo e reversível.
+ */
+
+/* ════════════════ 1. FUNDAMENTOS ════════════════ */
+
+::selection { background: var(--cyan); color: #fff; }
+
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: #c9cede; border-radius: 8px;
+  border: 2px solid var(--bg);
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+a { transition: color .15s; }
+
+/* ════════════════ 2. TOPBAR ════════════════ */
+
+.topbar {
+  height: 60px;
+  padding: 0 20px;
+  box-shadow: 0 2px 16px rgba(10, 14, 25, .35);
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.brand-logo-appam {
+  height: 38px;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.3));
+  transition: transform .2s;
+}
+.brand-link-appam:hover .brand-logo-appam { transform: scale(1.04); }
+
+.top-link {
+  position: relative;
+  padding: 8px 13px;
+  border-radius: 8px;
+  font-weight: 500;
+  letter-spacing: .1px;
+  transition: background .15s, color .15s;
+}
+.top-link:hover {
+  background: rgba(255, 255, 255, .08);
+  text-decoration: none;
+}
+.top-link.active {
+  background: rgba(25, 190, 211, .16);
+  color: var(--cyan);
+  font-weight: 700;
+}
+.top-link.active::after {
+  content: '';
+  position: absolute;
+  left: 13px; right: 13px; bottom: -1px;
+  height: 2px;
+  background: var(--cyan);
+  border-radius: 2px 2px 0 0;
+}
+
+.icon-btn {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  color: var(--topbar-text);
+  transition: background .15s, transform .12s;
+  position: relative;
+}
+.icon-btn:hover { background: rgba(255,255,255,.14); transform: translateY(-1px); }
+
+.badge-dot {
+  position: absolute;
+  top: 7px; right: 7px;
+  width: 8px; height: 8px;
+  background: var(--danger);
+  border-radius: 50%;
+  border: 2px solid var(--topbar-bg);
+}
+
+.avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 14px; color: #fff;
+  box-shadow: 0 0 0 2px rgba(25,190,211,.35);
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+.avatar:hover { transform: scale(1.06); box-shadow: 0 0 0 3px rgba(25,190,211,.5); }
+
+.user-name { letter-spacing: .2px; }
+
+.top-actions .btn-sm {
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+.top-actions form .btn-secondary {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+  color: var(--topbar-text);
+}
+.top-actions form .btn-secondary:hover { background: rgba(224,85,85,.25); border-color: var(--danger); }
+
+/* ════════════════ 3. SIDEBAR ════════════════ */
+
+.sidebar {
+  border-right: 1px solid var(--line);
+  box-shadow: 1px 0 8px rgba(26,31,46,.03);
+}
+.sidebar::-webkit-scrollbar { width: 6px; }
+
+.sidebar-section {
+  padding: 14px 12px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.sidebar-section:last-child { border-bottom: none; }
+
+.sidebar-group-title {
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  padding: 0 10px 8px;
+}
+
+.sidebar-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  margin-bottom: 2px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-2);
+  position: relative;
+  transition: background .14s, color .14s, padding-left .14s;
+}
+.sidebar-item:hover {
+  background: var(--cyan-light);
+  color: var(--cyan-dark);
+  text-decoration: none;
+  padding-left: 13px;
+}
+.sidebar-item.active {
+  background: var(--cyan-light);
+  color: var(--cyan-dark);
+  font-weight: 700;
+}
+.sidebar-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 6px; bottom: 6px;
+  width: 3px;
+  background: var(--cyan);
+  border-radius: 0 3px 3px 0;
+}
+
+.item-icon {
+  width: 22px;
+  text-align: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.item-badge {
+  margin-left: auto;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 20px;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+}
+.item-badge-restricted { background: var(--cyan-light); color: var(--cyan-dark); }
+
+.sidebar-course-progress {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--cyan-dark);
+  background: var(--cyan-light);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.sidebar-event-date {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--cyan-dark);
+  background: var(--cyan-light);
+  padding: 3px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* ════════════════ 4. HERO ════════════════ */
+
+.hero {
+  background: linear-gradient(120deg, var(--topbar-bg) 0%, #232b42 55%, #1d3a47 100%);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  right: -60px; top: -60px;
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, rgba(25,190,211,.18), transparent 70%);
+  pointer-events: none;
+}
+.hero-label {
+  font-size: 10.5px;
+  letter-spacing: 1.4px;
+  font-weight: 800;
+  color: var(--cyan);
+}
+.hero-title { letter-spacing: -.2px; }
+
+/* ════════════════ 5. CARDS ════════════════ */
+
+.card {
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  transition: box-shadow .18s, transform .18s;
+}
+.card-head {
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, #fbfcfe, transparent);
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.card-head h3 {
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: -.1px;
+}
+
+.view-header { margin-bottom: 18px; align-items: flex-start; }
+.view-header h1 { letter-spacing: -.3px; }
+.subtitle { font-size: 13px; }
+
+/* ════════════════ 6. BOTÕES ════════════════ */
+
+.btn {
+  border-radius: 8px;
+  font-weight: 700;
+  letter-spacing: .15px;
+  transition: transform .12s, box-shadow .15s, background .15s, filter .15s;
+  border: 1px solid transparent;
+}
+.btn:hover { text-decoration: none; transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+  box-shadow: 0 2px 10px rgba(25,190,211,.35);
+  color: #fff;
+}
+.btn-primary:hover { box-shadow: 0 4px 16px rgba(25,190,211,.45); filter: brightness(1.05); }
+
+.btn-secondary {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--text-2);
+}
+.btn-secondary:hover { border-color: var(--cyan); color: var(--cyan-dark); background: var(--cyan-light); }
+
+.btn-danger {
+  background: #fff0f0;
+  border-color: #f3c2c2;
+  color: var(--danger);
+}
+.btn-danger:hover { background: var(--danger); color: #fff; box-shadow: 0 3px 12px rgba(224,85,85,.35); }
+
+/* ════════════════ 7. BADGES & PILLS ════════════════ */
+
+.status-pill, .act-badge, .course-status-badge {
+  border-radius: 20px;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+.nota-badge { box-shadow: inset 0 0 0 1px rgba(0,0,0,.04); }
+
+/* ════════════════ 8. PROGRESS ════════════════ */
+
+.progress-track, .mini-prog-bar, .course-prog-bar {
+  background: var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.progress-fill,
+.mini-prog-bar > div,
+.course-prog-bar > div {
+  background: linear-gradient(90deg, var(--cyan), var(--cyan-dark));
+  border-radius: 20px;
+  transition: width .4s ease;
+}
+
+/* ════════════════ 9. TABELAS ════════════════ */
+
+.data-table { border-collapse: separate; border-spacing: 0; }
+.data-table thead th {
+  background: #f7f9fc;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--muted);
+  font-weight: 800;
+  border-bottom: 2px solid var(--line);
+  padding: 11px 14px;
+}
+.data-table tbody td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.data-table tbody tr { transition: background .12s; }
+.data-table tbody tr:hover { background: #f8fbfd; }
+.data-table tbody tr:last-child td { border-bottom: none; }
+.td-name { font-weight: 600; }
+
+/* ════════════════ 10. FORMULÁRIOS ════════════════ */
+
+.table-filter,
+input[type="text"], input[type="password"], input[type="number"],
+input[type="email"], input[type="url"], select, textarea {
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--text-1);
+  background: var(--surface);
+  transition: border-color .15s, box-shadow .15s;
+}
+.table-filter:focus,
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(25,190,211,.14);
+}
+input[type="file"] {
+  padding: 7px;
+  border: 1.5px dashed var(--line);
+  border-radius: 8px;
+  background: #fafbfd;
+  font-size: 12px;
+  transition: border-color .15s, background .15s;
+}
+input[type="file"]:hover { border-color: var(--cyan); background: var(--cyan-light); }
+label { font-weight: 600; }
+
+/* ════════════════ 11. MODAL ════════════════ */
+
+.modal-overlay {
+  background: rgba(20, 24, 38, .55);
+  backdrop-filter: blur(3px);
+}
+.modal {
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(10,14,25,.3);
+  animation: modal-in .22s ease;
+  border: 1px solid var(--line);
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(14px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-head {
+  border-bottom: 1px solid var(--line);
+  font-weight: 800;
+}
+.modal-close {
+  border-radius: 8px;
+  transition: background .12s;
+}
+.modal-close:hover { background: var(--cyan-light); color: var(--cyan-dark); }
+
+/* ════════════════ 12. TOASTS ════════════════ */
+
+.toast {
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: 0 6px 22px rgba(10,14,25,.18);
+  border-left: 4px solid rgba(255,255,255,.4);
+  animation: toast-in .25s ease;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ════════════════ 13. EMPTY STATES ════════════════ */
+
+.empty-state {
+  text-align: center;
+  padding: 36px 20px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+/* ════════════════ 14. DOC ITEMS (portal/recursos) ════════════ */
+
+.doc-item {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: var(--surface);
+  transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.doc-item:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 3px 14px rgba(25,190,211,.12);
+  transform: translateX(2px);
+}
+.doc-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: var(--cyan-light);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.doc-titulo { font-weight: 700; font-size: 13.5px; }
+.doc-desc { font-size: 12px; line-height: 1.5; }
+.doc-type {
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 11.5px;
+  padding: 6px 12px;
+  background: var(--cyan-light);
+  color: var(--cyan-dark);
+  white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+a.doc-type:hover { background: var(--cyan); color: #fff; text-decoration: none; }
+.doc-type.doc-empty { background: var(--bg); color: var(--muted); font-style: italic; }
+
+/* ════════════════ 15. PORTAL CARDS ════════════════ */
+
+.portal-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px 18px;
+  transition: transform .16s, box-shadow .16s, border-color .16s;
+}
+.portal-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--cyan);
+  text-decoration: none;
+}
+.portal-card-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  font-size: 22px;
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.04);
+}
+.portal-card h3 { font-size: 14.5px; font-weight: 800; letter-spacing: -.1px; }
+.portal-card p { font-size: 12px; line-height: 1.55; }
+
+.portal-detail-intro { font-size: 13.5px; line-height: 1.75; color: var(--text-2); }
+
+.area-breadcrumb {
+  font-size: 12px;
+  margin-bottom: 14px;
+  color: var(--muted);
+}
+.area-breadcrumb a { font-weight: 600; }
+
+/* ════════════════ 16. COURSE / CICLO CARDS ════════════════ */
+
+.course-card, .ciclo-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform .16s, box-shadow .16s, border-color .16s;
+}
+.course-card:hover, .ciclo-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--cyan);
+}
+.course-thumb { position: relative; }
+.course-thumb::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,.25));
+}
+.course-thumb-title { position: relative; z-index: 1; }
+.course-thumb-cat { position: relative; z-index: 1; }
+
+.ciclo-card-head {
+  background: linear-gradient(135deg, var(--cyan-light), #f4fbfd);
+  border-bottom: 1px solid var(--line);
+}
+
+.disciplina-row {
+  border-radius: 8px;
+  transition: background .13s, padding-left .13s;
+}
+.disciplina-row:hover { background: var(--cyan-light); padding-left: 6px; }
+
+/* ════════════════ 17. QUICK GRID (acessos rápidos) ════════════ */
+
+.quick-btn {
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--surface);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-2);
+  transition: transform .14s, box-shadow .14s, border-color .14s;
+}
+.quick-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+  border-color: var(--cyan);
+  color: var(--cyan-dark);
+  text-decoration: none;
+}
+.quick-icon {
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.05);
+}
+
+/* ════════════════ 18. TASK ITEMS / DATE TILES ════════════════ */
+
+.task-item {
+  padding: 11px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: background .13s, border-color .13s;
+}
+.task-item:hover { background: #f8fbfd; border-color: var(--line); }
+
+.task-date {
+  min-width: 46px;
+  padding: 7px 8px;
+  border-radius: 10px;
+  background: linear-gradient(160deg, var(--cyan-light), #f0fafc);
+  color: var(--cyan-dark);
+  font-weight: 800;
+  font-size: 17px;
+  text-align: center;
+  line-height: 1.05;
+  border: 1px solid rgba(25,190,211,.25);
+  flex-shrink: 0;
+}
+.task-date .month {
+  display: block;
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 800;
+  color: var(--cyan-dark);
+  opacity: .8;
+}
+.task-title { font-weight: 700; font-size: 13.5px; }
+.task-sub { font-size: 12px; }
+
+/* ════════════════ 19. ADMIN KPI / TABS ════════════════ */
+
+.kpi-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  transition: transform .15s, box-shadow .15s, border-color .15s;
+}
+.kpi-card:hover { transform: translateY(-2px); border-color: var(--cyan); }
+.kpi-num {
+  background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tabs { gap: 4px; border-bottom: 2px solid var(--line); }
+.tab {
+  border: none;
+  background: transparent;
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--muted);
+  border-radius: 8px 8px 0 0;
+  position: relative;
+  transition: color .14s, background .14s;
+}
+.tab:hover { color: var(--cyan-dark); background: var(--cyan-light); }
+.tab.active { color: var(--cyan-dark); }
+.tab.active::after {
+  content: '';
+  position: absolute;
+  left: 8px; right: 8px; bottom: -2px;
+  height: 3px;
+  background: var(--cyan);
+  border-radius: 3px 3px 0 0;
+}
+
+/* ════════════════ 20. WELCOME BANNER ════════════════ */
+
+.welcome-banner {
+  background: linear-gradient(120deg, var(--cyan-dark) 0%, var(--cyan) 70%, #4fd4e4 100%);
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(25,190,211,.3);
+}
+.welcome-banner::before {
+  content: '';
+  position: absolute;
+  right: -40px; bottom: -70px;
+  width: 200px; height: 200px;
+  background: rgba(255,255,255,.1);
+  border-radius: 50%;
+}
+.welcome-banner::after {
+  content: '🎓';
+  position: absolute;
+  right: 28px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 56px;
+  opacity: .25;
+}
+.welcome-stat {
+  background: rgba(255,255,255,.16);
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 10px;
+  backdrop-filter: blur(2px);
+}
+
+/* ════════════════ 21. NOTIFICAÇÕES & AVISOS ════════════════ */
+
+.notif-item { transition: border-color .14s, background .14s; }
+.notif-item:hover { border-color: var(--cyan); background: #f8fdfe; }
+
+.aviso-item {
+  border-radius: 10px;
+  padding: 10px 12px;
+  transition: background .13s;
+}
+.aviso-item:hover { background: #f8fbfd; }
+.aviso-dot { box-shadow: 0 0 0 3px var(--cyan-light); }
+
+/* ════════════════ 22. LOGIN / 403 ════════════════ */
+
+.floating-help {
+  border-radius: 50%;
+  box-shadow: 0 6px 20px rgba(25,190,211,.4);
+  transition: transform .15s, box-shadow .15s;
+}
+.floating-help:hover { transform: scale(1.08); box-shadow: 0 8px 26px rgba(25,190,211,.55); }
+
+/* ════════════════ 23. RESPONSIVE FINO ════════════════ */
+
+@media (max-width: 860px) {
+  .topbar { padding: 0 14px; }
+  .welcome-banner::after { display: none; }
+  .portal-card-icon { width: 42px; height: 42px; font-size: 19px; }
+}
+
+@media (max-width: 520px) {
+  .task-date { min-width: 42px; font-size: 15px; }
+  .doc-item { flex-wrap: wrap; }
+  .doc-type { width: 100%; text-align: center; margin-top: 4px; }
+  .view-header { flex-direction: column; gap: 10px; }
+  .view-header .btn { align-self: flex-start; }
+}
+
+@media print {
+  .topbar, .sidebar, .floating-help, .top-actions { display: none !important; }
+  .main-content { margin: 0 !important; }
+  .card { box-shadow: none; border: 1px solid #ccc; }
+}
