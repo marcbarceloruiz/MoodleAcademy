@@ -691,3 +691,162 @@ a.doc-type:hover { background: var(--cyan); color: #fff; text-decoration: none; 
   .main-content { margin: 0 !important; }
   .card { box-shadow: none; border: 1px solid #ccc; }
 }
+
+/* ════════════════ 24. FIX CONTRASTE FINAL ════════════════ */
+
+/* Cards de ciclos/cursos: mejorar legibilidad */
+.course-card,
+.ciclo-card {
+  background: #ffffff !important;
+}
+
+.course-card *,
+.ciclo-card * {
+  text-shadow: none !important;
+}
+
+.course-card h3,
+.course-card .course-title,
+.course-card .course-thumb-title,
+.ciclo-card h3,
+.ciclo-card .course-title,
+.ciclo-card .course-thumb-title {
+  color: #101828 !important;
+  opacity: 1 !important;
+  font-weight: 800 !important;
+}
+
+.course-card p,
+.course-card .course-description,
+.course-card .course-body,
+.course-card .course-meta,
+.ciclo-card p,
+.ciclo-card .course-description,
+.ciclo-card .course-body,
+.ciclo-card .course-meta {
+  color: #475467 !important;
+  opacity: 1 !important;
+}
+
+/* Cabecera superior de la card: fondo claro pero texto oscuro */
+.course-thumb,
+.ciclo-card-head {
+  background: linear-gradient(
+    135deg,
+    rgba(25, 190, 211, 0.14),
+    rgba(255, 255, 255, 0.92)
+  ) !important;
+}
+
+/* Quitar oscurecimiento que dejaba el texto casi invisible */
+.course-thumb::after {
+  background: transparent !important;
+  opacity: 0 !important;
+}
+
+/* Si hay iconos decorativos dentro de la card, que no tapen el texto */
+.course-thumb::before,
+.course-card::before,
+.course-card::after,
+.ciclo-card::before,
+.ciclo-card::after {
+  opacity: 0.08 !important;
+  pointer-events: none !important;
+}
+
+/* Botón Ver estrutura más visible */
+.course-card .btn,
+.ciclo-card .btn,
+.course-card .btn-primary,
+.ciclo-card .btn-primary {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  border-color: #1d4ed8 !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28) !important;
+}
+
+.course-card .btn:hover,
+.ciclo-card .btn:hover,
+.course-card .btn-primary:hover,
+.ciclo-card .btn-primary:hover {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #1d4ed8, #1e40af) !important;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.36) !important;
+}
+
+/* Botón Sair / Logout visible en topbar */
+.top-actions form .btn-secondary,
+.topbar .btn-secondary,
+.topbar .logout,
+.topbar .logout-btn,
+.topbar .btn-logout,
+.user-menu .logout,
+.user-menu .btn,
+button.logout,
+a.logout {
+  color: #101828 !important;
+  background: #f2f4f7 !important;
+  border: 1px solid #d0d5dd !important;
+  opacity: 1 !important;
+  font-weight: 700 !important;
+}
+
+.top-actions form .btn-secondary:hover,
+.topbar .btn-secondary:hover,
+.topbar .logout:hover,
+.topbar .logout-btn:hover,
+.topbar .btn-logout:hover,
+.user-menu .logout:hover,
+.user-menu .btn:hover,
+button.logout:hover,
+a.logout:hover {
+  color: #ffffff !important;
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+}
+
+/* Texto de usuario en topbar más legible */
+.user-name,
+.topbar .user-name,
+.topbar .user-role,
+.top-actions span {
+  color: #101828 !important;
+  opacity: 1 !important;
+}
+
+/* En caso de topbar clara, mantener links visibles */
+.topbar .top-link {
+  color: #1f2937;
+}
+
+.topbar .top-link.active {
+  color: #1d4ed8 !important;
+  background: rgba(37, 99, 235, 0.10) !important;
+}
+
+/* Badges/categorías dentro de cards */
+.course-card .course-category,
+.course-card .course-thumb-cat,
+.ciclo-card .course-category,
+.ciclo-card .course-thumb-cat {
+  color: #007c8a !important;
+  background: rgba(25, 190, 211, 0.16) !important;
+  font-weight: 800 !important;
+}
+
+/* Mejora general de contraste en cards claras */
+.card,
+.portal-card,
+.doc-item,
+.quick-btn,
+.task-item {
+  color: #101828;
+}
+
+.card p,
+.portal-card p,
+.doc-item p,
+.quick-btn p,
+.task-item p {
+  color: #475467;
+}
