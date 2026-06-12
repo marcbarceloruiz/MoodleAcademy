@@ -33,7 +33,7 @@
 
     {% if area_activa.restrito %}
       <span class="status-pill sp-pendente">
-        Área preparada para acesso restrito
+        🔒 Acesso restrito
       </span>
     {% endif %}
   </div>
@@ -49,7 +49,7 @@
   <div class="card mb-20">
     <div class="card-head">
       <h3>Documentos e recursos</h3>
-      <span class="text-sm text-muted">Conteúdo inicial</span>
+      <span class="text-sm text-muted">{{ area_activa.documentos | length }} documento(s)</span>
     </div>
 
     <div class="card-body docs-list">
@@ -82,36 +82,58 @@
                  href="{{ d.url }}"
                  target="_blank"
                  rel="noopener">
-                Abrir {{ d.tipo }}
+                {{ d._action_label or ('Abrir ' ~ d.tipo) }}
               </a>
             {% else %}
-              <span class="doc-type">{{ d.tipo }}</span>
+              <span class="doc-type doc-empty">Sem ficheiro</span>
             {% endif %}
           </div>
         {% endfor %}
       {% else %}
-        <p class="text-sm text-muted">
-          Ainda não existem documentos associados a esta área.
+        <p class="text-sm text-muted" style="line-height:1.7">
+          Ainda não existem documentos publicados nesta secção.<br>
+          Os recursos serão disponibilizados pela equipa pedagógica —
+          consulta esta área regularmente para acompanhar novas publicações.
         </p>
       {% endif %}
     </div>
   </div>
 
+  {% set sobre_textos = {
+    'regulamento-interno':  'Nesta área são disponibilizados os documentos normativos e as orientações internas da escola.',
+    'projeto-educativo':    'Consulta os princípios orientadores, os objetivos pedagógicos e as linhas estratégicas da instituição.',
+    'plano-atividades':     'Acompanha as atividades letivas, eventos, sessões e iniciativas previstas ao longo do ano.',
+    'eqavet':               'Área dedicada à qualidade, avaliação, melhoria contínua e acompanhamento dos indicadores EQAVET.',
+    'erasmus':              'Informação sobre mobilidades, candidaturas, relatórios e divulgação de resultados Erasmus+.',
+    'manual-aluno':         'Guias, regras e informação prática de apoio ao percurso escolar e profissional dos alunos.',
+    'manual-formador':      'Documentação interna de apoio à atividade letiva e pedagógica dos formadores.',
+    'biblioteca-digital':   'Acesso a recursos digitais, documentos de apoio, manuais e materiais complementares.',
+    'centro-qualifica':     'Informação sobre processos de qualificação, reconhecimento de competências e educação de adultos.',
+    'area-docente':         'Esta área reúne recursos pedagógicos, planificações, instrumentos de avaliação, atas, grelhas e documentos de acompanhamento para docentes e administradores.',
+    'centros-tecnologicos': 'Conhece os Centros Tecnológicos Especializados, os seus equipamentos e a oferta formativa associada.',
+    'cte-informatica':      'Equipamentos, áreas de especialização e percursos formativos em Programação, IA, Robótica e Realidade Virtual.',
+    'cte-industrial':       'Equipamentos, áreas de especialização e percursos formativos em CNC, CAD/CAM, Automatização e Indústria 5.0.',
+    'efa':                  'Informação sobre os percursos de Educação e Formação de Adultos, candidaturas e certificação.',
+    'efa-escolar':          'Componente escolar dos percursos EFA: disciplinas, metodologia e certificação académica.',
+    'efa-profissional':     'Componente profissional dos percursos EFA: formação tecnológica, FCT e empregabilidade.',
+    'formacao-modular-certificada': 'Consulta o catálogo de módulos certificados, os destinatários e as modalidades de funcionamento.'
+  } %}
   <div class="card">
     <div class="card-head">
-      <h3>Estado da implementação</h3>
+      <h3>Sobre esta área</h3>
     </div>
 
     <div class="card-body">
-      <p style="font-size:13px;color:var(--muted);line-height:1.7">
-        {% if area_activa.restrito %}
-          Esta secção está protegida por permissões de acesso para docentes e administradores.
-        {% else %}
-          Esta secção já está ligada à base de dados. Quando forem adicionados login,
-          roles e upload de ficheiros, estes itens poderão abrir PDFs, formulários,
-          recursos internos e documentos reais da academia.
-        {% endif %}
+      <p style="font-size:13px;color:var(--text-2);line-height:1.7">
+        {{ sobre_textos.get(area_activa.slug,
+           'Espaço institucional da Academia Profissional Prof. Albino de Matos - Escola Profissional Vértice.') }}
       </p>
+      {% if area_activa.restrito %}
+      <p style="font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px;
+                padding-top:10px;border-top:1px solid var(--line)">
+        🔒 Esta secção está protegida por permissões de acesso para docentes e administradores.
+      </p>
+      {% endif %}
     </div>
   </div>
 
