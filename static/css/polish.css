@@ -935,3 +935,75 @@ a.logout:hover {
   white-space: nowrap !important;
   display: block !important;
 }
+
+
+/* ════════════════ 25. SCROLL INDEPENDENTE ESTÁVEL ════════════════
+   O conteúdo principal usa o scroll normal da página.
+   A sidebar fica fixa e tem scroll próprio.
+*/
+
+@media (min-width: 861px) {
+  html {
+    height: auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  body {
+    min-height: 100vh !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  .topbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+  }
+
+  .body-layout {
+    display: flex !important;
+    align-items: flex-start !important;
+    min-height: calc(100vh - 60px) !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .sidebar {
+    position: sticky !important;
+    top: 60px !important;
+    height: calc(100vh - 60px) !important;
+    max-height: calc(100vh - 60px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    flex-shrink: 0 !important;
+    overscroll-behavior: contain;
+  }
+
+  .main-content {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    min-height: calc(100vh - 60px) !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
+
+@media (max-width: 860px) {
+  html,
+  body {
+    height: auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  .body-layout,
+  .sidebar,
+  .main-content {
+    position: static !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+}
