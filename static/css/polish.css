@@ -997,3 +997,23 @@ a.logout:hover {
     overflow: visible !important;
   }
 }
+
+/* =========================================================
+   FIX MOBILE: scroll propio del menú lateral
+   Solo afecta a pantallas móviles. No modifica colores,
+   anchos, márgenes ni estética.
+   ========================================================= */
+@media (max-width: 860px) {
+  .sidebar {
+    position: fixed !important;
+    top: 62px !important;
+    bottom: 0 !important;
+    height: auto !important;
+    max-height: calc(100dvh - 62px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+}
