@@ -131,10 +131,14 @@
                    rel="noopener">
                   {{ recurso._action_label or recurso._badge }}
                 </a>
+              {% elif recurso.tipo == 'foro' %}
+                <span class="act-badge ab-abierto">Participar</span>
+              {% elif recurso.tipo == 'cuestionario' %}
+                <span class="act-badge ab-abierto">Iniciar</span>
+              {% elif recurso.tipo == 'tarea' %}
+                <span class="act-badge ab-abierto">Entregar</span>
               {% else %}
-                <span class="act-badge ab-pendiente">
-                  Sem ficheiro
-                </span>
+                <span class="act-badge ab-pendiente">Em breve</span>
               {% endif %}
             </div>
           {% endfor %}
