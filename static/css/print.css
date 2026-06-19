@@ -33,7 +33,7 @@
 
   @page {
     size: A4;
-    margin: 28mm 14mm 24mm 14mm;
+    margin: 30mm 14mm 28mm 14mm;
   }
 
 
@@ -77,52 +77,48 @@
     display: none !important;
   }
 
-  /* Header realista: imagen institucional del modelo oficial */
+  /* Header: imagen institucional oficial */
   .print-doc-header {
     display: block !important;
     position: fixed !important;
-    top: -23mm !important;
+    top: -28mm !important;
     left: 0 !important;
     right: 0 !important;
-    height: 22mm !important;
+    height: 26mm !important;
     z-index: 9999 !important;
     background: #fff !important;
-    border-bottom: 1px solid #777 !important;
+    border-bottom: 1px solid #c0c4cc !important;
     overflow: hidden !important;
   }
 
   .print-header-img {
     display: block !important;
     width: 100% !important;
-    height: 19mm !important;
-    object-fit: cover !important;
-    object-position: top center !important;
-    opacity: .92 !important;
-    filter: grayscale(100%) contrast(1.12) !important;
+    height: 26mm !important;
+    object-fit: contain !important;
+    object-position: left center !important;
   }
 
-  /* Footer realista: tira de patrocinadores del modelo oficial */
+  /* Footer: tira de patrocinadores del modelo oficial */
   .print-doc-footer {
     display: block !important;
     position: fixed !important;
-    bottom: -19mm !important;
+    bottom: -23mm !important;
     left: 0 !important;
     right: 0 !important;
-    height: 18mm !important;
+    height: 22mm !important;
     z-index: 9999 !important;
     background: #fff !important;
-    border-top: 1px solid #777 !important;
+    border-top: 1px solid #d0d4dc !important;
     overflow: hidden !important;
   }
 
   .print-footer-img {
     display: block !important;
     width: 100% !important;
-    height: 16mm !important;
-    object-fit: cover !important;
-    object-position: bottom center !important;
-    opacity: .95 !important;
-    filter: grayscale(100%) contrast(1.18) !important;
+    height: 22mm !important;
+    object-fit: contain !important;
+    object-position: center center !important;
   }
 
   /* Contenido limpio para PDF/impresión */
