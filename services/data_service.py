@@ -282,7 +282,7 @@ def get_user_courses(usuario_id=1):
                     c.codigo,
                     c.descricao AS descripcion,
                     c.tipo,
-                    m.progreso,
+                    m.progresso,
                     m.estado,
                     'Prof. Albino de Matos' AS tutor
                 FROM matriculas m
@@ -376,7 +376,7 @@ def _event_mysql_to_dict(row):
     return {
         "id": row["id"],
         "titulo": row["titulo"],
-        "descripcion": row.get("descripcion") or "",
+        "descripcion": row.get("descricao") or "",
         "fecha": fecha,
         "hora": str(row["hora"])[:5] if row.get("hora") else "",
         "tipo": row.get("tipo") or "aviso",
@@ -393,7 +393,7 @@ def get_events(limit=None):
             SELECT
                 id,
                 titulo,
-                descripcion,
+                descricao,
                 data_evento,
                 hora,
                 tipo
