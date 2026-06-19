@@ -1294,11 +1294,35 @@ a.logout:hover {
   }
 }
 
+/* ════════════════ FIX MENÚ MÓVIL CERRADO POR DEFECTO ════════════════ */
+
 @media (max-width: 860px) {
   .sidebar {
-    position: static !important;
-    height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: -290px !important;
+    width: 280px !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    z-index: 2000 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    background: #ffffff !important;
+    transition: left 0.25s ease !important;
+    box-shadow: 12px 0 30px rgba(15, 23, 42, 0.18) !important;
+  }
+
+  body.sidebar-open .sidebar,
+  .body-layout.sidebar-open .sidebar,
+  .sidebar.is-open,
+  .sidebar.open,
+  .sidebar.active {
+    left: 0 !important;
+  }
+
+  .main-content,
+  .body-layout {
+    width: 100% !important;
+    max-width: 100% !important;
   }
 }
