@@ -1,4 +1,4 @@
-﻿"""
+"""
 Blueprint: Administración.
 Ruta: /admin
 
@@ -243,7 +243,7 @@ def _delete_uploaded_file(url):
             os.remove(file_path)
 
     except Exception as e:
-        current_app.logger.error("Error eliminando archivo subido:: %s", e, exc_info=True)
+        current_app.logger.error("Error eliminando archivo subido: %s", e, exc_info=True)
 
 
 def _delete_uploaded_files(urls):
@@ -391,7 +391,7 @@ def _load_secciones(limit=1000):
         """, {"limit": limit})
 
     except Exception as e:
-        current_app.logger.error("Error cargando secciones de disciplinas:: %s", e, exc_info=True)
+        current_app.logger.error("Error cargando secciones de disciplinas: %s", e, exc_info=True)
         return []
 
 
@@ -503,7 +503,7 @@ def update_area(area_id):
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error actualizando área institucional:: %s", e, exc_info=True)
+        current_app.logger.error("Error actualizando área institucional: %s", e, exc_info=True)
         flash("Erro ao atualizar a secção do portal.", "danger")
 
     return redirect(url_for("admin.admin", tab="portal"))
@@ -553,7 +553,7 @@ def create_documento():
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error creando documento institucional:: %s", e, exc_info=True)
+        current_app.logger.error("Error creando documento institucional: %s", e, exc_info=True)
         flash("Erro ao criar o documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
@@ -605,7 +605,7 @@ def update_documento(documento_id):
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error actualizando documento institucional:: %s", e, exc_info=True)
+        current_app.logger.error("Error actualizando documento institucional: %s", e, exc_info=True)
         flash("Erro ao atualizar o documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
@@ -627,7 +627,7 @@ def toggle_documento(documento_id):
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error cambiando visibilidad del documento institucional:: %s", e, exc_info=True)
+        current_app.logger.error("Error cambiando visibilidad del documento institucional: %s", e, exc_info=True)
         flash("Erro ao alterar a visibilidade do documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
@@ -659,7 +659,7 @@ def delete_documento(documento_id):
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error eliminando documento institucional:: %s", e, exc_info=True)
+        current_app.logger.error("Error eliminando documento institucional: %s", e, exc_info=True)
         flash("Erro ao eliminar o documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
@@ -729,7 +729,7 @@ def create_ciclo():
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error creando ciclo formativo:: %s", e, exc_info=True)
+        current_app.logger.error("Error creando ciclo formativo: %s", e, exc_info=True)
         flash("Erro ao criar o ciclo formativo.", "danger")
 
     return redirect(url_for("admin.admin", tab="ciclos"))
@@ -769,7 +769,7 @@ def update_ciclo(ciclo_id):
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error actualizando ciclo formativo:: %s", e, exc_info=True)
+        current_app.logger.error("Error actualizando ciclo formativo: %s", e, exc_info=True)
         flash("Erro ao atualizar o ciclo formativo.", "danger")
 
     return redirect(url_for("admin.admin", tab="ciclos"))
@@ -849,7 +849,7 @@ def delete_ciclo(ciclo_id):
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error eliminando ciclo formativo:: %s", e, exc_info=True)
+        current_app.logger.error("Error eliminando ciclo formativo: %s", e, exc_info=True)
         flash("Erro ao eliminar o ciclo formativo.", "danger")
 
     return redirect(url_for("admin.admin", tab="ciclos"))
@@ -951,7 +951,7 @@ def create_disciplina():
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error creando disciplina:: %s", e, exc_info=True)
+        current_app.logger.error("Error creando disciplina: %s", e, exc_info=True)
         flash("Erro ao criar a disciplina.", "danger")
 
     return redirect(url_for("admin.admin", tab="disciplinas"))
@@ -988,7 +988,7 @@ def update_disciplina(disciplina_id):
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error actualizando disciplina:: %s", e, exc_info=True)
+        current_app.logger.error("Error actualizando disciplina: %s", e, exc_info=True)
         flash("Erro ao atualizar a disciplina.", "danger")
 
     return redirect(url_for("admin.admin", tab="disciplinas"))
@@ -1043,7 +1043,7 @@ def delete_disciplina(disciplina_id):
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error eliminando disciplina:: %s", e, exc_info=True)
+        current_app.logger.error("Error eliminando disciplina: %s", e, exc_info=True)
         flash("Erro ao eliminar a disciplina.", "danger")
 
     return redirect(url_for("admin.admin", tab="disciplinas"))
@@ -1079,7 +1079,7 @@ def update_seccion(seccion_id):
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error actualizando sección de disciplina:: %s", e, exc_info=True)
+        current_app.logger.error("Error actualizando sección de disciplina: %s", e, exc_info=True)
         flash("Erro ao atualizar a secção.", "danger")
 
     return redirect(url_for("admin.admin", tab="secciones"))
@@ -1101,7 +1101,7 @@ def toggle_seccion(seccion_id):
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error cambiando visibilidad de sección:: %s", e, exc_info=True)
+        current_app.logger.error("Error cambiando visibilidad de sección: %s", e, exc_info=True)
         flash("Erro ao alterar a visibilidade da secção.", "danger")
 
     return redirect(url_for("admin.admin", tab="secciones"))
@@ -1144,7 +1144,7 @@ def delete_seccion(seccion_id):
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error eliminando sección de disciplina:: %s", e, exc_info=True)
+        current_app.logger.error("Error eliminando sección de disciplina: %s", e, exc_info=True)
         flash("Erro ao eliminar a secção.", "danger")
 
     return redirect(url_for("admin.admin", tab="secciones"))
@@ -1194,7 +1194,7 @@ def create_recurso():
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error creando recurso de disciplina:: %s", e, exc_info=True)
+        current_app.logger.error("Error creando recurso de disciplina: %s", e, exc_info=True)
         flash("Erro ao criar o recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
@@ -1246,7 +1246,7 @@ def update_recurso(recurso_id):
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error actualizando recurso de disciplina:: %s", e, exc_info=True)
+        current_app.logger.error("Error actualizando recurso de disciplina: %s", e, exc_info=True)
         flash("Erro ao atualizar o recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
@@ -1268,7 +1268,7 @@ def toggle_recurso(recurso_id):
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error cambiando visibilidad del recurso:: %s", e, exc_info=True)
+        current_app.logger.error("Error cambiando visibilidad del recurso: %s", e, exc_info=True)
         flash("Erro ao alterar a visibilidade do recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
@@ -1300,7 +1300,7 @@ def delete_recurso(recurso_id):
 
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error("Error eliminando recurso de disciplina:: %s", e, exc_info=True)
+        current_app.logger.error("Error eliminando recurso de disciplina: %s", e, exc_info=True)
         flash("Erro ao eliminar o recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
