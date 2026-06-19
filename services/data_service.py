@@ -1148,12 +1148,12 @@ def recurso_badge(tipo):
     return {
         "documento": "DOCUMENTO",
         "video": "VÍDEO",
-        "lectura": "LECTURA",
-        "tarea": "TAREA",
-        "foro": "FORO",
-        "cuestionario": "CUESTIONARIO",
-        "evidencia": "EVIDENCIA",
-        "enlace": "ENLACE",
+        "lectura": "LEITURA",
+        "tarea": "TAREFA",
+        "foro": "FÓRUM",
+        "cuestionario": "QUESTIONÁRIO",
+        "evidencia": "EVIDÊNCIA",
+        "enlace": "LINK",
     }.get(tipo, tipo.upper() if tipo else "RECURSO")
 
 
