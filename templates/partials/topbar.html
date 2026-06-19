@@ -2,7 +2,7 @@
 
   <div class="brand brand-appam">
     <button class="icon-btn" id="menu-toggle"
-            title="Menú" aria-label="Abrir menú" style="display:none">
+            title="Menú" aria-label="Abrir menú">
       <span>☰</span>
     </button>
     <a href="{{ url_for('dashboard.dashboard') }}"
@@ -73,11 +73,11 @@
 
     {% if session_autenticado %}
       {# Utilizador autenticado #}
-      <div style="display:flex;flex-direction:column;align-items:flex-end;line-height:1.2">
-        <span class="user-name" style="font-size:13px;font-weight:600">
+      <div class="topbar-user-info">
+        <span class="user-name">
           {{ session_usuario_nome or ('Administrador' if session_is_admin else 'Docente' if session_is_docente else 'Aluno' if session_is_aluno else 'Utilizador') }}
         </span>
-        <span style="font-size:10px;color:var(--muted)">
+        <span class="topbar-user-role">
           {% if session_is_admin %}Administrador
           {% elif session_is_docente %}Docente
           {% elif session_is_aluno %}Aluno
@@ -96,7 +96,7 @@
         {% endif %}
       </div>
 
-      <form method="post" action="{{ url_for('auth.logout') }}" style="margin:0">
+      <form method="post" action="{{ url_for('auth.logout') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn-secondary btn-sm" title="Terminar sessão">
           Sair
@@ -105,7 +105,7 @@
 
     {% else %}
       {# Não autenticado — sempre Visitante #}
-      <span class="user-name" style="font-size:13px;color:var(--muted)">
+      <span class="user-name">
         Visitante
       </span>
 
