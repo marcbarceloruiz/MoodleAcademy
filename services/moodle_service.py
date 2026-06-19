@@ -15,6 +15,7 @@ Se a tabela não existir ou a query falhar → devolve fallback demo
 e regista um aviso na consola.
 """
 
+from flask import current_app
 from sqlalchemy import text
 from extensions import db
 
@@ -32,7 +33,7 @@ def _safe_fetch_all(sql, params=None, context=""):
         rows = db.session.execute(text(sql), params or {}).mappings().all()
         return [dict(r) for r in rows]
     except Exception as e:
-        print(f"[moodle_service] Aviso ({context}): {e}")
+        current_app.logger.warning("[moodle_service] %s: %s", context, e)
         return None
 
 
@@ -44,7 +45,7 @@ def _fmt_date_pt(value):
         s = str(value)[:10]
         y, m, d = s.split("-")
         return f"{int(d)} {meses[int(m) - 1]} {y}"
-    except Exception:
+    except (ValueError, TypeError, AttributeError, IndexError):
         return str(value) if value else ""
 
 
@@ -56,7 +57,7 @@ def _dia_mes(value):
         s = str(value)[:10]
         _, m, d = s.split("-")
         return str(int(d)), meses[int(m) - 1]
-    except Exception:
+    except (ValueError, TypeError, AttributeError, IndexError):
         return "--", "---"
 
 
@@ -140,7 +141,7 @@ def get_classificacoes_usuario(usuario_id, limit=None):
                           if nota is not None else "—")
         try:
             n = float(nota) if nota is not None else None
-        except Exception:
+        except (TypeError, ValueError):
             n = None
         r["_nota_css"] = ("nota-alta" if n is not None and n >= 14
                           else "nota-media" if n is not None and n >= 10

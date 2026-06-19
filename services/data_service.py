@@ -62,7 +62,8 @@ def get_current_user():
                 "rol": "admin",
                 "matriculas": [],
             }
-    except Exception:
+    except RuntimeError:
+        # session accessed outside request context (e.g. CLI / tests)
         pass
 
     # Visitante não autenticado
@@ -492,7 +493,7 @@ def format_date(iso_value):
 
         return f"{d.day} de {meses[d.month - 1]} de {d.year}"
 
-    except Exception:
+    except (ValueError, TypeError, AttributeError):
         return str(iso_value)
 
 
@@ -514,7 +515,7 @@ def format_date_short(iso_value):
 
         return f"{d.day:02d} {meses[d.month - 1].upper()}"
 
-    except Exception:
+    except (ValueError, TypeError, AttributeError):
         return str(iso_value)
 
 

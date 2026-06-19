@@ -43,7 +43,8 @@ def create_app():
             layout_eventos = get_events(limit=3)
             for e in layout_eventos:
                 e["_fecha_corta"] = format_date_short(e["fecha"])
-        except Exception:
+        except Exception as e:
+            app.logger.warning("inject_layout_data: cursos/eventos: %s", e)
             layout_mis_cursos = []
             layout_eventos    = []
         try:
@@ -51,7 +52,8 @@ def create_app():
             from flask import session as _s
             layout_notificacoes = get_notificacoes_usuario(
                 _s.get("usuario_id"), limit=6)
-        except Exception:
+        except Exception as e:
+            app.logger.warning("inject_layout_data: notificacoes: %s", e)
             layout_notificacoes = []
 
         return {
