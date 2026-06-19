@@ -55,8 +55,8 @@ a { transition: color .15s; }
   text-decoration: none;
 }
 .top-link.active {
-  background: rgba(25, 190, 211, .16);
-  color: var(--cyan);
+  background: var(--appam-blue-soft);
+  color: var(--appam-blue);
   font-weight: 700;
 }
 .top-link.active::after {
@@ -64,7 +64,7 @@ a { transition: color .15s; }
   position: absolute;
   left: 13px; right: 13px; bottom: -1px;
   height: 2px;
-  background: var(--cyan);
+  background: var(--appam-blue);
   border-radius: 2px 2px 0 0;
 }
 
@@ -117,17 +117,14 @@ a { transition: color .15s; }
 
 /* ════════════════ 3. SIDEBAR ════════════════ */
 
-.sidebar {
-  border-right: 1px solid var(--line);
-  box-shadow: 1px 0 8px rgba(26,31,46,.03);
-}
+/* Borde/sombra: el borde único lo aporta layout.css (.sidebar border-right).
+   Aquí no duplicamos border-right ni box-shadow para evitar el doble filo. */
 .sidebar::-webkit-scrollbar { width: 6px; }
 
+/* Sin separadores entre secciones: el espaciado vertical ya las distingue. */
 .sidebar-section {
   padding: 14px 12px 10px;
-  border-bottom: 1px solid var(--line);
 }
-.sidebar-section:last-child { border-bottom: none; }
 
 .sidebar-group-title {
   font-size: 10.5px;
@@ -150,14 +147,14 @@ a { transition: color .15s; }
   transition: background .14s, color .14s, padding-left .14s;
 }
 .sidebar-item:hover {
-  background: var(--cyan-light);
-  color: var(--cyan-dark);
+  background: var(--appam-blue-soft);
+  color: var(--appam-blue);
   text-decoration: none;
   padding-left: 13px;
 }
 .sidebar-item.active {
-  background: var(--cyan-light);
-  color: var(--cyan-dark);
+  background: var(--appam-blue-soft);
+  color: var(--appam-blue);
   font-weight: 700;
 }
 .sidebar-item.active::before {
@@ -165,7 +162,7 @@ a { transition: color .15s; }
   position: absolute;
   left: 0; top: 6px; bottom: 6px;
   width: 3px;
-  background: var(--cyan);
+  background: var(--appam-blue);
   border-radius: 0 3px 3px 0;
 }
 
@@ -185,22 +182,22 @@ a { transition: color .15s; }
   letter-spacing: .4px;
   text-transform: uppercase;
 }
-.item-badge-restricted { background: var(--cyan-light); color: var(--cyan-dark); }
+.item-badge-restricted { background: var(--appam-blue-soft); color: var(--appam-blue-dark); }
 
 .sidebar-course-progress {
   margin-left: auto;
   font-size: 11px;
   font-weight: 800;
-  color: var(--cyan-dark);
-  background: var(--cyan-light);
+  color: var(--appam-blue-dark);
+  background: var(--appam-blue-soft);
   padding: 2px 8px;
   border-radius: 20px;
 }
 .sidebar-event-date {
   font-size: 10px;
   font-weight: 800;
-  color: var(--cyan-dark);
-  background: var(--cyan-light);
+  color: var(--appam-blue-dark);
+  background: var(--appam-blue-soft);
   padding: 3px 6px;
   border-radius: 6px;
   white-space: nowrap;
@@ -697,7 +694,7 @@ a.doc-type:hover { background: var(--cyan); color: #fff; text-decoration: none; 
 /* Cards de ciclos/cursos: mejorar legibilidad */
 .course-card,
 .ciclo-card {
-  background: #ffffff !important;
+  background: var(--surface) !important;
 }
 
 .course-card *,
@@ -711,7 +708,7 @@ a.doc-type:hover { background: var(--cyan); color: #fff; text-decoration: none; 
 .ciclo-card h3,
 .ciclo-card .course-title,
 .ciclo-card .course-thumb-title {
-  color: #101828 !important;
+  color: var(--appam-text) !important;
   opacity: 1 !important;
   font-weight: 800 !important;
 }
@@ -759,9 +756,9 @@ a.doc-type:hover { background: var(--cyan); color: #fff; text-decoration: none; 
 .ciclo-card .btn,
 .course-card .btn-primary,
 .ciclo-card .btn-primary {
-  color: #ffffff !important;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
-  border-color: #1d4ed8 !important;
+  color: var(--surface) !important;
+  background: linear-gradient(135deg, var(--appam-blue-600), var(--appam-blue-700)) !important;
+  border-color: var(--appam-blue-700) !important;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28) !important;
 }
 
@@ -769,8 +766,8 @@ a.doc-type:hover { background: var(--cyan); color: #fff; text-decoration: none; 
 .ciclo-card .btn:hover,
 .course-card .btn-primary:hover,
 .ciclo-card .btn-primary:hover {
-  color: #ffffff !important;
-  background: linear-gradient(135deg, #1d4ed8, #1e40af) !important;
+  color: var(--surface) !important;
+  background: linear-gradient(135deg, var(--appam-blue-700), var(--appam-blue-800)) !important;
   box-shadow: 0 6px 18px rgba(37, 99, 235, 0.36) !important;
 }
 
@@ -784,7 +781,7 @@ a.doc-type:hover { background: var(--cyan); color: #fff; text-decoration: none; 
 .user-menu .btn,
 button.logout,
 a.logout {
-  color: #101828 !important;
+  color: var(--appam-text) !important;
   background: #f2f4f7 !important;
   border: 1px solid #d0d5dd !important;
   opacity: 1 !important;
@@ -800,9 +797,9 @@ a.logout {
 .user-menu .btn:hover,
 button.logout:hover,
 a.logout:hover {
-  color: #ffffff !important;
-  background: #dc2626 !important;
-  border-color: #dc2626 !important;
+  color: var(--surface) !important;
+  background: var(--danger) !important;
+  border-color: var(--danger) !important;
 }
 
 /* Texto de usuario en topbar más legible */
@@ -810,7 +807,7 @@ a.logout:hover {
 .topbar .user-name,
 .topbar .user-role,
 .top-actions span {
-  color: #101828 !important;
+  color: var(--appam-text) !important;
   opacity: 1 !important;
 }
 
@@ -820,8 +817,8 @@ a.logout:hover {
 }
 
 .topbar .top-link.active {
-  color: #1d4ed8 !important;
-  background: rgba(37, 99, 235, 0.10) !important;
+  color: var(--appam-blue) !important;
+  background: var(--appam-blue-soft) !important;
 }
 
 /* Badges/categorías dentro de cards */
@@ -840,7 +837,7 @@ a.logout:hover {
 .doc-item,
 .quick-btn,
 .task-item {
-  color: #101828;
+  color: var(--appam-text);
 }
 
 .card p,
@@ -1130,7 +1127,7 @@ a.logout:hover {
   font-weight: 800;
 }
 
-.cal-type-avaliacao { background: #dbeafe !important; color: #1d4ed8 !important; }
+.cal-type-avaliacao { background: #dbeafe !important; color: var(--appam-blue-700) !important; }
 .cal-type-entrega { background: #ffe4e6 !important; color: #be123c !important; }
 .cal-type-fct { background: #dbeafe !important; color: #1e3a8a !important; }
 .cal-type-pap { background: #ede9fe !important; color: #6d28d9 !important; }
@@ -1138,7 +1135,7 @@ a.logout:hover {
 .cal-type-tarefa { background: #fef3c7 !important; color: #92400e !important; }
 
 .calendar-event-dot.cal-type-avaliacao,
-.calendar-event-dot.cal-type-fct { background: #2563eb !important; }
+.calendar-event-dot.cal-type-fct { background: var(--appam-blue-600) !important; }
 .calendar-event-dot.cal-type-entrega { background: #f43f5e !important; }
 .calendar-event-dot.cal-type-pap { background: #7c3aed !important; }
 .calendar-event-dot.cal-type-evento { background: var(--cyan) !important; }
