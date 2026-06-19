@@ -11,7 +11,7 @@ tarefas, entregas, eventos_campus); caso contrário usa-se o fallback mock
 sem rebentar a página.
 """
 
-from flask import Blueprint, render_template, session
+from flask import Blueprint, render_template, session, url_for
 
 from decorators import login_required
 from services.data_service import (
@@ -167,6 +167,72 @@ def tarefas():
     )
 
 
+
+
+def _date_iso(value):
+    """Converte date/datetime/string em YYYY-MM-DD para o calendário visual."""
+    if not value:
+        return ""
+    return str(value)[:10]
+
+
+_CAL_TIPO_LABELS = {
+    "avaliacao": ("📝", "Avaliação"),
+    "entrega": ("📤", "Entrega"),
+    "fct": ("🏢", "FCT"),
+    "pap": ("🎓", "PAP"),
+    "evento": ("📅", "Evento da escola"),
+    "tarefa": ("📌", "Tarefa"),
+}
+
+
+def _build_calendar_events(eventos, tarefas_cal):
+    """
+    Normaliza eventos e tarefas para JSON consumido pelo calendário visual.
+    Não altera a lógica existente; só prepara dados para o frontend.
+    """
+    calendar_events = []
+
+    for ev in eventos or []:
+        tipo = (ev.get("tipo") or "evento").lower()
+        icon, label = _CAL_TIPO_LABELS.get(tipo, _CAL_TIPO_LABELS["evento"])
+        date = _date_iso(ev.get("data_evento") or ev.get("fecha"))
+        if not date:
+            continue
+        calendar_events.append({
+            "title": ev.get("titulo") or "Evento",
+            "date": date,
+            "time": ev.get("hora") or "",
+            "type": tipo if tipo in _CAL_TIPO_LABELS else "evento",
+            "typeLabel": ev.get("_tipo_label") or label,
+            "icon": ev.get("_icone") or icon,
+            "description": ev.get("descricao") or ev.get("descripcion") or "",
+            "disciplina": ev.get("disciplina") or "",
+            "estado": ev.get("estado") or "",
+            "url": "",
+        })
+
+    for t in tarefas_cal or []:
+        date = _date_iso(t.get("data_limite") or t.get("fecha"))
+        if not date:
+            continue
+        icon, label = _CAL_TIPO_LABELS["tarefa"]
+        calendar_events.append({
+            "title": t.get("titulo") or "Tarefa",
+            "date": date,
+            "time": "23:59",
+            "type": "tarefa",
+            "typeLabel": label,
+            "icon": icon,
+            "description": t.get("descricao") or "",
+            "disciplina": t.get("disciplina") or "",
+            "estado": t.get("_estado_label") or t.get("estado") or "",
+            "url": url_for("dashboard.tarefas"),
+        })
+
+    return calendar_events
+
+
 # ──────────────────────────────────────────────
 # CALENDÁRIO DO CAMPUS
 # ──────────────────────────────────────────────
@@ -195,9 +261,12 @@ def calendario():
     if usuario_id and "aluno" in session.get("usuario_roles", []):
         tarefas_cal = get_tarefas_usuario(usuario_id, so_pendentes=True)
 
+    calendar_events = _build_calendar_events(eventos, tarefas_cal)
+
     return render_template(
         'calendario.html',
         usuario=usuario,
         eventos=eventos,
         tarefas_cal=tarefas_cal,
+        calendar_events=calendar_events,
     )

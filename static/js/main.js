@@ -188,3 +188,227 @@ function cambiarTabCurso(nombreTab, btnEl) {
   // Activar el botón pulsado
   if (btnEl) btnEl.classList.add('active');
 }
+// ──────────────────────────────────────────────
+// CALENDÁRIO VISUAL MENSAL
+// ──────────────────────────────────────────────
+
+(function () {
+  const monthNames = [
+    'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+    'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
+  ];
+
+  function parseISODate(value) {
+    if (!value) return null;
+    const parts = String(value).slice(0, 10).split('-').map(Number);
+    if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+  }
+
+  function isoDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  function sameDay(a, b) {
+    return a && b && isoDate(a) === isoDate(b);
+  }
+
+  function eventTypeLabel(type) {
+    const labels = {
+      avaliacao: 'Avaliação',
+      entrega: 'Entrega',
+      fct: 'FCT',
+      pap: 'PAP',
+      evento: 'Evento da escola',
+      tarefa: 'Tarefa'
+    };
+    return labels[type] || 'Evento';
+  }
+
+  function eventTypeIcon(type) {
+    const icons = {
+      avaliacao: '📝',
+      entrega: '📤',
+      fct: '🏢',
+      pap: '🎓',
+      evento: '📅',
+      tarefa: '📌'
+    };
+    return icons[type] || '📅';
+  }
+
+  function openCalendarEventModal(event) {
+    const title = event.title || 'Evento';
+    const label = event.typeLabel || eventTypeLabel(event.type);
+    const icon = event.icon || eventTypeIcon(event.type);
+    const date = parseISODate(event.date);
+    const dateText = date
+      ? `${date.getDate()} de ${monthNames[date.getMonth()]} de ${date.getFullYear()}`
+      : event.date || '';
+
+    const html = `
+      <div class="calendar-modal-detail">
+        <div class="calendar-modal-badge cal-type-${event.type || 'evento'}">${icon} ${label}</div>
+        <p><strong>Data:</strong> ${dateText}</p>
+        ${event.time ? `<p><strong>Hora:</strong> ${event.time}</p>` : ''}
+        ${event.disciplina ? `<p><strong>Disciplina:</strong> ${event.disciplina}</p>` : ''}
+        ${event.estado ? `<p><strong>Estado:</strong> ${event.estado}</p>` : ''}
+        ${event.description ? `<p class="calendar-modal-description">${event.description}</p>` : ''}
+        ${event.url ? `<a class="btn btn-primary btn-sm" href="${event.url}">Ver tarefa</a>` : ''}
+      </div>
+    `;
+
+    if (typeof abrirModal === 'function') {
+      abrirModal(title, html);
+    } else {
+      alert(`${title}\n${dateText}`);
+    }
+  }
+
+  function openDayEventsModal(dateKey, events) {
+    const date = parseISODate(dateKey);
+    const title = date
+      ? `Eventos de ${date.getDate()} de ${monthNames[date.getMonth()]}`
+      : 'Eventos do dia';
+
+    const html = events.map(ev => `
+      <button type="button" class="calendar-day-modal-item" data-event-id="${ev._id}">
+        <span class="calendar-event-dot cal-type-${ev.type || 'evento'}"></span>
+        <span>
+          <strong>${ev.title || 'Evento'}</strong>
+          <small>${ev.time ? ev.time + ' · ' : ''}${ev.typeLabel || eventTypeLabel(ev.type)}</small>
+        </span>
+      </button>
+    `).join('');
+
+    abrirModal(title, `<div class="calendar-day-modal-list">${html}</div>`);
+
+    setTimeout(() => {
+      document.querySelectorAll('.calendar-day-modal-item[data-event-id]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const ev = events.find(item => String(item._id) === btn.dataset.eventId);
+          if (ev) openCalendarEventModal(ev);
+        });
+      });
+    }, 0);
+  }
+
+  function initVisualCalendar() {
+    const root = document.getElementById('visual-calendar');
+    if (!root) return;
+
+    const grid = root.querySelector('[data-cal-grid]');
+    const currentLabel = root.querySelector('[data-cal-current]');
+    const prevBtn = root.querySelector('[data-cal-prev]');
+    const nextBtn = root.querySelector('[data-cal-next]');
+    const todayBtn = root.querySelector('[data-cal-today]');
+
+    const rawEvents = Array.isArray(window.calendarEvents) ? window.calendarEvents : [];
+    const events = rawEvents
+      .filter(ev => ev && ev.date)
+      .map((ev, index) => ({
+        ...ev,
+        _id: String(index),
+        type: ev.type || 'evento',
+        typeLabel: ev.typeLabel || eventTypeLabel(ev.type),
+        icon: ev.icon || eventTypeIcon(ev.type),
+      }));
+
+    const today = new Date();
+    const currentMonthHasEvents = events.some(ev => {
+      const d = parseISODate(ev.date);
+      return d && d.getFullYear() === today.getFullYear() && d.getMonth() === today.getMonth();
+    });
+    const firstEventDate = events.length ? parseISODate(events[0].date) : null;
+    let visibleMonth = currentMonthHasEvents || !firstEventDate
+      ? new Date(today.getFullYear(), today.getMonth(), 1)
+      : new Date(firstEventDate.getFullYear(), firstEventDate.getMonth(), 1);
+
+    function render() {
+      grid.innerHTML = '';
+      const year = visibleMonth.getFullYear();
+      const month = visibleMonth.getMonth();
+      currentLabel.textContent = `${monthNames[month]} ${year}`;
+
+      const firstDay = new Date(year, month, 1);
+      const startOffset = (firstDay.getDay() + 6) % 7; // segunda-feira = 0
+      const startDate = new Date(year, month, 1 - startOffset);
+
+      for (let i = 0; i < 42; i++) {
+        const day = new Date(startDate);
+        day.setDate(startDate.getDate() + i);
+        const key = isoDate(day);
+        const dayEvents = events.filter(ev => ev.date === key);
+        const visibleEvents = dayEvents.slice(0, 3);
+        const hiddenCount = Math.max(dayEvents.length - visibleEvents.length, 0);
+
+        const cell = document.createElement('div');
+        cell.className = 'app-calendar-day';
+        if (day.getMonth() !== month) cell.classList.add('is-muted');
+        if (sameDay(day, today)) cell.classList.add('is-today');
+        if (dayEvents.length) cell.classList.add('has-events');
+
+        const number = document.createElement('div');
+        number.className = 'app-calendar-day-number';
+        number.textContent = day.getDate();
+        cell.appendChild(number);
+
+        const list = document.createElement('div');
+        list.className = 'app-calendar-events';
+
+        visibleEvents.forEach(ev => {
+          const item = document.createElement('button');
+          item.type = 'button';
+          item.className = `app-calendar-event cal-type-${ev.type}`;
+          item.title = ev.title;
+          item.innerHTML = `<span class="calendar-event-dot cal-type-${ev.type}"></span><span>${ev.time ? ev.time + ' · ' : ''}${ev.title}</span>`;
+          item.addEventListener('click', (event) => {
+            event.stopPropagation();
+            openCalendarEventModal(ev);
+          });
+          list.appendChild(item);
+        });
+
+        if (hiddenCount) {
+          const more = document.createElement('button');
+          more.type = 'button';
+          more.className = 'app-calendar-more';
+          more.textContent = `+${hiddenCount} eventos`;
+          more.addEventListener('click', (event) => {
+            event.stopPropagation();
+            openDayEventsModal(key, dayEvents);
+          });
+          list.appendChild(more);
+        }
+
+        cell.appendChild(list);
+        if (dayEvents.length) {
+          cell.addEventListener('click', () => openDayEventsModal(key, dayEvents));
+        }
+        grid.appendChild(cell);
+      }
+    }
+
+    prevBtn?.addEventListener('click', () => {
+      visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1);
+      render();
+    });
+
+    nextBtn?.addEventListener('click', () => {
+      visibleMonth = new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1);
+      render();
+    });
+
+    todayBtn?.addEventListener('click', () => {
+      visibleMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      render();
+    });
+
+    render();
+  }
+
+  document.addEventListener('DOMContentLoaded', initVisualCalendar);
+})();

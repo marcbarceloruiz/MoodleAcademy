@@ -936,84 +936,369 @@ a.logout:hover {
   display: block !important;
 }
 
+/* ════════════════ 26. CALENDÁRIO VISUAL MENSAL ════════════════ */
 
-/* ════════════════ 25. SCROLL INDEPENDIENTE TIPO MOODLE ════════════════
-   Solo corrige el comportamiento del scroll en escritorio.
-   En móvil se mantiene el scroll normal de toda la página.
-*/
-
-/* Quitar la franja/hero superior que aparece dentro del contenido */
-#hero-banner,
-.main-content > .hero {
-  display: none !important;
+.app-calendar-card {
+  overflow: hidden;
 }
 
+.app-calendar-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, #ffffff, #fbfcfe);
+}
+
+.app-calendar-title {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-1);
+}
+
+.app-calendar-subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.app-calendar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.app-calendar-current {
+  min-width: 150px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--cyan-light);
+  color: var(--cyan-dark);
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.app-calendar-nav {
+  min-width: 36px;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.app-calendar-view-pill {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 2px 10px rgba(25,190,211,.24);
+}
+
+.app-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-bottom: 1px solid var(--line);
+  background: #f7f9fc;
+}
+
+.app-calendar-weekdays span {
+  padding: 10px 8px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+}
+
+.app-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  background: var(--line);
+  gap: 1px;
+}
+
+.app-calendar-day {
+  min-height: 132px;
+  padding: 10px;
+  background: #fff;
+  position: relative;
+  cursor: default;
+  transition: background .14s, box-shadow .14s;
+}
+
+.app-calendar-day:hover {
+  background: #fbfdff;
+  box-shadow: inset 0 0 0 1px rgba(25,190,211,.16);
+}
+
+.app-calendar-day.is-muted {
+  background: #fafbfd;
+}
+
+.app-calendar-day.is-muted .app-calendar-day-number {
+  color: #b2bbca;
+}
+
+.app-calendar-day.is-today {
+  background: linear-gradient(180deg, rgba(25,190,211,.10), #fff 42%);
+}
+
+.app-calendar-day.is-today .app-calendar-day-number {
+  background: var(--cyan);
+  color: #fff;
+}
+
+.app-calendar-day-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-1);
+  margin-bottom: 8px;
+}
+
+.app-calendar-events {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.app-calendar-event,
+.app-calendar-more,
+.calendar-day-modal-item {
+  border: 0;
+  font-family: var(--font);
+  cursor: pointer;
+}
+
+.app-calendar-event {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 7px;
+  border-radius: 8px;
+  color: var(--text-1);
+  background: #eefcff;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: left;
+  overflow: hidden;
+  transition: transform .12s, filter .12s;
+}
+
+.app-calendar-event:hover {
+  transform: translateX(2px);
+  filter: brightness(.98);
+}
+
+.app-calendar-event span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.calendar-event-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: 0 0 9px;
+  background: var(--cyan);
+}
+
+.app-calendar-more {
+  width: fit-content;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: #f2f4f7;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 800;
+}
+
+.cal-type-avaliacao { background: #dbeafe !important; color: #1d4ed8 !important; }
+.cal-type-entrega { background: #ffe4e6 !important; color: #be123c !important; }
+.cal-type-fct { background: #dbeafe !important; color: #1e3a8a !important; }
+.cal-type-pap { background: #ede9fe !important; color: #6d28d9 !important; }
+.cal-type-evento { background: var(--cyan-light) !important; color: var(--cyan-dark) !important; }
+.cal-type-tarefa { background: #fef3c7 !important; color: #92400e !important; }
+
+.calendar-event-dot.cal-type-avaliacao,
+.calendar-event-dot.cal-type-fct { background: #2563eb !important; }
+.calendar-event-dot.cal-type-entrega { background: #f43f5e !important; }
+.calendar-event-dot.cal-type-pap { background: #7c3aed !important; }
+.calendar-event-dot.cal-type-evento { background: var(--cyan) !important; }
+.calendar-event-dot.cal-type-tarefa { background: #f59e0b !important; }
+
+.calendar-modal-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.calendar-modal-badge {
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.calendar-modal-detail p {
+  margin: 0;
+}
+
+.calendar-modal-description {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f8fbfd;
+  line-height: 1.6;
+}
+
+.calendar-day-modal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.calendar-day-modal-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--text-1);
+  text-align: left;
+  transition: border-color .12s, background .12s;
+}
+
+.calendar-day-modal-item:hover {
+  border-color: var(--cyan);
+  background: #f8fdfe;
+}
+
+.calendar-day-modal-item strong,
+.calendar-day-modal-item small {
+  display: block;
+}
+
+.calendar-day-modal-item small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media (max-width: 860px) {
+  .app-calendar-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .app-calendar-actions {
+    justify-content: flex-start;
+  }
+
+  .app-calendar-grid,
+  .app-calendar-weekdays {
+    grid-template-columns: repeat(7, minmax(42px, 1fr));
+  }
+
+  .app-calendar-day {
+    min-height: 92px;
+    padding: 7px;
+  }
+
+  .app-calendar-day-number {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .app-calendar-event {
+    padding: 4px 5px;
+    font-size: 10px;
+  }
+
+  .app-calendar-current {
+    min-width: 130px;
+  }
+}
+
+@media (max-width: 620px) {
+  .app-calendar-card {
+    overflow-x: auto;
+  }
+
+  .app-calendar-weekdays,
+  .app-calendar-grid {
+    min-width: 720px;
+  }
+}
+
+/* ════════════════ FIX VISUAL SCROLL SIDEBAR ════════════════ */
+
 @media (min-width: 861px) {
-  html,
-  body {
-    height: 100% !important;
-    overflow: hidden !important;
-  }
+  .sidebar {
+    position: sticky !important;
+    top: 60px !important;
 
-  .app {
-    height: 100vh !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-  }
+    height: calc(100vh - 60px) !important;
+    max-height: calc(100vh - 60px) !important;
 
-  .body-layout {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-  }
-
-  .sidebar,
-  .main-content {
-    min-height: 0 !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
+
+    background: #ffffff !important;
+    border-right: 1px solid var(--line) !important;
     overscroll-behavior: contain;
+  }
+
+  .sidebar::-webkit-scrollbar {
+    width: 7px;
+  }
+
+  .sidebar::-webkit-scrollbar-track {
+    background: #f4f6f8;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb {
+    background: #c9cede;
+    border-radius: 999px;
+    border: 2px solid #f4f6f8;
+  }
+
+  .sidebar::-webkit-scrollbar-thumb:hover {
+    background: var(--cyan);
+  }
+
+  .sidebar-section:last-child {
+    padding-bottom: 32px;
   }
 }
 
 @media (max-width: 860px) {
-  html,
-  body {
-    height: auto !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-  }
-
-  .app {
-    height: auto !important;
-    overflow: visible !important;
-  }
-
-  .body-layout,
-  .sidebar,
-  .main-content {
+  .sidebar {
+    position: static !important;
     height: auto !important;
     max-height: none !important;
     overflow: visible !important;
-  }
-}
-
-/* =========================================================
-   FIX MOBILE: scroll propio del menú lateral
-   Solo afecta a pantallas móviles. No modifica colores,
-   anchos, márgenes ni estética.
-   ========================================================= */
-@media (max-width: 860px) {
-  .sidebar {
-    position: fixed !important;
-    top: 62px !important;
-    bottom: 0 !important;
-    height: auto !important;
-    max-height: calc(100dvh - 62px) !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    touch-action: pan-y;
   }
 }

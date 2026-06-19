@@ -13,6 +13,42 @@
   <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary btn-sm">← Voltar ao início</a>
 </div>
 
+
+<!-- ── CALENDÁRIO MENSAL VISUAL ───────────────────────────── -->
+<div class="card app-calendar-card mb-20" id="visual-calendar">
+  <div class="app-calendar-toolbar">
+    <div>
+      <h3 class="app-calendar-title">Calendário mensal</h3>
+      <p class="app-calendar-subtitle">Visão mensal de avaliações, entregas, FCT, PAP, tarefas e eventos da escola.</p>
+    </div>
+
+    <div class="app-calendar-actions">
+      <button type="button" class="btn btn-secondary btn-sm" data-cal-today>Hoje</button>
+      <button type="button" class="btn btn-secondary btn-sm app-calendar-nav" data-cal-prev aria-label="Mês anterior">‹</button>
+      <div class="app-calendar-current" data-cal-current>Mês</div>
+      <button type="button" class="btn btn-secondary btn-sm app-calendar-nav" data-cal-next aria-label="Mês seguinte">›</button>
+      <span class="app-calendar-view-pill">Mês</span>
+    </div>
+  </div>
+
+  <div class="app-calendar-weekdays" aria-hidden="true">
+    <span>Seg</span>
+    <span>Ter</span>
+    <span>Qua</span>
+    <span>Qui</span>
+    <span>Sex</span>
+    <span>Sáb</span>
+    <span>Dom</span>
+  </div>
+
+  <div class="app-calendar-grid" data-cal-grid></div>
+</div>
+
+<script>
+  window.calendarEvents = {{ calendar_events | default([]) | tojson }};
+</script>
+
+
 <div class="grid-2 mb-20">
 
   <!-- ── EVENTOS DO CAMPUS ───────────────────────────────── -->
