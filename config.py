@@ -29,7 +29,7 @@ class Config:
     # Pode ser texto simples (dev) ou hash werkzeug (recomendado para produção).
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
-        # Subida de archivos
+    # Subida de archivos
     UPLOAD_FOLDER = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
         "static",
