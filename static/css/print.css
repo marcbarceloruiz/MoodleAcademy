@@ -10,11 +10,32 @@
   display: none;
 }
 
+/* Ocultar SIEMPRE en pantalla normal */
+.print-chrome,
+.print-doc-header,
+.print-doc-footer,
+.print-header-img,
+.print-footer-img {
+  display: none !important;
+}
+
 @media print {
+  .print-chrome,
+  .print-doc-header,
+  .print-doc-footer {
+    display: block !important;
+  }
+
+  .print-header-img,
+  .print-footer-img {
+    display: block !important;
+  }
+
   @page {
     size: A4;
     margin: 28mm 14mm 24mm 14mm;
   }
+
 
   html,
   body {
