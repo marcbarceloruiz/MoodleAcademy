@@ -4,8 +4,11 @@ Campus Virtual — Ponto de entrada Flask.
 """
 
 from flask import Flask, session
+from flask_wtf.csrf import CSRFProtect
 from config import Config
 from extensions import db, migrate
+
+csrf = CSRFProtect()
 
 from routes.dashboard_routes import dashboard_bp
 from routes.courses_routes   import courses_bp
@@ -28,6 +31,7 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
+    csrf.init_app(app)
 
     # ── Context processor: dados de layout e sidebar ──────────
     @app.context_processor

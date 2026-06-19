@@ -3,6 +3,7 @@
  * main.js — Interacciones del lado cliente.
  *
  * Solo se ocupa de:
+ *  - CSRF: inyección automática del token en todos los formularios POST
  *  - Modal (abrir / cerrar)
  *  - Toasts
  *  - Menú responsive
@@ -11,6 +12,28 @@
  *
  * NO renderiza vistas. NO depende de DATA. El HTML viene del servidor.
  */
+
+// ──────────────────────────────────────────────
+// CSRF — inyección automática en formularios POST
+// El token vive en <meta name="csrf-token"> (base.html).
+// ──────────────────────────────────────────────
+(function () {
+  const metaToken = document.querySelector('meta[name="csrf-token"]');
+  if (!metaToken) return;
+  const token = metaToken.getAttribute('content');
+  if (!token) return;
+
+  document.addEventListener('submit', function (e) {
+    const form = e.target;
+    if (form.method && form.method.toLowerCase() !== 'post') return;
+    if (form.querySelector('input[name="csrf_token"]')) return; // ya tiene token
+    const input = document.createElement('input');
+    input.type  = 'hidden';
+    input.name  = 'csrf_token';
+    input.value = token;
+    form.appendChild(input);
+  }, true); // capture=true → actúa antes de que el submit se propague
+}());
 
 // ──────────────────────────────────────────────
 // MODAL

@@ -5,3 +5,5 @@ __pycache__/
 instance/
 .vscode/
 *.session.sql
+tmp_*.txt
+*.log

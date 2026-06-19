@@ -1,4 +1,4 @@
-"""
+﻿"""
 Blueprint: Administración.
 Ruta: /admin
 
@@ -21,6 +21,7 @@ from flask import (
 )
 from sqlalchemy import text
 from werkzeug.utils import secure_filename
+from werkzeug.security import check_password_hash
 
 from extensions import db
 from services.data_service import get_current_user, get_centro
@@ -75,13 +76,23 @@ def admin_login():
         admin_password = current_app.config.get("ADMIN_PASSWORD", "")
 
         if not admin_password:
-            error = "El panel de administración no está configurado. Falta ADMIN_PASSWORD en .env."
-        elif password == admin_password:
-            session["admin_ok"] = True
-            session.permanent = False
-            return redirect(url_for("admin.admin"))
+            error = "Painel não configurado. Defina ADMIN_PASSWORD em .env."
+        elif admin_password.startswith(("scrypt:", "pbkdf2:")):
+            # Palavra-passe armazenada como hash werkzeug (modo seguro)
+            if check_password_hash(admin_password, password):
+                session["admin_ok"] = True
+                session.permanent = False
+                return redirect(url_for("admin.admin"))
+            error = "Palavra-passe incorreta."
         else:
-            error = "Contraseña incorrecta."
+            # Compatibilidade: texto simples em desenvolvimento
+            # Para produção, substituir ADMIN_PASSWORD por um hash gerado com:
+            # python -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('a_tua_password'))"
+            if password == admin_password:
+                session["admin_ok"] = True
+                session.permanent = False
+                return redirect(url_for("admin.admin"))
+            error = "Palavra-passe incorreta."
 
     return render_template(
         "admin_login.html",
@@ -126,7 +137,7 @@ def _fetch_all(sql, params=None):
     try:
         return db.session.execute(text(sql), params or {}).mappings().all()
     except Exception as e:
-        print("[admin] Aviso _fetch_all:", e)
+        current_app.logger.error("[admin] _fetch_all: %s", e, exc_info=True)
         return []
 
 
@@ -134,7 +145,7 @@ def _fetch_one(sql, params=None):
     try:
         return db.session.execute(text(sql), params or {}).mappings().first()
     except Exception as e:
-        print("[admin] Aviso _fetch_one:", e)
+        current_app.logger.error("[admin] _fetch_one: %s", e, exc_info=True)
         return None
 
 
@@ -232,7 +243,7 @@ def _delete_uploaded_file(url):
             os.remove(file_path)
 
     except Exception as e:
-        print("Error eliminando archivo subido:", e)
+        current_app.logger.error("Error eliminando archivo subido:: %s", e, exc_info=True)
 
 
 def _delete_uploaded_files(urls):
@@ -260,7 +271,7 @@ def _admin_stats():
             row = _fetch_one(sql)
             stats[key] = row["total"] if row else 0
         except Exception as e:
-            print(f"Error calculando estadística {key}:", e)
+            current_app.logger.error("Error calculando estadística %s: %s", key, e, exc_info=True)
             stats[key] = 0
 
     return stats
@@ -380,7 +391,7 @@ def _load_secciones(limit=1000):
         """, {"limit": limit})
 
     except Exception as e:
-        print("Error cargando secciones de disciplinas:", e)
+        current_app.logger.error("Error cargando secciones de disciplinas:: %s", e, exc_info=True)
         return []
 
 
@@ -492,7 +503,7 @@ def update_area(area_id):
 
     except Exception as e:
         db.session.rollback()
-        print("Error actualizando área institucional:", e)
+        current_app.logger.error("Error actualizando área institucional:: %s", e, exc_info=True)
         flash("Erro ao atualizar a secção do portal.", "danger")
 
     return redirect(url_for("admin.admin", tab="portal"))
@@ -542,7 +553,7 @@ def create_documento():
 
     except Exception as e:
         db.session.rollback()
-        print("Error creando documento institucional:", e)
+        current_app.logger.error("Error creando documento institucional:: %s", e, exc_info=True)
         flash("Erro ao criar o documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
@@ -594,7 +605,7 @@ def update_documento(documento_id):
 
     except Exception as e:
         db.session.rollback()
-        print("Error actualizando documento institucional:", e)
+        current_app.logger.error("Error actualizando documento institucional:: %s", e, exc_info=True)
         flash("Erro ao atualizar o documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
@@ -616,7 +627,7 @@ def toggle_documento(documento_id):
 
     except Exception as e:
         db.session.rollback()
-        print("Error cambiando visibilidad del documento institucional:", e)
+        current_app.logger.error("Error cambiando visibilidad del documento institucional:: %s", e, exc_info=True)
         flash("Erro ao alterar a visibilidade do documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
@@ -648,7 +659,7 @@ def delete_documento(documento_id):
 
     except Exception as e:
         db.session.rollback()
-        print("Error eliminando documento institucional:", e)
+        current_app.logger.error("Error eliminando documento institucional:: %s", e, exc_info=True)
         flash("Erro ao eliminar o documento.", "danger")
 
     return redirect(url_for("admin.admin", tab="documentos"))
@@ -718,7 +729,7 @@ def create_ciclo():
 
     except Exception as e:
         db.session.rollback()
-        print("Error creando ciclo formativo:", e)
+        current_app.logger.error("Error creando ciclo formativo:: %s", e, exc_info=True)
         flash("Erro ao criar o ciclo formativo.", "danger")
 
     return redirect(url_for("admin.admin", tab="ciclos"))
@@ -758,7 +769,7 @@ def update_ciclo(ciclo_id):
 
     except Exception as e:
         db.session.rollback()
-        print("Error actualizando ciclo formativo:", e)
+        current_app.logger.error("Error actualizando ciclo formativo:: %s", e, exc_info=True)
         flash("Erro ao atualizar o ciclo formativo.", "danger")
 
     return redirect(url_for("admin.admin", tab="ciclos"))
@@ -838,7 +849,7 @@ def delete_ciclo(ciclo_id):
 
     except Exception as e:
         db.session.rollback()
-        print("Error eliminando ciclo formativo:", e)
+        current_app.logger.error("Error eliminando ciclo formativo:: %s", e, exc_info=True)
         flash("Erro ao eliminar o ciclo formativo.", "danger")
 
     return redirect(url_for("admin.admin", tab="ciclos"))
@@ -940,7 +951,7 @@ def create_disciplina():
 
     except Exception as e:
         db.session.rollback()
-        print("Error creando disciplina:", e)
+        current_app.logger.error("Error creando disciplina:: %s", e, exc_info=True)
         flash("Erro ao criar a disciplina.", "danger")
 
     return redirect(url_for("admin.admin", tab="disciplinas"))
@@ -977,7 +988,7 @@ def update_disciplina(disciplina_id):
 
     except Exception as e:
         db.session.rollback()
-        print("Error actualizando disciplina:", e)
+        current_app.logger.error("Error actualizando disciplina:: %s", e, exc_info=True)
         flash("Erro ao atualizar a disciplina.", "danger")
 
     return redirect(url_for("admin.admin", tab="disciplinas"))
@@ -1032,7 +1043,7 @@ def delete_disciplina(disciplina_id):
 
     except Exception as e:
         db.session.rollback()
-        print("Error eliminando disciplina:", e)
+        current_app.logger.error("Error eliminando disciplina:: %s", e, exc_info=True)
         flash("Erro ao eliminar a disciplina.", "danger")
 
     return redirect(url_for("admin.admin", tab="disciplinas"))
@@ -1068,7 +1079,7 @@ def update_seccion(seccion_id):
 
     except Exception as e:
         db.session.rollback()
-        print("Error actualizando sección de disciplina:", e)
+        current_app.logger.error("Error actualizando sección de disciplina:: %s", e, exc_info=True)
         flash("Erro ao atualizar a secção.", "danger")
 
     return redirect(url_for("admin.admin", tab="secciones"))
@@ -1090,7 +1101,7 @@ def toggle_seccion(seccion_id):
 
     except Exception as e:
         db.session.rollback()
-        print("Error cambiando visibilidad de sección:", e)
+        current_app.logger.error("Error cambiando visibilidad de sección:: %s", e, exc_info=True)
         flash("Erro ao alterar a visibilidade da secção.", "danger")
 
     return redirect(url_for("admin.admin", tab="secciones"))
@@ -1133,7 +1144,7 @@ def delete_seccion(seccion_id):
 
     except Exception as e:
         db.session.rollback()
-        print("Error eliminando sección de disciplina:", e)
+        current_app.logger.error("Error eliminando sección de disciplina:: %s", e, exc_info=True)
         flash("Erro ao eliminar a secção.", "danger")
 
     return redirect(url_for("admin.admin", tab="secciones"))
@@ -1183,7 +1194,7 @@ def create_recurso():
 
     except Exception as e:
         db.session.rollback()
-        print("Error creando recurso de disciplina:", e)
+        current_app.logger.error("Error creando recurso de disciplina:: %s", e, exc_info=True)
         flash("Erro ao criar o recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
@@ -1235,7 +1246,7 @@ def update_recurso(recurso_id):
 
     except Exception as e:
         db.session.rollback()
-        print("Error actualizando recurso de disciplina:", e)
+        current_app.logger.error("Error actualizando recurso de disciplina:: %s", e, exc_info=True)
         flash("Erro ao atualizar o recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
@@ -1257,7 +1268,7 @@ def toggle_recurso(recurso_id):
 
     except Exception as e:
         db.session.rollback()
-        print("Error cambiando visibilidad del recurso:", e)
+        current_app.logger.error("Error cambiando visibilidad del recurso:: %s", e, exc_info=True)
         flash("Erro ao alterar a visibilidade do recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
@@ -1289,7 +1300,7 @@ def delete_recurso(recurso_id):
 
     except Exception as e:
         db.session.rollback()
-        print("Error eliminando recurso de disciplina:", e)
+        current_app.logger.error("Error eliminando recurso de disciplina:: %s", e, exc_info=True)
         flash("Erro ao eliminar o recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))

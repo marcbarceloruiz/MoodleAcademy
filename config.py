@@ -21,8 +21,12 @@ class Config:
     DEBUG = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
     TEMPLATES_AUTO_RELOAD = True
 
-    # Contraseña simple para proteger el panel admin.
-    # Definir en .env: ADMIN_PASSWORD=tu_contraseña
+    # CSRF — Flask-WTF (usa SECRET_KEY como base)
+    WTF_CSRF_ENABLED = True
+    WTF_CSRF_TIME_LIMIT = 3600  # 1 hora
+
+    # Palavra-passe do painel admin. Definir em .env: ADMIN_PASSWORD=...
+    # Pode ser texto simples (dev) ou hash werkzeug (recomendado para produção).
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
         # Subida de archivos

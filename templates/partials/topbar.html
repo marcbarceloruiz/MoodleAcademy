@@ -97,6 +97,7 @@
       </div>
 
       <form method="post" action="{{ url_for('auth.logout') }}" style="margin:0">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn-secondary btn-sm" title="Terminar sessão">
           Sair
         </button>
