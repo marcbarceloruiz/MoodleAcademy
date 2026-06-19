@@ -28,3 +28,4 @@
 @import url('portal.css');
 @import url('responsive.css');
 @import url('polish.css');     /* refinamento visual APPAM */
+@import url('print.css');        /* cabecera y pie institucional para impresión */
