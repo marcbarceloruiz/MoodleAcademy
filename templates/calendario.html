@@ -44,8 +44,14 @@
   <div class="app-calendar-grid" data-cal-grid></div>
 </div>
 
+<script id="calendar-events-data" type="application/json">
+  {{ calendar_events | default([]) | tojson }}
+</script>
+
 <script>
-  window.calendarEvents = {{ calendar_events | default([]) | tojson }};
+  window.calendarEvents = JSON.parse(
+    document.getElementById('calendar-events-data')?.textContent || '[]'
+  );
 </script>
 
 
