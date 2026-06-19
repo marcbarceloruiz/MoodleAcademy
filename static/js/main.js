@@ -62,19 +62,61 @@ function mostrarToast(mensaje, tipo = 'info') {
 
 function toggleSidebar() {
   const sidebar = document.querySelector('.sidebar');
-  if (sidebar) sidebar.classList.toggle('open');
+  const toggle = document.getElementById('menu-toggle');
+  if (!sidebar) return;
+
+  const isOpen = sidebar.classList.toggle('open');
+  if (toggle) toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+}
+
+function closeSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const toggle = document.getElementById('menu-toggle');
+  if (!sidebar) return;
+
+  sidebar.classList.remove('open');
+  if (toggle) toggle.setAttribute('aria-expanded', 'false');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.getElementById('menu-toggle');
+  const sidebar = document.querySelector('.sidebar');
 
   function checkMobile() {
-    if (toggle) toggle.style.display = window.innerWidth <= 860 ? 'flex' : 'none';
+    const isMobile = window.innerWidth <= 860;
+    if (toggle) {
+      toggle.style.display = isMobile ? 'flex' : 'none';
+      toggle.setAttribute('aria-expanded', sidebar?.classList.contains('open') ? 'true' : 'false');
+    }
+
+    // Al volver a escritorio, el menú no debe quedar arrastrando el estado móvil.
+    if (!isMobile) closeSidebar();
   }
+
   checkMobile();
   window.addEventListener('resize', checkMobile);
 
-  if (toggle) toggle.addEventListener('click', toggleSidebar);
+  if (toggle) {
+    toggle.addEventListener('click', (event) => {
+      event.stopPropagation();
+      toggleSidebar();
+    });
+  }
+
+  // Cerrar el menú móvil al pulsar fuera o al entrar en una opción.
+  document.addEventListener('click', (event) => {
+    if (window.innerWidth > 860 || !sidebar?.classList.contains('open')) return;
+    if (sidebar.contains(event.target) || toggle?.contains(event.target)) return;
+    closeSidebar();
+  });
+
+  if (sidebar) {
+    sidebar.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth <= 860) closeSidebar();
+      });
+    });
+  }
 
   // Botón flotante de ayuda
   const helpBtn = document.getElementById('floating-help');

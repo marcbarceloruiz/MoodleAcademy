@@ -1258,10 +1258,10 @@ a.logout:hover {
 @media (min-width: 861px) {
   .sidebar {
     position: sticky !important;
-    top: 60px !important;
+    top: 68px !important;
 
-    height: calc(100vh - 60px) !important;
-    max-height: calc(100vh - 60px) !important;
+    height: calc(100vh - 68px) !important;
+    max-height: calc(100vh - 68px) !important;
 
     overflow-y: auto !important;
     overflow-x: hidden !important;
@@ -1294,35 +1294,33 @@ a.logout:hover {
   }
 }
 
-/* ════════════════ FIX MENÚ MÓVIL CERRADO POR DEFECTO ════════════════ */
 
-@media (max-width: 860px) {
-  .sidebar {
-    position: fixed !important;
-    top: 0 !important;
-    left: -290px !important;
-    width: 280px !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-    z-index: 2000 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    background: #ffffff !important;
-    transition: left 0.25s ease !important;
-    box-shadow: 12px 0 30px rgba(15, 23, 42, 0.18) !important;
-  }
+/* ════════════════ 27. QUITAR BLOQUE HERO DEL DASHBOARD ════════════════
+   Elimina el bloque azul oscuro superior "Campus Virtual" sin tocar topbar,
+   sidebar, calendario ni cards inferiores.
+*/
+.hero,
+.main-content > .hero,
+.page-wrap > .hero,
+main > .hero,
+.dashboard-hero,
+.welcome-hero,
+.page-hero {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
 
-  body.sidebar-open .sidebar,
-  .body-layout.sidebar-open .sidebar,
-  .sidebar.is-open,
-  .sidebar.open,
-  .sidebar.active {
-    left: 0 !important;
-  }
-
-  .main-content,
-  .body-layout {
-    width: 100% !important;
-    max-width: 100% !important;
-  }
+/* Deja el primer bloque real de contenido bien pegado arriba tras quitar el hero */
+.main-content > .welcome-banner:first-child,
+.page-wrap > .welcome-banner:first-child,
+main > .welcome-banner:first-child {
+  margin-top: 0 !important;
 }
