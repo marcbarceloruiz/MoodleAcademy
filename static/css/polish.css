@@ -1275,10 +1275,10 @@ a.logout:hover {
 @media (min-width: 861px) {
   .sidebar {
     position: sticky !important;
-    top: 68px !important;
+    top: 60px !important;
 
-    height: calc(100vh - 68px) !important;
-    max-height: calc(100vh - 68px) !important;
+    height: calc(100vh - 60px) !important;
+    max-height: calc(100vh - 60px) !important;
 
     overflow-y: auto !important;
     overflow-x: hidden !important;
