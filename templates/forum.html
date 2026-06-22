@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Fórum — {{ recurso.titulo }}{% endblock %}
+{% block hero_title %}Fórum{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <h1>Fórum — {{ recurso.titulo }}</h1>
+    <p class="subtitle">Debate e partilha de conhecimento</p>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start">
+
+  <!-- Coluna principal: thread ou lista de tópicos -->
+  <div>
+
+    {% if thread_atual %}
+      <!-- Vista de um tópico -->
+      <div class="card mb-20">
+        <div class="card-head">
+          <div>
+            <a href="{{ url_for('student.forum', recurso_id=recurso.id) }}"
+               style="font-size:12px;color:var(--muted)">
+              ← Voltar aos tópicos
+            </a>
+            <h3 style="margin-top:6px">{{ thread_atual.titulo }}</h3>
+          </div>
+        </div>
+
+        <div class="card-body" style="padding:0">
+          {% for post in posts %}
+            <div style="padding:16px 20px;border-bottom:1px solid var(--line)">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--appam-blue);display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;flex-shrink:0">
+                  {{ (post.autor_nome or post.autor_username or 'U')[0].upper() }}
+                </div>
+                <span style="font-size:12px;font-weight:600;color:var(--text-2)">
+                  {{ post.autor_nome or post.autor_username or 'Utilizador' }}
+                </span>
+                <span style="font-size:11px;color:var(--muted);margin-left:auto">
+                  {{ post.created_at.strftime('%d/%m/%Y %H:%M') if post.created_at else '' }}
+                </span>
+              </div>
+              <p style="font-size:13px;line-height:1.6;color:var(--text-1);white-space:pre-wrap;margin:0">{{ post.conteudo }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Responder -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Responder</h3>
+        </div>
+        <div class="card-body">
+          <form method="post"
+                action="{{ url_for('student.forum', recurso_id=recurso.id, thread=thread_atual.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="novo_post">
+            <textarea name="conteudo"
+                      required
+                      rows="4"
+                      placeholder="Escreve a tua resposta…"
+                      style="width:100%;resize:vertical;box-sizing:border-box"></textarea>
+            <div style="margin-top:10px">
+              <button type="submit" class="btn btn-primary btn-sm">Publicar resposta</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    {% else %}
+      <!-- Lista de tópicos -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Tópicos</h3>
+          <span class="text-sm text-muted">{{ threads | length }} tópico(s)</span>
+        </div>
+
+        <div class="card-body" style="padding:0">
+          {% if threads %}
+            {% for t in threads %}
+              <a href="{{ url_for('student.forum', recurso_id=recurso.id, thread=t.id) }}"
+                 style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--line);text-decoration:none;color:inherit;transition:background .15s"
+                 onmouseover="this.style.background='var(--bg)'"
+                 onmouseout="this.style.background='transparent'">
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;font-weight:700;margin-bottom:2px">{{ t.titulo }}</div>
+                  <div style="font-size:11px;color:var(--muted)">
+                    {{ t.autor_nome or t.autor_username or 'Utilizador' }}
+                    · {{ t.created_at.strftime('%d/%m/%Y') if t.created_at else '' }}
+                  </div>
+                </div>
+                <span style="font-size:11px;color:var(--muted);white-space:nowrap;background:var(--bg);padding:3px 8px;border-radius:999px">
+                  {{ t.total_posts }} post(s)
+                </span>
+              </a>
+            {% endfor %}
+          {% else %}
+            <div style="padding:20px">
+              <p style="font-size:13px;color:var(--muted)">
+                Ainda não há tópicos neste fórum. Cria o primeiro!
+              </p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+  </div>
+
+  <!-- Sidebar: novo tópico -->
+  {% if not thread_atual %}
+    <div class="card" style="position:sticky;top:20px">
+      <div class="card-head">
+        <h3>Novo tópico</h3>
+      </div>
+      <div class="card-body">
+        <form method="post"
+              action="{{ url_for('student.forum', recurso_id=recurso.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="action" value="novo_thread">
+
+          <div style="margin-bottom:12px">
+            <label style="font-size:12px;font-weight:600;color:var(--text-2);display:block;margin-bottom:4px">
+              Título
+            </label>
+            <input type="text"
+                   name="titulo"
+                   required
+                   placeholder="Assunto do tópico"
+                   style="width:100%;box-sizing:border-box">
+          </div>
+
+          <div style="margin-bottom:14px">
+            <label style="font-size:12px;font-weight:600;color:var(--text-2);display:block;margin-bottom:4px">
+              Mensagem
+            </label>
+            <textarea name="conteudo"
+                      required
+                      rows="5"
+                      placeholder="Escreve a tua mensagem…"
+                      style="width:100%;resize:vertical;box-sizing:border-box"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-sm" style="width:100%">
+            Criar tópico
+          </button>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}

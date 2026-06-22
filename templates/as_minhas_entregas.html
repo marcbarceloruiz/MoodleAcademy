@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}As Minhas Entregas{% endblock %}
+{% block hero_title %}As Minhas Entregas{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <h1>As Minhas Entregas</h1>
+    <p class="subtitle">Histórico de tarefas entregues e respetivas notas</p>
+  </div>
+</div>
+
+<div class="card">
+  {% if entregas %}
+    <div class="table-toolbar" style="padding:14px 18px;border-bottom:1px solid var(--line)">
+      <span class="text-sm text-muted">{{ entregas | length }} entrega(s) registada(s)</span>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="border-bottom:1px solid var(--line)">
+            <th style="padding:10px 16px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Recurso</th>
+            <th style="padding:10px 16px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Disciplina</th>
+            <th style="padding:10px 16px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Data</th>
+            <th style="padding:10px 16px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Estado</th>
+            <th style="padding:10px 16px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Nota</th>
+            <th style="padding:10px 16px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Ficheiro</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in entregas %}
+            <tr style="border-bottom:1px solid var(--line)">
+              <td style="padding:12px 16px;font-size:13px;font-weight:600">
+                {{ e.recurso_titulo or '—' }}
+              </td>
+              <td style="padding:12px 16px;font-size:13px;color:var(--text-2)">
+                {{ e.disciplina_nome or '—' }}
+              </td>
+              <td style="padding:12px 16px;font-size:12px;color:var(--muted);white-space:nowrap">
+                {% if e.data_entrega %}
+                  {{ e.data_entrega.strftime('%d/%m/%Y %H:%M') if e.data_entrega else '—' }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td style="padding:12px 16px">
+                {% if e.estado == 'avaliado' %}
+                  <span class="act-badge ab-completado">Avaliado</span>
+                {% elif e.estado == 'entregue' %}
+                  <span class="act-badge ab-abierto">Entregue</span>
+                {% else %}
+                  <span class="act-badge ab-pendiente">{{ e.estado or 'Pendente' }}</span>
+                {% endif %}
+              </td>
+              <td style="padding:12px 16px;font-size:13px;font-weight:700">
+                {% if e.nota is not none and e.nota != '' %}
+                  <span style="color:{% if e.nota|float >= 10 %}#059669{% else %}#dc2626{% endif %}">
+                    {{ e.nota }}/20
+                  </span>
+                {% else %}
+                  <span style="color:var(--muted)">—</span>
+                {% endif %}
+              </td>
+              <td style="padding:12px 16px">
+                {% if e.ficheiro_url %}
+                  <a href="{{ e.ficheiro_url }}"
+                     target="_blank"
+                     rel="noopener"
+                     class="btn btn-secondary btn-sm"
+                     style="font-size:11px">
+                    Ver ficheiro
+                  </a>
+                {% else %}
+                  <span style="color:var(--muted);font-size:12px">—</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="card-body">
+      <p style="font-size:13px;color:var(--muted)">
+        Ainda não realizaste nenhuma entrega.
+      </p>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}
