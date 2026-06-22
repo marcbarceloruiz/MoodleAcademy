@@ -1,95 +1,39 @@
 {% extends 'base.html' %}
 
 {% block title %}{{ disciplina.nombre }} — Disciplina{% endblock %}
-{% block hero_title %}{{ disciplina.nombre }}{% endblock %}
+{% block hero_title %}{{ disciplina.ciclo.nombre }}{% endblock %}
 
 {% block content %}
 
-<div class="view-header">
+<!-- Cabeçalho compacto -->
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px">
   <div>
     <a href="{{ url_for('courses.ciclo_detail', ciclo_id=disciplina.ciclo.id) }}"
        class="btn btn-secondary btn-sm"
        style="margin-bottom:10px">
       ← Voltar ao ciclo
     </a>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px">
+      <span class="act-badge ab-abierto">{{ disciplina.tipo | upper }}</span>
+      {% if disciplina.horas %}<span class="act-badge ab-pendiente">{{ disciplina.horas }}h</span>{% endif %}
+      <span style="font-size:12px;color:var(--muted)">{{ disciplina.ciclo.nombre }} · {{ disciplina.ano.ano_escolar }}{% if disciplina.codigo %} · {{ disciplina.codigo }}{% endif %}</span>
+    </div>
+    {% if disciplina.descripcion %}
+      <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-top:8px;max-width:680px">{{ disciplina.descripcion }}</p>
+    {% endif %}
+  </div>
 
-    <h1>{{ disciplina.nombre }}</h1>
-
-    <p class="subtitle">
-      {{ disciplina.ciclo.nombre }}
-      ·
-      {{ disciplina.ano.ano_escolar }}
-      {% if disciplina.codigo %}
-        · {{ disciplina.codigo }}
-      {% endif %}
-    </p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;flex-shrink:0">
+    {% if disciplina.secciones %}
+      {% for seccion in disciplina.secciones %}
+        <a href="#{{ seccion.slug }}" class="btn btn-secondary btn-sm" style="font-size:11px">{{ seccion.titulo }}</a>
+      {% endfor %}
+    {% endif %}
+    {% if session_is_admin %}
+      <a href="{{ url_for('admin.admin_entregas') }}" class="btn btn-secondary btn-sm">Ver entregas</a>
+    {% endif %}
   </div>
 </div>
-
-<!-- Resumo da disciplina -->
-<div class="card mb-20">
-  <div class="card-body">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap">
-      <div style="flex:1;min-width:260px">
-        <h3 style="font-size:16px;margin-bottom:8px">
-          Informação da disciplina
-        </h3>
-
-        <p style="font-size:13px;color:var(--text-2);line-height:1.7">
-          {% if disciplina.descripcion %}
-            {{ disciplina.descripcion }}
-          {% else %}
-            Espaço organizado para consulta de informação geral, conteúdos, avaliação,
-            evidências e comunicação da disciplina.
-          {% endif %}
-        </p>
-      </div>
-
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start">
-        <span class="act-badge ab-abierto">
-          {{ disciplina.tipo | upper }}
-        </span>
-
-        {% if disciplina.horas %}
-          <span class="act-badge ab-pendiente">
-            {{ disciplina.horas }}h
-          </span>
-        {% endif %}
-
-        <span class="act-badge ab-completado">
-          {{ disciplina.ano.ano_escolar }}
-        </span>
-
-        {% if session_is_admin %}
-          <a href="{{ url_for('admin.admin_entregas') }}"
-             class="btn btn-secondary btn-sm">
-            Ver entregas
-          </a>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Navegação rápida -->
-{% if disciplina.secciones %}
-  <div class="card mb-20">
-    <div class="card-head">
-      <h3>Acesso rápido</h3>
-    </div>
-
-    <div class="card-body">
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        {% for seccion in disciplina.secciones %}
-          <a href="#{{ seccion.slug }}"
-             class="btn btn-secondary btn-sm">
-            {{ seccion.titulo }}
-          </a>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-{% endif %}
 
 <!-- Secções da disciplina -->
 {% if disciplina.secciones %}

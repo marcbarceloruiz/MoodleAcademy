@@ -1,37 +1,24 @@
 {% extends 'base.html' %}
 
 {% block title %}{{ ciclo.nombre }} — Ciclo Formativo{% endblock %}
-{% block hero_title %}{{ ciclo.nombre }}{% endblock %}
+{% block hero_title %}Ciclos Formativos{% endblock %}
 
 {% block content %}
 
-<div class="view-header">
-  <div>
-    <a href="{{ url_for('courses.ciclos') }}"
-       class="btn btn-secondary btn-sm"
-       style="margin-bottom:10px">
-      ← Voltar aos ciclos
-    </a>
-
-    <h1>{{ ciclo.nombre }}</h1>
-
-    <p class="subtitle">
-      {{ ciclo.nivel or 'Nível 4' }}
-      ·
-      {{ ciclo.duracion or '3 anos' }}
-      {% if ciclo.codigo %}
-        · {{ ciclo.codigo }}
-      {% endif %}
-    </p>
+<div style="margin-bottom:20px">
+  <a href="{{ url_for('courses.ciclos') }}"
+     class="btn btn-secondary btn-sm"
+     style="margin-bottom:10px">
+    ← Voltar aos ciclos
+  </a>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px">
+    <span class="act-badge ab-abierto">{{ ciclo.nivel or 'Nível 4' }}</span>
+    <span class="act-badge ab-pendiente">{{ ciclo.duracion or '3 anos' }}</span>
+    {% if ciclo.codigo %}<span style="font-size:12px;color:var(--muted)">{{ ciclo.codigo }}</span>{% endif %}
   </div>
-</div>
-
-<div class="card mb-20">
-  <div class="card-body">
-    <p style="font-size:13px;color:var(--text-2);line-height:1.7">
-      {{ ciclo.descripcion or 'Estrutura do ciclo formativo.' }}
-    </p>
-  </div>
+  {% if ciclo.descripcion %}
+    <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-top:8px;max-width:680px">{{ ciclo.descripcion }}</p>
+  {% endif %}
 </div>
 
 {% if ciclo.anos %}
