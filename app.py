@@ -15,6 +15,7 @@ from routes.courses_routes   import courses_bp
 from routes.admin_routes     import admin_bp
 from routes.portal_routes    import portal_bp
 from routes.auth_routes      import auth_bp
+from routes.student_routes   import student_bp
 
 from services.data_service import (
     get_user_courses,
@@ -107,6 +108,11 @@ def create_app():
     app.register_blueprint(admin_bp)
     app.register_blueprint(portal_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(student_bp)
+
+    with app.app_context():
+        from routes.student_routes import _ensure_tables
+        _ensure_tables()
 
     return app
 

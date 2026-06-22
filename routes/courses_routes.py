@@ -3,7 +3,10 @@ Blueprint: Mis cursos, detalle de curso y ciclos formativos.
 Rutas: /cursos  /cursos/<id>  /ciclos  /ciclos/<id>
 """
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, session
+
+from sqlalchemy import text
+from extensions import db
 
 from services.data_service import (
     get_current_user,
@@ -164,8 +167,52 @@ def disciplina_detail(disciplina_id):
     if not disciplina:
         return render_template("404.html", usuario=usuario), 404
 
+    usuario_id = session.get("usuario_id")
+
+    # IDs de recursos ya completados por este usuario
+    concluidos = set()
+    # IDs de recursos con entrega ya realizada por este usuario
+    entregues = {}
+
+    if usuario_id:
+        try:
+            rows = db.session.execute(
+                text("SELECT recurso_id FROM recurso_conclusao WHERE usuario_id = :u"),
+                {"u": usuario_id},
+            ).mappings().all()
+            concluidos = {r["recurso_id"] for r in rows}
+        except Exception:
+            pass
+
+        try:
+            rows = db.session.execute(
+                text("""
+                    SELECT recurso_id, data_entrega
+                    FROM entregas
+                    WHERE usuario_id = :u AND recurso_id IS NOT NULL
+                    ORDER BY data_entrega DESC
+                """),
+                {"u": usuario_id},
+            ).mappings().all()
+            for r in rows:
+                if r["recurso_id"] not in entregues:
+                    entregues[r["recurso_id"]] = r["data_entrega"]
+        except Exception:
+            pass
+
+    # Progresso por secção
+    for seccion in disciplina.get("secciones", []):
+        recursos = seccion.get("recursos", [])
+        total = len(recursos)
+        done = sum(1 for r in recursos if r.get("id") in concluidos)
+        seccion["_progresso_total"] = total
+        seccion["_progresso_done"] = done
+        seccion["_progresso_pct"] = int(done / total * 100) if total else 0
+
     return render_template(
         "disciplina_detail.html",
         usuario=usuario,
         disciplina=disciplina,
+        concluidos=concluidos,
+        entregues=entregues,
     )
