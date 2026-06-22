@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(run)",
+      "Skill(run:*)",
+      "Bash(npx --yes playwright screenshot --browser chromium \"http://127.0.0.1:5000/\" /tmp/screen_home.png --viewport-size \"1400,900\")",
+      "Bash(npx playwright *)",
+      "PowerShell(pip install playwright -q)",
+      "PowerShell(python -c \"import playwright; print\\(playwright.__version__\\)\")",
+      "Bash(python -c \"from app import create_app; app = create_app\\(\\); print\\('OK'\\)\")",
+      "Bash(python -c ' *)",
+      "Bash(git add *)"
+    ]
+  }
+}
