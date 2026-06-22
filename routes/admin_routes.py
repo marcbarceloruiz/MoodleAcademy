@@ -456,6 +456,34 @@ def admin():
     secciones = _load_secciones_for_select()
     recursos = _load_recursos()
 
+    alunos = []
+    classificacoes_admin = []
+    if tab == "avaliacoes":
+        alunos = _fetch_all("""
+            SELECT u.id, u.nome, u.username
+            FROM usuarios u
+            JOIN usuario_roles ur ON ur.usuario_id = u.id
+            JOIN roles r ON r.id = ur.role_id
+            WHERE r.nome = 'aluno'
+            ORDER BY u.nome ASC
+        """)
+        classificacoes_admin = _fetch_all("""
+            SELECT
+                c.id,
+                c.usuario_id,
+                c.disciplina,
+                c.tipo_avaliacao,
+                c.nota,
+                c.observacao,
+                c.data_avaliacao,
+                u.nome AS aluno_nome,
+                u.username AS aluno_username
+            FROM classificacoes c
+            LEFT JOIN usuarios u ON u.id = c.usuario_id
+            ORDER BY c.criado_em DESC
+            LIMIT 200
+        """)
+
     return render_template(
         "admin.html",
         usuario=usuario,
@@ -470,6 +498,8 @@ def admin():
         secciones_admin=secciones_admin,
         secciones=secciones,
         recursos=recursos,
+        alunos=alunos,
+        classificacoes_admin=classificacoes_admin,
     )
 
 
@@ -1304,3 +1334,118 @@ def delete_recurso(recurso_id):
         flash("Erro ao eliminar o recurso.", "danger")
 
     return redirect(url_for("admin.admin", tab="recursos"))
+
+
+# ──────────────────────────────────────────────
+# CLASSIFICAÇÕES
+# ──────────────────────────────────────────────
+
+@admin_bp.route("/admin/classificacoes/nova", methods=["POST"])
+def create_classificacao():
+    try:
+        usuario_id = _to_int(request.form.get("usuario_id"))
+        disciplina = request.form.get("disciplina", "").strip()
+        tipo_avaliacao = request.form.get("tipo_avaliacao", "").strip()
+        nota_raw = request.form.get("nota", "").strip()
+        observacao = request.form.get("observacao", "").strip()
+
+        nota = None
+        if nota_raw:
+            nota = float(nota_raw)
+            if nota < 0 or nota > 20:
+                flash("A nota deve estar entre 0 e 20.", "warning")
+                return redirect(url_for("admin.admin", tab="avaliacoes"))
+
+        if usuario_id and disciplina and tipo_avaliacao:
+            db.session.execute(
+                text("""
+                    INSERT INTO classificacoes
+                    (usuario_id, disciplina, tipo_avaliacao, nota, observacao, data_avaliacao, criado_em)
+                    VALUES
+                    (:usuario_id, :disciplina, :tipo_avaliacao, :nota, :observacao, CURDATE(), NOW())
+                """),
+                {
+                    "usuario_id": usuario_id,
+                    "disciplina": disciplina,
+                    "tipo_avaliacao": tipo_avaliacao,
+                    "nota": nota,
+                    "observacao": observacao or None,
+                },
+            )
+            db.session.commit()
+            flash("Classificação registada com sucesso.", "success")
+        else:
+            flash("Faltam dados obrigatórios (aluno, disciplina e tipo de avaliação).", "warning")
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error("Error creando clasificación: %s", e, exc_info=True)
+        flash("Erro ao registar a classificação.", "danger")
+
+    return redirect(url_for("admin.admin", tab="avaliacoes"))
+
+
+# ──────────────────────────────────────────────
+# ENTREGAS (admin view)
+# ──────────────────────────────────────────────
+
+@admin_bp.route("/admin/entregas")
+def admin_entregas():
+    usuario = get_current_user()
+
+    entregas = _fetch_all("""
+        SELECT
+            e.id,
+            e.estado,
+            e.ficheiro_url,
+            e.nota,
+            e.data_entrega,
+            e.usuario_id,
+            e.recurso_id,
+            u.nome        AS aluno_nome,
+            u.username    AS aluno_username,
+            r.titulo      AS recurso_titulo,
+            d.nombre      AS disciplina_nome
+        FROM entregas e
+        LEFT JOIN usuarios u ON u.id = e.usuario_id
+        LEFT JOIN recursos_disciplina r ON r.id = e.recurso_id
+        LEFT JOIN secciones_disciplina s ON s.id = r.seccion_id
+        LEFT JOIN disciplinas_ciclo d ON d.id = s.disciplina_id
+        ORDER BY e.data_entrega DESC
+        LIMIT 500
+    """)
+
+    return render_template(
+        "admin_entregas.html",
+        usuario=usuario,
+        entregas=entregas,
+    )
+
+
+@admin_bp.route("/admin/entregas/<int:entrega_id>/nota", methods=["POST"])
+def admin_nota_entrega(entrega_id):
+    try:
+        nota_raw = request.form.get("nota", "").strip()
+        estado = request.form.get("estado", "entregue").strip()
+
+        nota = None
+        if nota_raw:
+            nota = float(nota_raw)
+
+        db.session.execute(
+            text("""
+                UPDATE entregas
+                SET nota = :nota, estado = :estado
+                WHERE id = :id
+            """),
+            {"nota": nota, "estado": estado, "id": entrega_id},
+        )
+        db.session.commit()
+        flash("Nota atualizada.", "success")
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error("Error actualizando nota de entrega: %s", e, exc_info=True)
+        flash("Erro ao atualizar a nota.", "danger")
+
+    return redirect(url_for("admin.admin_entregas"))

@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Entregas dos Alunos — Administração{% endblock %}
+{% block hero_title %}Entregas dos Alunos{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <a href="{{ url_for('admin.admin', tab='avaliacoes') }}"
+       class="btn btn-secondary btn-sm"
+       style="margin-bottom:10px">
+      ← Voltar ao painel admin
+    </a>
+    <h1>Entregas dos Alunos</h1>
+    <p class="subtitle">Consulta, avaliação e feedback das tarefas entregues</p>
+  </div>
+</div>
+
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% if msgs %}
+    {% for cat, msg in msgs %}
+      <div class="alert alert-{{ cat }} mb-20">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="card">
+  {% if entregas %}
+    <div style="padding:14px 18px;border-bottom:1px solid var(--line)">
+      <span class="text-sm text-muted">{{ entregas | length }} entrega(s) encontrada(s)</span>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;min-width:900px">
+        <thead>
+          <tr style="border-bottom:1px solid var(--line);background:var(--bg)">
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">#</th>
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Aluno</th>
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Recurso</th>
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Disciplina</th>
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Data</th>
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Estado</th>
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Nota</th>
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Ficheiro</th>
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in entregas %}
+            <tr style="border-bottom:1px solid var(--line)">
+              <td style="padding:10px 14px;font-size:12px;color:var(--muted)">{{ e.id }}</td>
+              <td style="padding:10px 14px;font-size:13px;font-weight:600">
+                {{ e.aluno_nome or e.aluno_username or '—' }}
+              </td>
+              <td style="padding:10px 14px;font-size:13px">
+                {{ e.recurso_titulo or '—' }}
+              </td>
+              <td style="padding:10px 14px;font-size:12px;color:var(--text-2)">
+                {{ e.disciplina_nome or '—' }}
+              </td>
+              <td style="padding:10px 14px;font-size:12px;color:var(--muted);white-space:nowrap">
+                {{ e.data_entrega.strftime('%d/%m/%Y %H:%M') if e.data_entrega else '—' }}
+              </td>
+              <td style="padding:10px 14px">
+                {% if e.estado == 'avaliado' %}
+                  <span class="act-badge ab-completado">Avaliado</span>
+                {% elif e.estado == 'entregue' %}
+                  <span class="act-badge ab-abierto">Entregue</span>
+                {% else %}
+                  <span class="act-badge ab-pendiente">{{ e.estado or '—' }}</span>
+                {% endif %}
+              </td>
+              <td style="padding:10px 14px;font-size:13px;font-weight:700">
+                {% if e.nota is not none and e.nota != '' %}
+                  <span style="color:{{ '#059669' if e.nota|float >= 10 else '#dc2626' }}">
+                    {{ e.nota }}/20
+                  </span>
+                {% else %}
+                  <span style="color:var(--muted)">—</span>
+                {% endif %}
+              </td>
+              <td style="padding:10px 14px">
+                {% if e.ficheiro_url %}
+                  <a href="{{ e.ficheiro_url }}"
+                     target="_blank"
+                     rel="noopener"
+                     class="btn btn-secondary btn-sm"
+                     style="font-size:11px">
+                    Ver
+                  </a>
+                {% else %}
+                  <span style="color:var(--muted);font-size:12px">—</span>
+                {% endif %}
+              </td>
+              <td style="padding:10px 14px">
+                <form method="post"
+                      action="{{ url_for('admin.admin_nota_entrega', entrega_id=e.id) }}"
+                      style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="number"
+                         name="nota"
+                         min="0"
+                         max="20"
+                         step="0.1"
+                         value="{{ e.nota if e.nota is not none else '' }}"
+                         placeholder="0–20"
+                         style="width:70px;font-size:12px">
+                  <select name="estado" style="font-size:12px">
+                    <option value="entregue" {% if e.estado == 'entregue' %}selected{% endif %}>Entregue</option>
+                    <option value="avaliado" {% if e.estado == 'avaliado' %}selected{% endif %}>Avaliado</option>
+                    <option value="pendente" {% if e.estado == 'pendente' %}selected{% endif %}>Pendente</option>
+                  </select>
+                  <button type="submit" class="btn btn-secondary btn-sm" style="font-size:11px;white-space:nowrap">
+                    Guardar
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="card-body">
+      <p style="font-size:13px;color:var(--muted)">
+        Ainda não há nenhuma entrega registada.
+      </p>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

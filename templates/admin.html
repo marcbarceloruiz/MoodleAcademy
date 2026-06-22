@@ -271,7 +271,8 @@
       ('ciclos','Ciclos formativos'),
       ('disciplinas','Disciplinas'),
       ('secciones','Secções'),
-      ('recursos','Recursos')
+      ('recursos','Recursos'),
+      ('avaliacoes','Avaliações')
     ] %}
       <a class="tab {% if tab == t %}active{% endif %}"
          href="{{ url_for('admin.admin', tab=t) }}">
@@ -1129,6 +1130,117 @@
       </div>
 
     {% endif %}
+
+    {% if tab == 'avaliacoes' %}
+
+      <div class="table-toolbar" style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">
+        <span class="text-sm text-muted">{{ classificacoes_admin | length }} classificação(ões) registada(s)</span>
+        <a href="{{ url_for('admin.admin_entregas') }}" class="btn btn-secondary btn-sm">
+          Ver entregas dos alunos
+        </a>
+      </div>
+
+      <!-- Formulário nova classificação -->
+      <div style="padding:18px 20px;border-bottom:1px solid var(--line);background:var(--bg)">
+        <h4 style="font-size:13px;font-weight:700;margin-bottom:12px">Registar nova classificação</h4>
+        <form method="post"
+              action="{{ url_for('admin.create_classificacao') }}"
+              style="display:grid;grid-template-columns:1fr 1fr 1fr 100px 1fr auto;gap:10px;align-items:end">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div>
+            <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px">Aluno</label>
+            <select name="usuario_id" required style="width:100%">
+              <option value="">Selecionar aluno…</option>
+              {% for a in alunos %}
+                <option value="{{ a.id }}">{{ a.nome or a.username }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px">Disciplina</label>
+            <input type="text" name="disciplina" required placeholder="Ex: Português" style="width:100%;box-sizing:border-box">
+          </div>
+
+          <div>
+            <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px">Tipo de avaliação</label>
+            <select name="tipo_avaliacao" required style="width:100%">
+              <option value="">Selecionar…</option>
+              <option value="Teste">Teste</option>
+              <option value="Trabalho">Trabalho</option>
+              <option value="Prática">Prática</option>
+              <option value="Oral">Oral</option>
+              <option value="Projeto">Projeto</option>
+              <option value="PAP">PAP</option>
+              <option value="FCT">FCT</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px">Nota (0–20)</label>
+            <input type="number" name="nota" min="0" max="20" step="0.1" placeholder="0–20" style="width:100%;box-sizing:border-box">
+          </div>
+
+          <div>
+            <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:3px">Observação</label>
+            <input type="text" name="observacao" placeholder="Opcional" style="width:100%;box-sizing:border-box">
+          </div>
+
+          <div>
+            <button type="submit" class="btn btn-primary btn-sm" style="white-space:nowrap">
+              Registar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tabela de classificações -->
+      {% if classificacoes_admin %}
+        <div class="admin-table-wrap">
+          <table class="data-table" style="min-width:900px">
+            <thead>
+              <tr>
+                <th>Aluno</th>
+                <th>Disciplina</th>
+                <th>Tipo</th>
+                <th>Nota</th>
+                <th>Observação</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in classificacoes_admin %}
+                <tr>
+                  <td style="font-weight:600">{{ c.aluno_nome or c.aluno_username or c.usuario_id }}</td>
+                  <td>{{ c.disciplina }}</td>
+                  <td>{{ c.tipo_avaliacao }}</td>
+                  <td>
+                    {% if c.nota is not none %}
+                      <span style="font-weight:700;color:{{ '#059669' if c.nota|float >= 10 else '#dc2626' }}">
+                        {{ c.nota }}/20
+                      </span>
+                    {% else %}
+                      <span style="color:var(--muted)">—</span>
+                    {% endif %}
+                  </td>
+                  <td style="color:var(--text-2)">{{ c.observacao or '—' }}</td>
+                  <td style="color:var(--muted);white-space:nowrap">
+                    {{ c.data_avaliacao.strftime('%d/%m/%Y') if c.data_avaliacao else '—' }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div style="padding:20px">
+          <p style="font-size:13px;color:var(--muted)">Ainda não há classificações registadas.</p>
+        </div>
+      {% endif %}
+
+    {% endif %}
+
   </div>
 </div>
 
