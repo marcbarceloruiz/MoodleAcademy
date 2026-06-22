@@ -1,0 +1,5 @@
+[33m4d7a291[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Actualizar producción
+[33m9534b3e[m feat: add Avaliações tab and entregas management to admin panel
+[33m6b7ab0f[m feat: update disciplina_detail.html with progress, submissions and forum/quiz links
+[33me5b24d8[m feat: wire student_bp in app.py and enrich disciplina_detail route
+[33m7f916be[m feat: add student blueprint with progress, submissions, forum and quiz routes
