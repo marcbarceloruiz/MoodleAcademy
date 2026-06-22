@@ -5,6 +5,29 @@
 
 {% block content %}
 
+<!-- Barra de estatísticas da plataforma -->
+<div class="plataforma-stats no-print">
+  <div class="pstat">
+    <div class="pstat-num">{{ n_ciclos }}</div>
+    <div class="pstat-lbl">Ciclos Formativos</div>
+  </div>
+  <div class="pstat-divider"></div>
+  <div class="pstat">
+    <div class="pstat-num">{{ n_areas }}</div>
+    <div class="pstat-lbl">Áreas Institucionais</div>
+  </div>
+  <div class="pstat-divider"></div>
+  <div class="pstat">
+    <div class="pstat-num">{{ "{:,}".format(n_recursos).replace(",", ".") }}</div>
+    <div class="pstat-lbl">Recursos Disponíveis</div>
+  </div>
+  <div class="pstat-divider"></div>
+  <div class="pstat">
+    <div class="pstat-num">2025/26</div>
+    <div class="pstat-lbl">Ano Letivo</div>
+  </div>
+</div>
+
 {# ── ADMINISTRADOR ─────────────────────────────────────────── #}
 {% if session_is_admin %}
 

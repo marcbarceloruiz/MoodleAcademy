@@ -87,7 +87,7 @@
 <!-- Secções da disciplina -->
 {% if disciplina.secciones %}
   {% for seccion in disciplina.secciones %}
-    <section class="card mb-20" id="{{ seccion.slug }}">
+    <section class="card mb-20 seccion-{{ seccion.slug }}" id="{{ seccion.slug }}">
       <div class="card-head">
         <div>
           <h3>{{ seccion.titulo }}</h3>
@@ -107,7 +107,7 @@
       <div class="card-body" style="padding:0">
         {% if seccion.recursos %}
           {% for recurso in seccion.recursos %}
-            <div class="disciplina-row">
+            <div class="disciplina-row" data-tipo="{{ recurso.tipo }}">
               <div class="ai-icon ai-video">
                 {{ recurso._icono }}
               </div>

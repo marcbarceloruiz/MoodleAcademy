@@ -12,6 +12,8 @@ sem rebentar a página.
 """
 
 from flask import Blueprint, render_template, session, url_for
+from extensions import db
+from sqlalchemy import text
 
 from decorators import login_required
 from services.data_service import (
@@ -110,6 +112,13 @@ def dashboard():
     elif is_aluno:
         mis_cursos = _cursos_do_aluno(None)
 
+    try:
+        n_ciclos   = db.session.execute(text("SELECT COUNT(*) FROM ciclos_formativos WHERE activo=1")).scalar() or 12
+        n_areas    = db.session.execute(text("SELECT COUNT(*) FROM areas_institucionais WHERE ativo=1")).scalar() or 17
+        n_recursos = db.session.execute(text("SELECT COUNT(*) FROM recursos_disciplina WHERE visible=1")).scalar() or 0
+    except Exception:
+        n_ciclos, n_areas, n_recursos = 12, 17, 0
+
     return render_template(
         'dashboard.html',
         usuario=usuario,
@@ -122,6 +131,9 @@ def dashboard():
         tarefas_pendentes=tarefas_pendentes,
         format_date=format_date,
         format_date_short=format_date_short,
+        n_ciclos=n_ciclos,
+        n_areas=n_areas,
+        n_recursos=n_recursos,
     )
 
 

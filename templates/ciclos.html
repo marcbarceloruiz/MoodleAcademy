@@ -54,7 +54,7 @@
 {% if ciclos %}
   <div class="ciclos-grid">
     {% for c in ciclos %}
-      <article class="ciclo-card">
+      <article class="ciclo-card ciclo-area-{{ c.area }}">
         <div class="ciclo-card-head">
           <div style="font-size:26px;margin-bottom:8px">
             {{ c._icono }}
