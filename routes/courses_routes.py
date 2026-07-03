@@ -132,6 +132,8 @@ def ciclo_detail(ciclo_id):
     """
     Detalle de ciclo formativo con años, disciplinas, FCT y PAP.
     """
+    from sqlalchemy import bindparam
+
     usuario = get_current_user()
     ciclo = get_ciclo_by_id(ciclo_id)
 
@@ -147,9 +149,61 @@ def ciclo_detail(ciclo_id):
     for ano in ciclo.get("anos", []):
         for disciplina in ano.get("disciplinas", []):
             disciplina["_icono"] = tipo_iconos.get(
-                disciplina.get("tipo", "disciplina"),
-                "📘",
+                disciplina.get("tipo", "disciplina"), "📘",
             )
+            disciplina["_progresso_pct"]   = 0
+            disciplina["_progresso_done"]  = 0
+            disciplina["_progresso_total"] = 0
+
+    # Progresso real do aluno por disciplina
+    usuario_id = session.get("usuario_id")
+    if usuario_id:
+        disc_ids = [
+            d["id"]
+            for a in ciclo.get("anos", [])
+            for d in a.get("disciplinas", [])
+            if d.get("id")
+        ]
+        if disc_ids:
+            try:
+                totals = {
+                    r["disciplina_id"]: r["total"]
+                    for r in db.session.execute(
+                        text("""
+                            SELECT s.disciplina_id, COUNT(r.id) AS total
+                            FROM recursos_disciplina r
+                            JOIN secciones_disciplina s ON s.id = r.seccion_id
+                            WHERE r.visible = 1
+                              AND s.disciplina_id IN :ids
+                            GROUP BY s.disciplina_id
+                        """).bindparams(bindparam("ids", expanding=True)),
+                        {"ids": disc_ids},
+                    ).mappings().all()
+                }
+                dones = {
+                    r["disciplina_id"]: r["done"]
+                    for r in db.session.execute(
+                        text("""
+                            SELECT s.disciplina_id, COUNT(rc.id) AS done
+                            FROM recurso_conclusao rc
+                            JOIN recursos_disciplina r ON r.id = rc.recurso_id
+                            JOIN secciones_disciplina s ON s.id = r.seccion_id
+                            WHERE rc.usuario_id = :uid
+                              AND s.disciplina_id IN :ids
+                            GROUP BY s.disciplina_id
+                        """).bindparams(bindparam("ids", expanding=True)),
+                        {"uid": usuario_id, "ids": disc_ids},
+                    ).mappings().all()
+                }
+                for ano in ciclo.get("anos", []):
+                    for disc in ano.get("disciplinas", []):
+                        total = totals.get(disc["id"], 0)
+                        done  = dones.get(disc["id"], 0)
+                        disc["_progresso_total"] = total
+                        disc["_progresso_done"]  = done
+                        disc["_progresso_pct"]   = int(done / total * 100) if total else 0
+            except Exception:
+                pass
 
     return render_template(
         "ciclo_detail.html",
@@ -187,7 +241,7 @@ def disciplina_detail(disciplina_id):
         try:
             rows = db.session.execute(
                 text("""
-                    SELECT recurso_id, data_entrega
+                    SELECT recurso_id, data_entrega, nota, estado
                     FROM entregas
                     WHERE usuario_id = :u AND recurso_id IS NOT NULL
                     ORDER BY data_entrega DESC
@@ -196,7 +250,11 @@ def disciplina_detail(disciplina_id):
             ).mappings().all()
             for r in rows:
                 if r["recurso_id"] not in entregues:
-                    entregues[r["recurso_id"]] = r["data_entrega"]
+                    entregues[r["recurso_id"]] = {
+                        "dt":     r["data_entrega"],
+                        "nota":   r["nota"],
+                        "estado": r["estado"],
+                    }
         except Exception:
             pass
 
@@ -209,10 +267,12 @@ def disciplina_detail(disciplina_id):
         seccion["_progresso_done"] = done
         seccion["_progresso_pct"] = int(done / total * 100) if total else 0
 
+    from datetime import datetime
     return render_template(
         "disciplina_detail.html",
         usuario=usuario,
         disciplina=disciplina,
         concluidos=concluidos,
         entregues=entregues,
+        now=datetime.now(),
     )

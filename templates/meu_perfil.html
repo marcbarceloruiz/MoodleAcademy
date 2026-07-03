@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}O meu perfil — Campus Virtual{% endblock %}
+{% block hero_title %}O meu perfil{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <h1>O meu perfil</h1>
+    <p class="subtitle">Dados pessoais e segurança da conta</p>
+  </div>
+</div>
+
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% if msgs %}
+    {% for cat, msg in msgs %}
+      <div class="alert alert-{{ cat }} mb-20">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
+
+  <!-- Dados pessoais -->
+  <div class="card">
+    <div class="card-head">
+      <h3>Dados pessoais</h3>
+    </div>
+    <div class="card-body">
+      <form method="post" action="{{ url_for('auth.meu_perfil') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="perfil">
+
+        <div style="margin-bottom:14px">
+          <label class="text-sm text-muted">Utilizador</label>
+          <input class="table-filter"
+                 type="text"
+                 value="{{ usuario.username }}"
+                 disabled
+                 style="width:100%;margin-top:6px;padding:8px 12px;opacity:.6">
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label class="text-sm text-muted">Email</label>
+          <input class="table-filter"
+                 type="text"
+                 value="{{ usuario.email or '—' }}"
+                 disabled
+                 style="width:100%;margin-top:6px;padding:8px 12px;opacity:.6">
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label class="text-sm text-muted" for="nome">Nome</label>
+          <input id="nome"
+                 class="table-filter"
+                 type="text"
+                 name="nome"
+                 value="{{ usuario.nome or '' }}"
+                 placeholder="O teu nome"
+                 style="width:100%;margin-top:6px;padding:8px 12px">
+        </div>
+
+        <div style="margin-bottom:20px">
+          <label class="text-sm text-muted" for="apelido">Apelido</label>
+          <input id="apelido"
+                 class="table-filter"
+                 type="text"
+                 name="apelido"
+                 value="{{ usuario.apelido or '' }}"
+                 placeholder="O teu apelido"
+                 style="width:100%;margin-top:6px;padding:8px 12px">
+        </div>
+
+        <button class="btn btn-primary" type="submit" style="width:100%;padding:10px">
+          Guardar alterações
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+
+    <!-- Alterar palavra-passe -->
+    <div class="card" id="alterar-password">
+      <div class="card-head">
+        <h3>Alterar palavra-passe</h3>
+      </div>
+      <div class="card-body">
+        <form method="post" action="{{ url_for('auth.meu_perfil') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="action" value="password">
+
+          <div style="margin-bottom:14px">
+            <label class="text-sm text-muted" for="password_atual">Palavra-passe atual</label>
+            <input id="password_atual"
+                   class="table-filter"
+                   type="password"
+                   name="password_atual"
+                   required
+                   autocomplete="current-password"
+                   placeholder="••••••••"
+                   style="width:100%;margin-top:6px;padding:8px 12px">
+          </div>
+
+          <div style="margin-bottom:14px">
+            <label class="text-sm text-muted" for="password_nova">Nova palavra-passe</label>
+            <input id="password_nova"
+                   class="table-filter"
+                   type="password"
+                   name="password_nova"
+                   required
+                   minlength="8"
+                   autocomplete="new-password"
+                   placeholder="mínimo 8 caracteres"
+                   style="width:100%;margin-top:6px;padding:8px 12px">
+          </div>
+
+          <div style="margin-bottom:20px">
+            <label class="text-sm text-muted" for="password_nova2">Confirmar nova palavra-passe</label>
+            <input id="password_nova2"
+                   class="table-filter"
+                   type="password"
+                   name="password_nova2"
+                   required
+                   minlength="8"
+                   autocomplete="new-password"
+                   placeholder="••••••••"
+                   style="width:100%;margin-top:6px;padding:8px 12px">
+          </div>
+
+          <button class="btn btn-secondary" type="submit" style="width:100%;padding:10px">
+            Alterar palavra-passe
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="card">
+      <div class="card-head">
+        <h3>A minha atividade</h3>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:center">
+          <div style="padding:16px;background:var(--bg);border-radius:var(--radius-sm)">
+            <div style="font-size:28px;font-weight:800;color:var(--cyan)">{{ stats.recursos_concluidos }}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">Recursos concluídos</div>
+          </div>
+          <div style="padding:16px;background:var(--bg);border-radius:var(--radius-sm)">
+            <div style="font-size:28px;font-weight:800;color:var(--cyan)">{{ stats.entregas }}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">Tarefas entregues</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line);text-align:center">
+          <a href="{{ url_for('student.as_minhas_entregas') }}" class="btn btn-secondary btn-sm">
+            Ver as minhas entregas
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

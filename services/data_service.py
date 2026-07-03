@@ -371,7 +371,8 @@ def get_teachers():
 # ──────────────────────────────────────────────
 
 def _event_mysql_to_dict(row):
-    fecha = row["data_evento"]
+    fecha_raw = row["data_evento"]
+    fecha = str(fecha_raw)[:10] if fecha_raw is not None else ""
 
     return {
         "id": row["id"],
@@ -1098,7 +1099,8 @@ def get_disciplina_by_id(disciplina_id):
                         tipo,
                         descripcion,
                         url,
-                        orden
+                        orden,
+                        data_limite
                     FROM recursos_disciplina
                     WHERE seccion_id = :seccion_id
                       AND visible = 1
@@ -1111,14 +1113,15 @@ def get_disciplina_by_id(disciplina_id):
                 tipo = recurso_row["tipo"]
 
                 seccion["recursos"].append({
-                    "id": recurso_row["id"],
-                    "titulo": recurso_row["titulo"],
-                    "tipo": tipo,
+                    "id":          recurso_row["id"],
+                    "titulo":      recurso_row["titulo"],
+                    "tipo":        tipo,
                     "descripcion": recurso_row["descripcion"],
-                    "url": recurso_row["url"],
-                    "orden": recurso_row["orden"],
-                    "_icono": recurso_icono(tipo),
-                    "_badge": recurso_badge(tipo),
+                    "url":         recurso_row["url"],
+                    "orden":       recurso_row["orden"],
+                    "data_limite": recurso_row["data_limite"],
+                    "_icono":        recurso_icono(tipo),
+                    "_badge":        recurso_badge(tipo),
                     "_action_label": url_action_label(recurso_row["url"], tipo),
                 })
 

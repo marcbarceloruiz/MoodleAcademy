@@ -17,6 +17,10 @@ class Config:
     )
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "connect_args": {"connect_timeout": 3},
+        "pool_pre_ping": True,
+    }
 
     DEBUG = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
     TEMPLATES_AUTO_RELOAD = True
@@ -37,6 +41,16 @@ class Config:
     )
 
     MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10 MB
+
+    # Email — configurar via .env
+    MAIL_SERVER   = os.environ.get("MAIL_SERVER",   "smtp.gmail.com")
+    MAIL_PORT     = int(os.environ.get("MAIL_PORT", 587))
+    MAIL_USE_TLS  = True
+    MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
+    MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
+    MAIL_DEFAULT_SENDER = os.environ.get(
+        "MAIL_DEFAULT_SENDER", "campus@academiaprofissional.pt"
+    )
 
     ALLOWED_UPLOAD_EXTENSIONS = {
         "pdf",

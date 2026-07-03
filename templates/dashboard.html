@@ -60,7 +60,7 @@
     <div class="card-head"><h3>📅 Eventos próximos</h3></div>
     <div class="card-body">
       {% for ev in eventos %}
-      {% set parts = ev.fecha.split('-') %}
+      {% set parts = (ev.fecha | string).split('-') %}
       <div class="task-item">
         <div class="task-date">
           {{ ev._dia if ev._dia is defined else parts[2] | int }}
@@ -150,7 +150,7 @@
     <div class="card-head"><h3>📅 Tarefas e eventos próximos</h3></div>
     <div class="card-body">
       {% for ev in eventos %}
-      {% set parts = ev.fecha.split('-') %}
+      {% set parts = (ev.fecha | string).split('-') %}
       <div class="task-item">
         <div class="task-date">
           {{ ev._dia if ev._dia is defined else parts[2] | int }}
@@ -197,7 +197,7 @@
       <div class="lbl">Cursos</div>
     </div>
     <div class="welcome-stat">
-      <div class="num">{{ mis_cursos | selectattr('estado', 'equalto', 'en-progreso') | list | length }}</div>
+      <div class="num">{{ mis_cursos | selectattr('estado', 'equalto', 'em_curso') | list | length }}</div>
       <div class="lbl">Em curso</div>
     </div>
     <div class="welcome-stat">
@@ -237,7 +237,7 @@
     <div class="card-head"><h3>Tarefas e eventos próximos</h3></div>
     <div class="card-body">
       {% for ev in eventos %}
-      {% set parts = ev.fecha.split('-') %}
+      {% set parts = (ev.fecha | string).split('-') %}
       <div class="task-item">
         <div class="task-date">
           {{ ev._dia if ev._dia is defined else parts[2] | int }}

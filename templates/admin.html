@@ -945,7 +945,7 @@
           <form method="post"
                 enctype="multipart/form-data"
                 action="{{ url_for('admin.create_recurso') }}"
-                style="display:grid;grid-template-columns:1.7fr 1.2fr .8fr 1.6fr 1.2fr 1.4fr auto;gap:10px;align-items:end">
+                style="display:grid;grid-template-columns:1.7fr 1.2fr .8fr 1.6fr 1.2fr 1.4fr 1.1fr auto;gap:10px;align-items:end">
 
             <div>
               <label class="text-sm text-muted">Secção</label>
@@ -992,6 +992,11 @@
               <input class="table-filter" type="file" name="archivo" style="width:100%">
             </div>
 
+            <div>
+              <label class="text-sm text-muted">Prazo entrega</label>
+              <input class="table-filter" type="datetime-local" name="data_limite" style="width:100%">
+            </div>
+
             <button class="btn btn-primary btn-sm" type="submit">
               Adicionar
             </button>
@@ -1010,6 +1015,7 @@
               <th>Descrição</th>
               <th>URL</th>
               <th>Ficheiro</th>
+              <th>Prazo</th>
               <th>Ordem</th>
               <th>Visível</th>
               <th>Ação</th>
@@ -1074,6 +1080,15 @@
                 <td>
                   <input form="recurso-form-{{ r.id }}"
                          class="table-filter"
+                         type="datetime-local"
+                         name="data_limite"
+                         value="{{ r.data_limite.strftime('%Y-%m-%dT%H:%M') if r.data_limite else '' }}"
+                         style="width:160px;font-size:12px">
+                </td>
+
+                <td>
+                  <input form="recurso-form-{{ r.id }}"
+                         class="table-filter"
                          type="number"
                          name="orden"
                          value="{{ r.orden }}"
@@ -1109,6 +1124,13 @@
                       Guardar
                     </button>
 
+                    {% if r.tipo == 'cuestionario' %}
+                    <a class="btn btn-secondary btn-sm"
+                       href="{{ url_for('admin.admin_quiz', recurso_id=r.id) }}">
+                      📝 Perguntas
+                    </a>
+                    {% endif %}
+
                     <button class="btn btn-secondary btn-sm"
                             form="recurso-toggle-{{ r.id }}"
                             type="submit">
@@ -1137,6 +1159,9 @@
         <span class="text-sm text-muted">{{ classificacoes_admin | length }} classificação(ões) registada(s)</span>
         <a href="{{ url_for('admin.admin_entregas') }}" class="btn btn-secondary btn-sm">
           Ver entregas dos alunos
+        </a>
+        <a href="{{ url_for('admin.admin_atividade') }}" class="btn btn-secondary btn-sm">
+          Ver atividade
         </a>
       </div>
 

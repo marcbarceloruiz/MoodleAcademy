@@ -9,7 +9,18 @@
       "PowerShell(python -c \"import playwright; print\\(playwright.__version__\\)\")",
       "Bash(python -c \"from app import create_app; app = create_app\\(\\); print\\('OK'\\)\")",
       "Bash(python -c ' *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(grep -r \"class.*Entrega\\\\|class.*Recurso\\\\|class.*Usuario\" . --include=\"*.py\" ! -path \"*/venv/*\")",
+      "Bash(grep -r \"entregas\\\\|recursos_disciplina\\\\|usuarios\" . --include=\"*.py\" ! -path \"*/venv/*\")",
+      "Bash(grep -r \"CREATE TABLE.*entregas\" . --include=\"*.sql\" --include=\"*.py\" ! -path \"*/venv/*\")",
+      "Bash(grep -r \"entregas\" . --include=\"*.sql\" ! -path \"*/venv/*\")",
+      "Bash(xargs grep -l \"entregas\")",
+      "Bash(grep -r \"MAIL_SERVER\\\\|SMTP\\\\|flask_mail\" . --include=\"*.py\" ! -path \"*/venv/*\")",
+      "Bash(grep -r \"completado\\\\|progreso\\\\|viewed\\\\|recurso_conclusao\" . --include=\"*.py\" ! -path \"*/venv/*\")",
+      "Bash(pip install *)",
+      "PowerShell(.\\\\venv\\\\Scripts\\\\python.exe -m py_compile routes\\\\student_routes.py routes\\\\admin_routes.py routes\\\\messages_routes.py app.py services\\\\data_service.py)",
+      "PowerShell(if \\($?\\) { \"OK - todo compila\" })",
+      "PowerShell(.\\\\venv\\\\Scripts\\\\python.exe \"C:\\\\Users\\\\marcm\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-marcm-Desktop-MoodleAcademy\\\\418a0634-eb86-48a7-bc56-f52021db891a\\\\scratchpad\\\\check_templates.py\")"
     ]
   }
 }

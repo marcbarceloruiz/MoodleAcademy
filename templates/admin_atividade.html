@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Atividade dos Alunos — Administração{% endblock %}
+{% block hero_title %}Atividade dos Alunos{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <a href="{{ url_for('admin.admin', tab='avaliacoes') }}"
+       class="btn btn-secondary btn-sm"
+       style="margin-bottom:10px">
+      ← Voltar ao painel admin
+    </a>
+    <h1>Atividade dos Alunos</h1>
+    <p class="subtitle">Recursos concluídos e tarefas entregues — últimas 500 ações</p>
+  </div>
+</div>
+
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% if msgs %}
+    {% for cat, msg in msgs %}
+      <div class="alert alert-{{ cat }} mb-20">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<div class="card">
+  {% if logs %}
+    <div style="padding:14px 18px;border-bottom:1px solid var(--line)">
+      <span class="text-sm text-muted">{{ logs | length }} ação(ões) registada(s)</span>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;min-width:700px">
+        <thead>
+          <tr style="border-bottom:1px solid var(--line);background:var(--bg)">
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Data</th>
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Aluno</th>
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Ação</th>
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Recurso</th>
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Disciplina</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+            <tr style="border-bottom:1px solid var(--line)">
+              <td style="padding:10px 14px;font-size:12px;color:var(--muted);white-space:nowrap">
+                {{ log.created_at.strftime('%d/%m/%Y %H:%M') if log.created_at else '—' }}
+              </td>
+              <td style="padding:10px 14px;font-size:13px;font-weight:600">
+                {{ log.aluno_nome or log.aluno_username or '—' }}
+              </td>
+              <td style="padding:10px 14px">
+                {% if log.tipo == 'conclusao' %}
+                  <span class="act-badge ab-completado">✓ Concluiu</span>
+                {% elif log.tipo == 'entrega' %}
+                  <span class="act-badge ab-abierto">📤 Entregou</span>
+                {% else %}
+                  <span class="act-badge ab-pendiente">{{ log.tipo }}</span>
+                {% endif %}
+              </td>
+              <td style="padding:10px 14px;font-size:13px">
+                {{ log.recurso_titulo or '—' }}
+              </td>
+              <td style="padding:10px 14px;font-size:12px;color:var(--text-2)">
+                {{ log.disciplina_nome or '—' }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="card-body">
+      <p style="font-size:13px;color:var(--muted)">
+        Ainda não há atividade registada.
+      </p>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

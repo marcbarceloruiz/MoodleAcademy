@@ -7,36 +7,132 @@
 
 <div class="view-header">
   <div>
+    <a href="javascript:history.back()" class="btn btn-secondary btn-sm" style="margin-bottom:10px">
+      ← Voltar
+    </a>
     <h1>{{ recurso.titulo }}</h1>
     <p class="subtitle">Questionário de avaliação</p>
   </div>
 </div>
 
-<div class="card" style="max-width:600px;margin:0 auto">
-  <div class="card-body" style="text-align:center;padding:48px 32px">
-    <div style="font-size:48px;margin-bottom:16px">📝</div>
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in msgs %}
+    <div class="alert alert-{{ cat }} mb-20">{{ msg }}</div>
+  {% endfor %}
+{% endwith %}
 
-    <h2 style="font-size:20px;margin-bottom:8px">
-      {{ questionario.titulo if questionario else 'Questionário' }}
-    </h2>
+<div style="max-width:640px;margin:0 auto">
 
-    {% if questionario and questionario.descricao %}
-      <p style="font-size:14px;color:var(--text-2);margin-bottom:20px;line-height:1.6">
-        {{ questionario.descricao }}
-      </p>
-    {% endif %}
+  {% if questionario and n_perguntas > 0 %}
 
-    <div style="background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:20px;margin:24px 0;text-align:left">
-      <p style="font-size:13px;color:var(--muted);margin:0;line-height:1.7">
-        Este questionário está <strong>em preparação</strong>. As perguntas serão disponibilizadas
-        em breve pelo docente responsável. Quando estiver pronto poderás iniciá-lo diretamente aqui.
-      </p>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-body" style="padding:32px;text-align:center">
+        <div style="font-size:48px;margin-bottom:16px">📝</div>
+        <h2 style="font-size:22px;margin-bottom:6px">{{ questionario.titulo }}</h2>
+        {% if questionario.descricao %}
+          <p style="font-size:14px;color:var(--text-2);line-height:1.6;margin-bottom:24px">
+            {{ questionario.descricao }}
+          </p>
+        {% endif %}
+
+        <div style="display:flex;gap:16px;justify-content:center;margin-bottom:28px;flex-wrap:wrap">
+          <div style="text-align:center;padding:14px 20px;background:var(--bg);border-radius:var(--radius-sm);min-width:80px">
+            <div style="font-size:26px;font-weight:800;color:var(--cyan)">{{ n_perguntas }}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Perguntas</div>
+          </div>
+          <div style="text-align:center;padding:14px 20px;background:var(--bg);border-radius:var(--radius-sm);min-width:80px">
+            <div style="font-size:26px;font-weight:800;color:var(--cyan)">{{ tentativas | length }}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Tentativas</div>
+          </div>
+          {% if melhor_nota is not none %}
+          <div style="text-align:center;padding:14px 20px;background:var(--bg);border-radius:var(--radius-sm);min-width:80px">
+            <div style="font-size:26px;font-weight:800;color:{% if melhor_nota >= 10 %}#059669{% else %}#dc2626{% endif %}">
+              {{ melhor_nota | round(1) }}
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">Melhor nota</div>
+          </div>
+          {% endif %}
+        </div>
+
+        <form method="post" action="{{ url_for('student.quiz_iniciar', recurso_id=recurso.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-primary" style="padding:12px 32px;font-size:14px">
+            {% if tentativa_aberta %}▶ Continuar tentativa{% else %}▶ Iniciar questionário{% endif %}
+          </button>
+        </form>
+        <p style="font-size:11px;color:var(--muted);margin-top:12px">
+          Correção automática · Podes repetir o questionário
+        </p>
+      </div>
     </div>
 
-    <span class="act-badge ab-pendiente" style="font-size:13px;padding:8px 20px">
-      Em preparação
-    </span>
-  </div>
+    {% if tentativas %}
+    <div class="card">
+      <div class="card-head"><h3>As minhas tentativas</h3></div>
+      <div class="card-body" style="padding:0">
+        {% for t in tentativas %}
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line)">
+            <div>
+              <div style="font-size:13px;font-weight:600">
+                Tentativa {{ loop.length - loop.index0 }}
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">
+                {{ t.iniciada_em.strftime('%d/%m/%Y %H:%M') if t.iniciada_em else '—' }}
+              </div>
+            </div>
+            {% if t.terminada_em and t.nota is not none %}
+              <div style="display:flex;align-items:center;gap:12px">
+                <span style="font-size:16px;font-weight:800;color:{% if t.nota >= 10 %}#059669{% else %}#dc2626{% endif %}">
+                  {{ t.nota | round(1) }} / 20
+                </span>
+                <a href="{{ url_for('student.quiz_resultado', recurso_id=recurso.id, tentativa_id=t.id) }}"
+                   class="btn btn-secondary btn-sm" style="font-size:11px">
+                  Rever
+                </a>
+              </div>
+            {% else %}
+              <span class="act-badge ab-abierto">Em curso</span>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  {% elif questionario %}
+
+    <div class="card">
+      <div class="card-body" style="padding:32px;text-align:center">
+        <div style="font-size:48px;margin-bottom:16px">📝</div>
+        <h2 style="font-size:20px;margin-bottom:8px">{{ questionario.titulo }}</h2>
+        <div style="background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:20px;margin:24px 0;text-align:left">
+          <p style="font-size:13px;color:var(--muted);margin:0;line-height:1.7">
+            O docente ainda não adicionou perguntas a este questionário.
+            Quando estiverem disponíveis poderás iniciar a avaliação aqui.
+          </p>
+        </div>
+        <span class="act-badge ab-pendiente" style="font-size:13px;padding:8px 20px">Em preparação</span>
+      </div>
+    </div>
+
+  {% else %}
+
+    <div class="card">
+      <div class="card-body" style="padding:32px;text-align:center">
+        <div style="font-size:48px;margin-bottom:16px">📝</div>
+        <h2 style="font-size:20px;margin-bottom:8px">{{ recurso.titulo }}</h2>
+        <div style="background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:20px;margin:24px 0;text-align:left">
+          <p style="font-size:13px;color:var(--muted);margin:0;line-height:1.7">
+            Este questionário está <strong>em preparação</strong>. As perguntas serão
+            disponibilizadas em breve pelo docente responsável.
+          </p>
+        </div>
+        <span class="act-badge ab-pendiente" style="font-size:13px;padding:8px 20px">Em preparação</span>
+      </div>
+    </div>
+
+  {% endif %}
+
 </div>
 
 {% endblock %}

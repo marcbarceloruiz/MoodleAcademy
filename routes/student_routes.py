@@ -69,6 +69,13 @@ def _current_usuario_id():
 
 def _ensure_tables():
     """Cria as tabelas novas se não existirem (idempotente)."""
+    try:
+        db.session.execute(text("SELECT 1"))
+    except Exception:
+        db.session.rollback()
+        current_app.logger.warning("[student] _ensure_tables: DB não disponível, a saltar")
+        return
+
     stmts = [
         """
         CREATE TABLE IF NOT EXISTS recurso_conclusao (
@@ -148,19 +155,50 @@ def _ensure_tables():
             KEY idx_ra_tentativa (tentativa_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
         """,
+        """
+        CREATE TABLE IF NOT EXISTS activity_log (
+            id          INT AUTO_INCREMENT PRIMARY KEY,
+            usuario_id  INT NOT NULL,
+            recurso_id  INT NOT NULL,
+            tipo        VARCHAR(20) NOT NULL DEFAULT 'conclusao',
+            created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            KEY idx_al_usuario (usuario_id),
+            KEY idx_al_recurso (recurso_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        """,
+        """
+        CREATE TABLE IF NOT EXISTS mensagens (
+            id              INT AUTO_INCREMENT PRIMARY KEY,
+            remetente_id    INT NOT NULL,
+            destinatario_id INT NOT NULL,
+            assunto         VARCHAR(255) NOT NULL,
+            corpo           TEXT NOT NULL,
+            lida            TINYINT(1) NOT NULL DEFAULT 0,
+            created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            KEY idx_msg_dest (destinatario_id, lida),
+            KEY idx_msg_rem (remetente_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        """,
     ]
     for stmt in stmts:
         try:
             db.session.execute(text(stmt))
         except Exception as e:
             current_app.logger.warning("[student] _ensure_tables: %s", e)
-    try:
-        db.session.execute(text("""
-            ALTER TABLE entregas
-            ADD COLUMN IF NOT EXISTS recurso_id INT DEFAULT NULL
-        """))
-    except Exception:
-        pass
+
+    extra_alters = [
+        "ALTER TABLE entregas ADD COLUMN IF NOT EXISTS recurso_id INT DEFAULT NULL",
+        "ALTER TABLE entregas ADD COLUMN IF NOT EXISTS feedback TEXT NULL",
+        "ALTER TABLE entregas ADD COLUMN IF NOT EXISTS data_avaliacao DATETIME NULL",
+        "ALTER TABLE recursos_disciplina ADD COLUMN IF NOT EXISTS data_limite DATETIME NULL",
+        "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS reset_token VARCHAR(100) NULL",
+        "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS reset_token_expira DATETIME NULL",
+    ]
+    for stmt in extra_alters:
+        try:
+            db.session.execute(text(stmt))
+        except Exception:
+            pass
     try:
         db.session.commit()
     except Exception:
@@ -198,6 +236,13 @@ def concluir_recurso(recurso_id):
                 """),
                 {"u": usuario_id, "r": recurso_id},
             )
+            try:
+                db.session.execute(
+                    text("INSERT INTO activity_log (usuario_id, recurso_id, tipo) VALUES (:u, :r, 'conclusao')"),
+                    {"u": usuario_id, "r": recurso_id},
+                )
+            except Exception:
+                pass
         db.session.commit()
     except Exception as e:
         db.session.rollback()
@@ -255,6 +300,14 @@ def entregar_recurso(recurso_id):
             },
         )
         db.session.commit()
+        try:
+            db.session.execute(
+                text("INSERT INTO activity_log (usuario_id, recurso_id, tipo) VALUES (:u, :r, 'entrega')"),
+                {"u": usuario_id, "r": recurso_id},
+            )
+            db.session.commit()
+        except Exception:
+            pass
         flash("Entrega realizada com sucesso.", "success")
     except Exception as e:
         db.session.rollback()
@@ -281,6 +334,7 @@ def as_minhas_entregas():
             e.estado,
             e.ficheiro_url,
             e.nota,
+            e.feedback,
             e.data_entrega,
             e.recurso_id,
             r.titulo AS recurso_titulo,
@@ -426,26 +480,258 @@ def forum(recurso_id):
 # QUIZ
 # ──────────────────────────────────────────────
 
-@student_bp.route("/quiz/<int:recurso_id>")
-@login_required
-def quiz(recurso_id):
-    usuario = get_current_user()
-
+def _quiz_context(recurso_id):
+    """Recurso + questionario associados, ou (None, None) se não existirem."""
     recurso = _fetch_one(
         "SELECT id, titulo FROM recursos_disciplina WHERE id = :r",
         {"r": recurso_id},
     )
     if not recurso:
-        abort(404)
-
+        return None, None
     questionario = _fetch_one(
         "SELECT id, titulo, descricao FROM questionarios WHERE recurso_id = :r",
         {"r": recurso_id},
     )
+    return recurso, questionario
+
+
+def _tentativa_aberta(questionario_id, usuario_id):
+    return _fetch_one(
+        """SELECT id, iniciada_em FROM tentativas_quiz
+           WHERE questionario_id = :q AND usuario_id = :u AND terminada_em IS NULL
+           ORDER BY iniciada_em DESC LIMIT 1""",
+        {"q": questionario_id, "u": usuario_id},
+    )
+
+
+@student_bp.route("/quiz/<int:recurso_id>")
+@login_required
+def quiz(recurso_id):
+    usuario = get_current_user()
+    usuario_id = _current_usuario_id()
+
+    recurso, questionario = _quiz_context(recurso_id)
+    if not recurso:
+        abort(404)
+
+    n_perguntas = 0
+    tentativas = []
+    aberta = None
+    if questionario:
+        row = _fetch_one(
+            "SELECT COUNT(*) AS n FROM perguntas WHERE questionario_id = :q",
+            {"q": questionario["id"]},
+        )
+        n_perguntas = (row["n"] if row else 0) or 0
+
+        tentativas = _fetch_all(
+            """SELECT id, nota, iniciada_em, terminada_em
+               FROM tentativas_quiz
+               WHERE questionario_id = :q AND usuario_id = :u
+               ORDER BY iniciada_em DESC LIMIT 10""",
+            {"q": questionario["id"], "u": usuario_id},
+        )
+        aberta = _tentativa_aberta(questionario["id"], usuario_id)
+
+    melhor_nota = None
+    notas = [t["nota"] for t in tentativas if t["nota"] is not None]
+    if notas:
+        melhor_nota = max(notas)
 
     return render_template(
         "quiz.html",
         usuario=usuario,
         recurso=recurso,
         questionario=questionario,
+        n_perguntas=n_perguntas,
+        tentativas=tentativas,
+        tentativa_aberta=aberta,
+        melhor_nota=melhor_nota,
+    )
+
+
+@student_bp.route("/quiz/<int:recurso_id>/iniciar", methods=["POST"])
+@login_required
+def quiz_iniciar(recurso_id):
+    usuario_id = _current_usuario_id()
+    recurso, questionario = _quiz_context(recurso_id)
+    if not recurso or not questionario:
+        abort(404)
+
+    row = _fetch_one(
+        "SELECT COUNT(*) AS n FROM perguntas WHERE questionario_id = :q",
+        {"q": questionario["id"]},
+    )
+    if not row or not row["n"]:
+        flash("Este questionário ainda não tem perguntas.", "warning")
+        return redirect(url_for("student.quiz", recurso_id=recurso_id))
+
+    # Reaproveita a tentativa aberta se existir; senão cria uma nova
+    if not _tentativa_aberta(questionario["id"], usuario_id):
+        try:
+            db.session.execute(
+                text("""INSERT INTO tentativas_quiz (questionario_id, usuario_id)
+                        VALUES (:q, :u)"""),
+                {"q": questionario["id"], "u": usuario_id},
+            )
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error("[student] quiz_iniciar: %s", e, exc_info=True)
+            flash("Erro ao iniciar o questionário.", "danger")
+            return redirect(url_for("student.quiz", recurso_id=recurso_id))
+
+    return redirect(url_for("student.quiz_responder", recurso_id=recurso_id))
+
+
+@student_bp.route("/quiz/<int:recurso_id>/responder")
+@login_required
+def quiz_responder(recurso_id):
+    usuario = get_current_user()
+    usuario_id = _current_usuario_id()
+    recurso, questionario = _quiz_context(recurso_id)
+    if not recurso or not questionario:
+        abort(404)
+
+    tentativa = _tentativa_aberta(questionario["id"], usuario_id)
+    if not tentativa:
+        return redirect(url_for("student.quiz", recurso_id=recurso_id))
+
+    perguntas = _fetch_all(
+        """SELECT id, enunciado, tipo, ordem FROM perguntas
+           WHERE questionario_id = :q ORDER BY ordem ASC, id ASC""",
+        {"q": questionario["id"]},
+    )
+    opcoes = _fetch_all(
+        """SELECT o.id, o.pergunta_id, o.texto
+           FROM opcoes_resposta o
+           JOIN perguntas p ON p.id = o.pergunta_id
+           WHERE p.questionario_id = :q
+           ORDER BY o.id ASC""",
+        {"q": questionario["id"]},
+    )
+    opcoes_por_pergunta = {}
+    for o in opcoes:
+        opcoes_por_pergunta.setdefault(o["pergunta_id"], []).append(o)
+
+    return render_template(
+        "quiz_responder.html",
+        usuario=usuario,
+        recurso=recurso,
+        questionario=questionario,
+        tentativa=tentativa,
+        perguntas=perguntas,
+        opcoes_por_pergunta=opcoes_por_pergunta,
+    )
+
+
+@student_bp.route("/quiz/<int:recurso_id>/submeter", methods=["POST"])
+@login_required
+def quiz_submeter(recurso_id):
+    usuario_id = _current_usuario_id()
+    recurso, questionario = _quiz_context(recurso_id)
+    if not recurso or not questionario:
+        abort(404)
+
+    tentativa = _tentativa_aberta(questionario["id"], usuario_id)
+    if not tentativa:
+        flash("Não há nenhuma tentativa em curso.", "warning")
+        return redirect(url_for("student.quiz", recurso_id=recurso_id))
+
+    perguntas = _fetch_all(
+        "SELECT id FROM perguntas WHERE questionario_id = :q",
+        {"q": questionario["id"]},
+    )
+    corretas_rows = _fetch_all(
+        """SELECT o.pergunta_id, o.id
+           FROM opcoes_resposta o
+           JOIN perguntas p ON p.id = o.pergunta_id
+           WHERE p.questionario_id = :q AND o.correta = 1""",
+        {"q": questionario["id"]},
+    )
+    corretas = {r["pergunta_id"]: r["id"] for r in corretas_rows}
+
+    total = len(perguntas)
+    acertos = 0
+    try:
+        for p in perguntas:
+            escolhida = request.form.get(f"pergunta_{p['id']}", type=int)
+            db.session.execute(
+                text("""INSERT INTO respostas_aluno (tentativa_id, pergunta_id, opcao_id)
+                        VALUES (:t, :p, :o)"""),
+                {"t": tentativa["id"], "p": p["id"], "o": escolhida},
+            )
+            if escolhida and corretas.get(p["id"]) == escolhida:
+                acertos += 1
+
+        nota = round(acertos / total * 20, 1) if total else 0
+        db.session.execute(
+            text("""UPDATE tentativas_quiz
+                    SET nota = :n, terminada_em = NOW()
+                    WHERE id = :t"""),
+            {"n": nota, "t": tentativa["id"]},
+        )
+        db.session.execute(
+            text("INSERT INTO activity_log (usuario_id, recurso_id, tipo) VALUES (:u, :r, 'quiz')"),
+            {"u": usuario_id, "r": recurso_id},
+        )
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error("[student] quiz_submeter: %s", e, exc_info=True)
+        flash("Erro ao submeter o questionário.", "danger")
+        return redirect(url_for("student.quiz", recurso_id=recurso_id))
+
+    return redirect(url_for(
+        "student.quiz_resultado", recurso_id=recurso_id, tentativa_id=tentativa["id"]
+    ))
+
+
+@student_bp.route("/quiz/<int:recurso_id>/resultado/<int:tentativa_id>")
+@login_required
+def quiz_resultado(recurso_id, tentativa_id):
+    usuario = get_current_user()
+    usuario_id = _current_usuario_id()
+    recurso, questionario = _quiz_context(recurso_id)
+    if not recurso or not questionario:
+        abort(404)
+
+    tentativa = _fetch_one(
+        """SELECT id, nota, iniciada_em, terminada_em FROM tentativas_quiz
+           WHERE id = :t AND usuario_id = :u AND questionario_id = :q""",
+        {"t": tentativa_id, "u": usuario_id, "q": questionario["id"]},
+    )
+    if not tentativa or tentativa["terminada_em"] is None:
+        return redirect(url_for("student.quiz", recurso_id=recurso_id))
+
+    revisao = _fetch_all(
+        """SELECT
+               p.id            AS pergunta_id,
+               p.enunciado,
+               ra.opcao_id     AS escolhida_id,
+               oe.texto        AS escolhida_texto,
+               oc.id           AS correta_id,
+               oc.texto        AS correta_texto
+           FROM perguntas p
+           LEFT JOIN respostas_aluno ra
+                  ON ra.pergunta_id = p.id AND ra.tentativa_id = :t
+           LEFT JOIN opcoes_resposta oe ON oe.id = ra.opcao_id
+           LEFT JOIN opcoes_resposta oc
+                  ON oc.pergunta_id = p.id AND oc.correta = 1
+           WHERE p.questionario_id = :q
+           ORDER BY p.ordem ASC, p.id ASC""",
+        {"t": tentativa_id, "q": questionario["id"]},
+    )
+
+    acertos = sum(1 for r in revisao if r["escolhida_id"] and r["escolhida_id"] == r["correta_id"])
+
+    return render_template(
+        "quiz_resultado.html",
+        usuario=usuario,
+        recurso=recurso,
+        questionario=questionario,
+        tentativa=tentativa,
+        revisao=revisao,
+        acertos=acertos,
+        total=len(revisao),
     )

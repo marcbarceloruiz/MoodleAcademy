@@ -6,7 +6,7 @@ Campus Virtual — Ponto de entrada Flask.
 from flask import Flask, session
 from flask_wtf.csrf import CSRFProtect
 from config import Config
-from extensions import db, migrate
+from extensions import db, migrate, mail
 
 csrf = CSRFProtect()
 
@@ -16,6 +16,7 @@ from routes.admin_routes     import admin_bp
 from routes.portal_routes    import portal_bp
 from routes.auth_routes      import auth_bp
 from routes.student_routes   import student_bp
+from routes.messages_routes  import messages_bp
 
 from services.data_service import (
     get_user_courses,
@@ -33,34 +34,72 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     csrf.init_app(app)
+    mail.init_app(app)
 
     # ── Context processor: dados de layout e sidebar ──────────
     @app.context_processor
     def inject_layout_data():
+        from flask import session as _s
+        usuario_id = _s.get("usuario_id")
+        roles      = _s.get("usuario_roles", [])
+
         try:
-            layout_mis_cursos = get_user_courses()
-            for c in layout_mis_cursos:
-                c["_progreso"] = calculate_course_progress(c)
-            layout_eventos = get_events(limit=3)
-            for e in layout_eventos:
-                e["_fecha_corta"] = format_date_short(e["fecha"])
+            from services.moodle_service import get_matriculas_usuario
+            if usuario_id and "aluno" in roles:
+                matriculas = get_matriculas_usuario(usuario_id)
+                if matriculas:
+                    layout_mis_cursos = [
+                        {
+                            "id":        m["ciclo_id"],
+                            "titulo":    m["titulo"],
+                            "estado":    m["estado"],
+                            "_progreso": m.get("progresso") or 0,
+                            "_real":     True,
+                        }
+                        for m in matriculas
+                    ]
+                else:
+                    layout_mis_cursos = get_user_courses()
+                    for c in layout_mis_cursos:
+                        c["_progreso"] = calculate_course_progress(c)
+            else:
+                layout_mis_cursos = get_user_courses()
+                for c in layout_mis_cursos:
+                    c["_progreso"] = calculate_course_progress(c)
         except Exception as e:
-            app.logger.warning("inject_layout_data: cursos/eventos: %s", e)
+            app.logger.warning("inject_layout_data: cursos: %s", e)
             layout_mis_cursos = []
-            layout_eventos    = []
+
+        try:
+            from services.moodle_service import get_eventos_campus
+            layout_eventos = get_eventos_campus(limit=3, futuros=True) or get_events(limit=3)
+            for e in layout_eventos:
+                e["_fecha_corta"] = format_date_short(
+                    e.get("fecha") or str(e.get("data_inicio") or "")
+                )
+        except Exception as e:
+            app.logger.warning("inject_layout_data: eventos: %s", e)
+            layout_eventos = []
+
         try:
             from services.moodle_service import get_notificacoes_usuario
-            from flask import session as _s
-            layout_notificacoes = get_notificacoes_usuario(
-                _s.get("usuario_id"), limit=6)
+            layout_notificacoes = get_notificacoes_usuario(usuario_id, limit=6)
         except Exception as e:
             app.logger.warning("inject_layout_data: notificacoes: %s", e)
             layout_notificacoes = []
+
+        try:
+            from routes.messages_routes import contar_nao_lidas
+            layout_msgs_nao_lidas = contar_nao_lidas(usuario_id)
+        except Exception as e:
+            app.logger.warning("inject_layout_data: mensagens: %s", e)
+            layout_msgs_nao_lidas = 0
 
         return {
             "layout_mis_cursos": layout_mis_cursos,
             "layout_eventos":    layout_eventos,
             "layout_notificacoes": layout_notificacoes,
+            "layout_msgs_nao_lidas": layout_msgs_nao_lidas,
         }
 
     # ── Context processor: dados de sessão para templates ─────
@@ -109,6 +148,7 @@ def create_app():
     app.register_blueprint(portal_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(student_bp)
+    app.register_blueprint(messages_bp)
 
     with app.app_context():
         from routes.student_routes import _ensure_tables

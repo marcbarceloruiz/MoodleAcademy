@@ -177,14 +177,7 @@ function abrirNotificacoes() {
 }
 
 function abrirMensagens() {
-  abrirModal('Mensagens', `
-    <p class="modal-text" style="margin-bottom:8px">
-      A mensageria interna ainda não está disponível nesta versão do campus.
-    </p>
-    <p class="modal-text" style="font-size:12px;color:var(--muted)">
-      Entretanto, podes contactar a escola em
-      <a href="mailto:geral@academiaprofissional.pt">geral@academiaprofissional.pt</a>.
-    </p>`);
+  window.location.href = '/mensagens';
 }
 
 function _msgFutura() {
@@ -215,10 +208,15 @@ function abrirModalPerfil() {
       </div>
     </div>
     <div class="profile-actions">
-      <button class="btn btn-secondary w-full"
-              onclick="_msgFutura()">✏ Editar perfil</button>
-      <button class="btn btn-secondary w-full"
-              onclick="_msgFutura()">🔒 Alterar palavra-passe</button>
+      <a class="btn btn-secondary w-full"
+         href="/meu-perfil"
+         style="display:block;text-align:center">✏ Editar perfil</a>
+      <a class="btn btn-secondary w-full"
+         href="/meu-perfil#alterar-password"
+         style="display:block;text-align:center">🔒 Alterar palavra-passe</a>
+      <a class="btn btn-secondary w-full"
+         href="/mensagens"
+         style="display:block;text-align:center">✉ Mensagens</a>
       <button class="btn btn-secondary w-full"
               onclick="cerrarModal(); abrirNotificacoes()">🔔 Notificações</button>
       <button class="btn btn-danger w-full"

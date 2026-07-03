@@ -66,7 +66,14 @@
         </button>
       </form>
 
-      <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);
+      <div style="margin-top:14px;text-align:right">
+        <a href="{{ url_for('auth.esqueci_password') }}"
+           style="font-size:12px;color:var(--muted)">
+          Esqueceste a palavra-passe?
+        </a>
+      </div>
+
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line);
                   font-size:12px;color:var(--muted);text-align:center;line-height:1.7">
         Acesso ao campus restrito a utilizadores registados.<br>
         Contacto: <a href="mailto:geral@academiaprofissional.pt">geral@academiaprofissional.pt</a>

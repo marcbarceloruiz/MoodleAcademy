@@ -43,6 +43,7 @@
             <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Estado</th>
             <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Nota</th>
             <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Ficheiro</th>
+            <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Feedback</th>
             <th style="padding:10px 14px;text-align:left;font-size:12px;color:var(--muted);font-weight:600">Ações</th>
           </tr>
         </thead>
@@ -94,24 +95,40 @@
                 {% endif %}
               </td>
               <td style="padding:10px 14px">
+                {% if e.feedback %}
+                  <div style="font-size:12px;color:var(--text-2);max-width:200px;line-height:1.4">
+                    {{ e.feedback }}
+                  </div>
+                {% else %}
+                  <span style="color:var(--muted);font-size:12px">—</span>
+                {% endif %}
+              </td>
+
+              <td style="padding:10px 14px">
                 <form method="post"
                       action="{{ url_for('admin.admin_nota_entrega', entrega_id=e.id) }}"
-                      style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap">
+                      style="display:flex;flex-direction:column;gap:6px;min-width:220px">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                  <input type="number"
-                         name="nota"
-                         min="0"
-                         max="20"
-                         step="0.1"
-                         value="{{ e.nota if e.nota is not none else '' }}"
-                         placeholder="0–20"
-                         style="width:70px;font-size:12px">
-                  <select name="estado" style="font-size:12px">
-                    <option value="entregue" {% if e.estado == 'entregue' %}selected{% endif %}>Entregue</option>
-                    <option value="avaliado" {% if e.estado == 'avaliado' %}selected{% endif %}>Avaliado</option>
-                    <option value="pendente" {% if e.estado == 'pendente' %}selected{% endif %}>Pendente</option>
-                  </select>
-                  <button type="submit" class="btn btn-secondary btn-sm" style="font-size:11px;white-space:nowrap">
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <input type="number"
+                           name="nota"
+                           min="0"
+                           max="20"
+                           step="0.1"
+                           value="{{ e.nota if e.nota is not none else '' }}"
+                           placeholder="0–20"
+                           style="width:70px;font-size:12px">
+                    <select name="estado" style="font-size:12px">
+                      <option value="entregue" {% if e.estado == 'entregue' %}selected{% endif %}>Entregue</option>
+                      <option value="avaliado" {% if e.estado == 'avaliado' %}selected{% endif %}>Avaliado</option>
+                      <option value="pendente" {% if e.estado == 'pendente' %}selected{% endif %}>Pendente</option>
+                    </select>
+                  </div>
+                  <textarea name="feedback"
+                            rows="2"
+                            placeholder="Comentário para o aluno (opcional)…"
+                            style="font-size:11px;resize:vertical;width:100%;box-sizing:border-box">{{ e.feedback or '' }}</textarea>
+                  <button type="submit" class="btn btn-secondary btn-sm" style="font-size:11px;white-space:nowrap;align-self:flex-start">
                     Guardar
                   </button>
                 </form>

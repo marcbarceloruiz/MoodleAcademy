@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ m.assunto }} — Mensagens{% endblock %}
+{% block hero_title %}Mensagens{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <a href="{{ url_for('messages.inbox') }}" class="btn btn-secondary btn-sm" style="margin-bottom:10px">
+      ← Voltar às mensagens
+    </a>
+    <h1 style="font-size:22px">{{ m.assunto }}</h1>
+  </div>
+</div>
+
+<div style="max-width:720px;margin:0 auto">
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-body" style="padding:24px">
+
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line)">
+        <div style="width:42px;height:42px;border-radius:50%;background:var(--appam-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex-shrink:0">
+          {{ (m.remetente_nome or m.remetente_username or 'U')[0] | upper }}
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:700">
+            {{ m.remetente_nome or m.remetente_username or '—' }}
+          </div>
+          <div style="font-size:12px;color:var(--muted)">
+            Para: {{ m.destinatario_nome or m.destinatario_username or '—' }}
+          </div>
+        </div>
+        <span style="font-size:12px;color:var(--muted);white-space:nowrap">
+          {{ m.created_at.strftime('%d/%m/%Y %H:%M') if m.created_at else '' }}
+        </span>
+      </div>
+
+      <p style="font-size:14px;line-height:1.7;color:var(--text-1);white-space:pre-wrap;margin:0">{{ m.corpo }}</p>
+    </div>
+  </div>
+
+  {% if sou_destinatario %}
+  <div style="text-align:right">
+    <a href="{{ url_for('messages.nova', para=m.remetente_id, assunto=('Re: ' + m.assunto) if not m.assunto.startswith('Re:') else m.assunto) }}"
+       class="btn btn-primary">
+      ↩ Responder
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

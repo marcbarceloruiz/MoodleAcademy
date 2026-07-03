@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Mensagens — Campus Virtual{% endblock %}
+{% block hero_title %}Mensagens{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <h1>Mensagens</h1>
+    <p class="subtitle">
+      {% if vista == 'recebidas' %}
+        Caixa de entrada{% if nao_lidas %} · <strong>{{ nao_lidas }} por ler</strong>{% endif %}
+      {% else %}
+        Mensagens enviadas
+      {% endif %}
+    </p>
+  </div>
+  <a href="{{ url_for('messages.nova') }}" class="btn btn-primary">✉ Nova mensagem</a>
+</div>
+
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in msgs %}
+    <div class="alert alert-{{ cat }} mb-20">{{ msg }}</div>
+  {% endfor %}
+{% endwith %}
+
+<div class="card">
+  <div class="card-head" style="gap:8px">
+    <div style="display:flex;gap:8px">
+      <a href="{{ url_for('messages.inbox') }}"
+         class="btn btn-sm {{ 'btn-primary' if vista == 'recebidas' else 'btn-secondary' }}">
+        📥 Recebidas
+      </a>
+      <a href="{{ url_for('messages.enviadas') }}"
+         class="btn btn-sm {{ 'btn-primary' if vista == 'enviadas' else 'btn-secondary' }}">
+        📤 Enviadas
+      </a>
+    </div>
+    <span class="text-sm text-muted">{{ mensagens | length }} mensagem(ns)</span>
+  </div>
+
+  <div class="card-body" style="padding:0">
+    {% for m in mensagens %}
+      <a href="{{ url_for('messages.detalhe', mensagem_id=m.id) }}"
+         style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--line);text-decoration:none;color:inherit;{{ 'background:var(--bg)' if vista == 'recebidas' and not m.lida else '' }}"
+         onmouseover="this.style.opacity='.8'"
+         onmouseout="this.style.opacity='1'">
+
+        {% set outro = m.remetente_nome or m.remetente_username if vista == 'recebidas'
+                       else m.destinatario_nome or m.destinatario_username %}
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--appam-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">
+          {{ (outro or 'U')[0] | upper }}
+        </div>
+
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:13px;{{ 'font-weight:800' if vista == 'recebidas' and not m.lida else 'font-weight:600' }}">
+              {{ outro or '—' }}
+            </span>
+            {% if vista == 'recebidas' and not m.lida %}
+              <span style="width:8px;height:8px;border-radius:50%;background:var(--appam-blue);flex-shrink:0"></span>
+            {% endif %}
+          </div>
+          <div style="font-size:13px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+            {{ m.assunto }}
+          </div>
+        </div>
+
+        <span style="font-size:11px;color:var(--muted);white-space:nowrap;flex-shrink:0">
+          {{ m.created_at.strftime('%d/%m/%Y %H:%M') if m.created_at else '' }}
+        </span>
+      </a>
+    {% else %}
+      <div style="padding:32px;text-align:center">
+        <div style="font-size:36px;margin-bottom:10px">📭</div>
+        <p style="font-size:13px;color:var(--muted);margin:0">
+          {% if vista == 'recebidas' %}
+            Não tens mensagens. Quando alguém te escrever, aparecem aqui.
+          {% else %}
+            Ainda não enviaste nenhuma mensagem.
+          {% endif %}
+        </p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

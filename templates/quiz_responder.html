@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}A responder — {{ questionario.titulo }}{% endblock %}
+{% block hero_title %}Questionário{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <h1>{{ questionario.titulo }}</h1>
+    <p class="subtitle">{{ perguntas | length }} pergunta(s) · seleciona uma opção em cada pergunta</p>
+  </div>
+</div>
+
+<form method="post"
+      action="{{ url_for('student.quiz_submeter', recurso_id=recurso.id) }}"
+      style="max-width:720px;margin:0 auto">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  {% for p in perguntas %}
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-body" style="padding:20px 24px">
+        <div style="display:flex;gap:12px;margin-bottom:14px">
+          <span style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--appam-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">
+            {{ loop.index }}
+          </span>
+          <p style="font-size:14px;font-weight:600;line-height:1.6;margin:0;padding-top:3px">
+            {{ p.enunciado }}
+          </p>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px;margin-left:40px">
+          {% for o in opcoes_por_pergunta.get(p.id, []) %}
+            <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:13px;transition:background .15s"
+                   onmouseover="this.style.background='var(--bg)'"
+                   onmouseout="if(!this.querySelector('input').checked)this.style.background='transparent'">
+              <input type="radio"
+                     name="pergunta_{{ p.id }}"
+                     value="{{ o.id }}"
+                     style="accent-color:var(--appam-blue)">
+              {{ o.texto }}
+            </label>
+          {% else %}
+            <p style="font-size:12px;color:var(--muted)">Esta pergunta não tem opções configuradas.</p>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-body" style="display:flex;justify-content:space-between;align-items:center;padding:18px 24px">
+      <span style="font-size:12px;color:var(--muted)">
+        Ao terminar, a correção é feita automaticamente.
+      </span>
+      <button type="submit" class="btn btn-primary" style="padding:10px 28px">
+        Terminar e corrigir
+      </button>
+    </div>
+  </div>
+</form>
+
+{% endblock %}

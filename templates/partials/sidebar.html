@@ -52,6 +52,17 @@
          href="{{ url_for('dashboard.calendario') }}">
         <span class="item-icon">📅</span> Calendário
       </a>
+      <a class="sidebar-item {% if request.blueprint == 'messages' %}active{% endif %}"
+         href="{{ url_for('messages.inbox') }}">
+        <span class="item-icon">✉️</span> Mensagens
+        {% if layout_msgs_nao_lidas %}
+          <span class="item-badge" style="background:var(--danger);color:#fff">{{ layout_msgs_nao_lidas }}</span>
+        {% endif %}
+      </a>
+      <a class="sidebar-item {% if request.endpoint == 'auth.meu_perfil' %}active{% endif %}"
+         href="{{ url_for('auth.meu_perfil') }}">
+        <span class="item-icon">👤</span> O meu perfil
+      </a>
     </div>
     {% endif %}
 
@@ -144,7 +155,8 @@
     <div class="sidebar-section">
       <div class="sidebar-group-title">Meus cursos ativos</div>
       {% for c in sb_courses %}
-      <a class="sidebar-item" href="{{ url_for('courses.course_detail', course_id=c.id) }}">
+      <a class="sidebar-item"
+         href="{{ url_for('courses.ciclo_detail', ciclo_id=c.id) if c._real else url_for('courses.course_detail', course_id=c.id) }}">
         <span class="item-icon">📖</span>
         <span class="sidebar-course-title">{{ c.titulo.split(':')[0] }}</span>
         <span class="sidebar-course-progress">{{ c._progreso }}%</span>

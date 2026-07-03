@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Gerir questionário — {{ recurso.titulo }}{% endblock %}
+{% block hero_title %}Gerir questionário{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <a href="{{ url_for('admin.admin', tab='recursos') }}"
+       class="btn btn-secondary btn-sm" style="margin-bottom:10px">
+      ← Voltar ao painel admin
+    </a>
+    <h1>{{ recurso.titulo }}</h1>
+    <p class="subtitle">
+      {{ recurso.disciplina_nome or 'Sem disciplina' }} ·
+      {{ perguntas | length }} pergunta(s) ·
+      {{ n_tentativas }} tentativa(s) de alunos
+    </p>
+  </div>
+</div>
+
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in msgs %}
+    <div class="alert alert-{{ cat }} mb-20">{{ msg }}</div>
+  {% endfor %}
+{% endwith %}
+
+<div style="display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start">
+
+  <!-- Coluna principal: perguntas existentes -->
+  <div>
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-head">
+        <h3>Dados do questionário</h3>
+      </div>
+      <div class="card-body">
+        <form method="post" action="{{ url_for('admin.admin_quiz_meta', recurso_id=recurso.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div style="margin-bottom:12px">
+            <label class="text-sm text-muted">Título</label>
+            <input type="text" name="titulo" required
+                   value="{{ questionario.titulo }}"
+                   style="width:100%;margin-top:6px;padding:8px 12px;box-sizing:border-box">
+          </div>
+          <div style="margin-bottom:14px">
+            <label class="text-sm text-muted">Descrição (opcional)</label>
+            <textarea name="descricao" rows="2"
+                      placeholder="Instruções para o aluno…"
+                      style="width:100%;margin-top:6px;padding:8px 12px;resize:vertical;box-sizing:border-box">{{ questionario.descricao or '' }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-secondary btn-sm">Guardar dados</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Perguntas</h3>
+        <span class="text-sm text-muted">{{ perguntas | length }} pergunta(s)</span>
+      </div>
+      <div class="card-body" style="padding:0">
+        {% for p in perguntas %}
+          <div style="padding:16px 22px;border-bottom:1px solid var(--line)">
+            <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+              <p style="font-size:13px;font-weight:600;margin:0 0 10px;line-height:1.5">
+                {{ loop.index }}. {{ p.enunciado }}
+              </p>
+              <form method="post"
+                    action="{{ url_for('admin.admin_quiz_pergunta_delete', recurso_id=recurso.id, pergunta_id=p.id) }}"
+                    onsubmit="return confirm('Eliminar esta pergunta? As respostas dos alunos a esta pergunta também são eliminadas.')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-danger btn-sm" style="font-size:11px">✕</button>
+              </form>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;margin-left:16px">
+              {% for o in opcoes_por_pergunta.get(p.id, []) %}
+                <div style="font-size:12px;color:{{ '#059669' if o.correta else 'var(--text-2)' }};{{ 'font-weight:700' if o.correta else '' }}">
+                  {{ '✓' if o.correta else '·' }} {{ o.texto }}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% else %}
+          <div style="padding:24px">
+            <p style="font-size:13px;color:var(--muted);margin:0">
+              Ainda não há perguntas. Usa o formulário à direita para adicionar a primeira.
+            </p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar: nova pergunta -->
+  <div class="card" style="position:sticky;top:20px">
+    <div class="card-head"><h3>Nova pergunta</h3></div>
+    <div class="card-body">
+      <form method="post" action="{{ url_for('admin.admin_quiz_pergunta_create', recurso_id=recurso.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div style="margin-bottom:14px">
+          <label class="text-sm text-muted">Enunciado</label>
+          <textarea name="enunciado" required rows="3"
+                    placeholder="Escreve a pergunta…"
+                    style="width:100%;margin-top:6px;padding:8px 12px;resize:vertical;box-sizing:border-box"></textarea>
+        </div>
+
+        {% for i in range(1, 5) %}
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <input type="radio" name="correta" value="{{ i }}"
+                 {% if i == 1 %}required{% endif %}
+                 title="Marcar como correta"
+                 style="accent-color:#059669;flex-shrink:0">
+          <input type="text" name="opcao_{{ i }}"
+                 placeholder="Opção {{ i }}{{ ' (obrigatória)' if i <= 2 else ' (opcional)' }}"
+                 {% if i <= 2 %}required{% endif %}
+                 style="flex:1;padding:8px 12px;box-sizing:border-box">
+        </div>
+        {% endfor %}
+
+        <p style="font-size:11px;color:var(--muted);margin:0 0 14px">
+          Seleciona o círculo da opção correta.
+        </p>
+
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:10px">
+          + Adicionar pergunta
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

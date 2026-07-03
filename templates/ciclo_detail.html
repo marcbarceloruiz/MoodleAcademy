@@ -45,19 +45,24 @@
 
                 <div style="font-size:11px;color:var(--muted)">
                   {{ disc.tipo | upper }}
-
-                  {% if disc.codigo %}
-                    · {{ disc.codigo }}
-                  {% endif %}
-
-                  {% if disc.horas %}
-                    · {{ disc.horas }}h
-                  {% endif %}
+                  {% if disc.codigo %} · {{ disc.codigo }}{% endif %}
+                  {% if disc.horas %} · {{ disc.horas }}h{% endif %}
                 </div>
 
                 {% if disc.descripcion %}
                   <div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.5">
                     {{ disc.descripcion }}
+                  </div>
+                {% endif %}
+
+                {% if session_is_aluno and disc._progresso_total %}
+                  <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+                    <div style="width:100px;height:5px;background:var(--line);border-radius:3px;overflow:hidden">
+                      <div style="width:{{ disc._progresso_pct }}%;height:100%;background:var(--cyan);border-radius:3px"></div>
+                    </div>
+                    <span style="font-size:10px;color:var(--muted)">
+                      {{ disc._progresso_done }}/{{ disc._progresso_total }} ({{ disc._progresso_pct }}%)
+                    </span>
                   </div>
                 {% endif %}
               </div>

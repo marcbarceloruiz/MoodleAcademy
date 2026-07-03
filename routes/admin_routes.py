@@ -18,12 +18,14 @@ from flask import (
     session,
     current_app,
     flash,              # ← AÑADIDO para mensajes de feedback
+    abort,
 )
 from sqlalchemy import text
 from werkzeug.utils import secure_filename
 from werkzeug.security import check_password_hash
 
-from extensions import db
+from extensions import db, mail
+from flask_mail import Message
 from services.data_service import get_current_user, get_centro
 
 admin_bp = Blueprint("admin", __name__)
@@ -426,6 +428,7 @@ def _load_recursos(limit=120):
             r.url,
             r.orden,
             r.visible,
+            r.data_limite,
             s.titulo AS seccion_titulo,
             s.slug AS seccion_slug,
             d.nombre AS disciplina_nombre,
@@ -1194,10 +1197,11 @@ def create_recurso():
             uploaded_url = _save_uploaded_file("archivo", "recursos")
             url = uploaded_url or request.form.get("url", "").strip() or None
 
+            data_limite_raw = request.form.get("data_limite", "").strip() or None
             db.session.execute(
                 text("""
                     INSERT INTO recursos_disciplina
-                    (seccion_id, titulo, tipo, descripcion, url, orden, visible)
+                    (seccion_id, titulo, tipo, descripcion, url, orden, visible, data_limite)
                     SELECT
                         :seccion_id,
                         :titulo,
@@ -1205,16 +1209,18 @@ def create_recurso():
                         :descripcion,
                         :url,
                         COALESCE(MAX(orden), 0) + 1,
-                        1
+                        1,
+                        :data_limite
                     FROM recursos_disciplina
                     WHERE seccion_id = :seccion_id
                 """),
                 {
-                    "seccion_id": seccion_id,
-                    "titulo": titulo,
-                    "tipo": request.form.get("tipo", "documento").strip(),
+                    "seccion_id":  seccion_id,
+                    "titulo":      titulo,
+                    "tipo":        request.form.get("tipo", "documento").strip(),
                     "descripcion": request.form.get("descripcion", "").strip(),
-                    "url": url,
+                    "url":         url,
+                    "data_limite": data_limite_raw,
                 },
             )
             db.session.commit()
@@ -1245,26 +1251,29 @@ def update_recurso(recurso_id):
         uploaded_url = _save_uploaded_file("archivo", "recursos")
         url = uploaded_url or request.form.get("url", "").strip() or None
 
+        data_limite_raw = request.form.get("data_limite", "").strip() or None
         db.session.execute(
             text("""
                 UPDATE recursos_disciplina
                 SET
-                    titulo = :titulo,
-                    tipo = :tipo,
+                    titulo      = :titulo,
+                    tipo        = :tipo,
                     descripcion = :descripcion,
-                    url = :url,
-                    orden = :orden,
-                    visible = :visible
+                    url         = :url,
+                    orden       = :orden,
+                    visible     = :visible,
+                    data_limite = :data_limite
                 WHERE id = :recurso_id
             """),
             {
-                "recurso_id": recurso_id,
-                "titulo": request.form.get("titulo", "").strip(),
-                "tipo": request.form.get("tipo", "documento").strip(),
+                "recurso_id":  recurso_id,
+                "titulo":      request.form.get("titulo", "").strip(),
+                "tipo":        request.form.get("tipo", "documento").strip(),
                 "descripcion": request.form.get("descripcion", "").strip(),
-                "url": url,
-                "orden": _to_int(request.form.get("orden"), 0),
-                "visible": _checkbox_value("visible"),
+                "url":         url,
+                "orden":       _to_int(request.form.get("orden"), 0),
+                "visible":     _checkbox_value("visible"),
+                "data_limite": data_limite_raw,
             },
         )
         db.session.commit()
@@ -1386,6 +1395,207 @@ def create_classificacao():
 
 
 # ──────────────────────────────────────────────
+# ATIVIDADE (admin view)
+# ──────────────────────────────────────────────
+
+@admin_bp.route("/admin/atividade")
+def admin_atividade():
+    usuario = get_current_user()
+    logs = _fetch_all("""
+        SELECT
+            al.id,
+            al.tipo,
+            al.created_at,
+            al.usuario_id,
+            al.recurso_id,
+            u.nome        AS aluno_nome,
+            u.username    AS aluno_username,
+            r.titulo      AS recurso_titulo,
+            d.nombre      AS disciplina_nome
+        FROM activity_log al
+        LEFT JOIN usuarios u ON u.id = al.usuario_id
+        LEFT JOIN recursos_disciplina r ON r.id = al.recurso_id
+        LEFT JOIN secciones_disciplina s ON s.id = r.seccion_id
+        LEFT JOIN disciplinas_ciclo d ON d.id = s.disciplina_id
+        ORDER BY al.created_at DESC
+        LIMIT 500
+    """)
+    return render_template("admin_atividade.html", usuario=usuario, logs=logs)
+
+
+# ──────────────────────────────────────────────
+# QUIZ BUILDER (admin)
+# ──────────────────────────────────────────────
+
+def _get_or_create_questionario(recurso):
+    """Questionário associado ao recurso; cria-o se ainda não existir."""
+    q = _fetch_one(
+        "SELECT id, titulo, descricao FROM questionarios WHERE recurso_id = :r",
+        {"r": recurso["id"]},
+    )
+    if q:
+        return q
+    try:
+        db.session.execute(
+            text("""INSERT INTO questionarios (recurso_id, titulo)
+                    VALUES (:r, :titulo)"""),
+            {"r": recurso["id"], "titulo": recurso["titulo"]},
+        )
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error("[admin] criar questionario: %s", e, exc_info=True)
+        return None
+    return _fetch_one(
+        "SELECT id, titulo, descricao FROM questionarios WHERE recurso_id = :r",
+        {"r": recurso["id"]},
+    )
+
+
+@admin_bp.route("/admin/quiz/<int:recurso_id>")
+def admin_quiz(recurso_id):
+    usuario = get_current_user()
+
+    recurso = _fetch_one(
+        """SELECT r.id, r.titulo, d.nombre AS disciplina_nome
+           FROM recursos_disciplina r
+           LEFT JOIN secciones_disciplina s ON s.id = r.seccion_id
+           LEFT JOIN disciplinas_ciclo d ON d.id = s.disciplina_id
+           WHERE r.id = :r""",
+        {"r": recurso_id},
+    )
+    if not recurso:
+        abort(404)
+
+    questionario = _get_or_create_questionario(recurso)
+    if not questionario:
+        flash("Erro ao preparar o questionário.", "danger")
+        return redirect(url_for("admin.admin", tab="recursos"))
+
+    perguntas = _fetch_all(
+        """SELECT id, enunciado, tipo, ordem FROM perguntas
+           WHERE questionario_id = :q ORDER BY ordem ASC, id ASC""",
+        {"q": questionario["id"]},
+    )
+    opcoes = _fetch_all(
+        """SELECT o.id, o.pergunta_id, o.texto, o.correta
+           FROM opcoes_resposta o
+           JOIN perguntas p ON p.id = o.pergunta_id
+           WHERE p.questionario_id = :q
+           ORDER BY o.id ASC""",
+        {"q": questionario["id"]},
+    )
+    opcoes_por_pergunta = {}
+    for o in opcoes:
+        opcoes_por_pergunta.setdefault(o["pergunta_id"], []).append(o)
+
+    n_tentativas = _fetch_one(
+        "SELECT COUNT(*) AS n FROM tentativas_quiz WHERE questionario_id = :q",
+        {"q": questionario["id"]},
+    )
+
+    return render_template(
+        "admin_quiz.html",
+        usuario=usuario,
+        recurso=recurso,
+        questionario=questionario,
+        perguntas=perguntas,
+        opcoes_por_pergunta=opcoes_por_pergunta,
+        n_tentativas=(n_tentativas["n"] if n_tentativas else 0) or 0,
+    )
+
+
+@admin_bp.route("/admin/quiz/<int:recurso_id>/meta", methods=["POST"])
+def admin_quiz_meta(recurso_id):
+    titulo = (request.form.get("titulo") or "").strip()
+    descricao = (request.form.get("descricao") or "").strip()
+    if not titulo:
+        flash("O título é obrigatório.", "warning")
+        return redirect(url_for("admin.admin_quiz", recurso_id=recurso_id))
+    try:
+        db.session.execute(
+            text("""UPDATE questionarios SET titulo = :t, descricao = :d
+                    WHERE recurso_id = :r"""),
+            {"t": titulo, "d": descricao or None, "r": recurso_id},
+        )
+        db.session.commit()
+        flash("Questionário atualizado.", "success")
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error("[admin] quiz_meta: %s", e, exc_info=True)
+        flash("Erro ao atualizar o questionário.", "danger")
+    return redirect(url_for("admin.admin_quiz", recurso_id=recurso_id))
+
+
+@admin_bp.route("/admin/quiz/<int:recurso_id>/pergunta/create", methods=["POST"])
+def admin_quiz_pergunta_create(recurso_id):
+    questionario = _fetch_one(
+        "SELECT id FROM questionarios WHERE recurso_id = :r", {"r": recurso_id}
+    )
+    if not questionario:
+        abort(404)
+
+    enunciado = (request.form.get("enunciado") or "").strip()
+    correta_idx = request.form.get("correta", type=int)
+    opcoes = []
+    for i in range(1, 5):
+        texto = (request.form.get(f"opcao_{i}") or "").strip()
+        if texto:
+            opcoes.append((i, texto))
+
+    if not enunciado or len(opcoes) < 2 or correta_idx not in [i for i, _ in opcoes]:
+        flash("Preenche o enunciado, pelo menos 2 opções e marca a correta.", "warning")
+        return redirect(url_for("admin.admin_quiz", recurso_id=recurso_id))
+
+    try:
+        ordem_row = _fetch_one(
+            "SELECT COALESCE(MAX(ordem), 0) + 1 AS prox FROM perguntas WHERE questionario_id = :q",
+            {"q": questionario["id"]},
+        )
+        result = db.session.execute(
+            text("""INSERT INTO perguntas (questionario_id, enunciado, ordem)
+                    VALUES (:q, :e, :o)"""),
+            {"q": questionario["id"], "e": enunciado,
+             "o": (ordem_row["prox"] if ordem_row else 1) or 1},
+        )
+        pergunta_id = result.lastrowid
+        for i, texto in opcoes:
+            db.session.execute(
+                text("""INSERT INTO opcoes_resposta (pergunta_id, texto, correta)
+                        VALUES (:p, :t, :c)"""),
+                {"p": pergunta_id, "t": texto, "c": 1 if i == correta_idx else 0},
+            )
+        db.session.commit()
+        flash("Pergunta adicionada.", "success")
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error("[admin] quiz_pergunta_create: %s", e, exc_info=True)
+        flash("Erro ao adicionar a pergunta.", "danger")
+    return redirect(url_for("admin.admin_quiz", recurso_id=recurso_id))
+
+
+@admin_bp.route("/admin/quiz/<int:recurso_id>/pergunta/<int:pergunta_id>/delete", methods=["POST"])
+def admin_quiz_pergunta_delete(recurso_id, pergunta_id):
+    try:
+        db.session.execute(
+            text("DELETE FROM respostas_aluno WHERE pergunta_id = :p"), {"p": pergunta_id}
+        )
+        db.session.execute(
+            text("DELETE FROM opcoes_resposta WHERE pergunta_id = :p"), {"p": pergunta_id}
+        )
+        db.session.execute(
+            text("DELETE FROM perguntas WHERE id = :p"), {"p": pergunta_id}
+        )
+        db.session.commit()
+        flash("Pergunta eliminada.", "success")
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error("[admin] quiz_pergunta_delete: %s", e, exc_info=True)
+        flash("Erro ao eliminar a pergunta.", "danger")
+    return redirect(url_for("admin.admin_quiz", recurso_id=recurso_id))
+
+
+# ──────────────────────────────────────────────
 # ENTREGAS (admin view)
 # ──────────────────────────────────────────────
 
@@ -1399,7 +1609,9 @@ def admin_entregas():
             e.estado,
             e.ficheiro_url,
             e.nota,
+            e.feedback,
             e.data_entrega,
+            e.data_avaliacao,
             e.usuario_id,
             e.recurso_id,
             u.nome        AS aluno_nome,
@@ -1426,7 +1638,8 @@ def admin_entregas():
 def admin_nota_entrega(entrega_id):
     try:
         nota_raw = request.form.get("nota", "").strip()
-        estado = request.form.get("estado", "entregue").strip()
+        estado   = request.form.get("estado", "entregue").strip()
+        feedback = request.form.get("feedback", "").strip() or None
 
         nota = None
         if nota_raw:
@@ -1435,13 +1648,25 @@ def admin_nota_entrega(entrega_id):
         db.session.execute(
             text("""
                 UPDATE entregas
-                SET nota = :nota, estado = :estado
+                SET nota             = :nota,
+                    estado           = :estado,
+                    feedback         = :feedback,
+                    data_avaliacao   = CASE WHEN :avaliado THEN NOW() ELSE data_avaliacao END
                 WHERE id = :id
             """),
-            {"nota": nota, "estado": estado, "id": entrega_id},
+            {
+                "nota":     nota,
+                "estado":   estado,
+                "feedback": feedback,
+                "avaliado": estado == "avaliado",
+                "id":       entrega_id,
+            },
         )
         db.session.commit()
         flash("Nota atualizada.", "success")
+
+        if estado == "avaliado" and nota is not None:
+            _enviar_email_nota(entrega_id, nota, feedback)
 
     except Exception as e:
         db.session.rollback()
@@ -1449,3 +1674,66 @@ def admin_nota_entrega(entrega_id):
         flash("Erro ao atualizar a nota.", "danger")
 
     return redirect(url_for("admin.admin_entregas"))
+
+
+def _enviar_email_nota(entrega_id, nota, feedback=None):
+    try:
+        row = db.session.execute(
+            text("""
+                SELECT u.email, u.nome, r.titulo AS recurso_titulo
+                FROM entregas e
+                JOIN usuarios u ON u.id = e.usuario_id
+                LEFT JOIN recursos_disciplina r ON r.id = e.recurso_id
+                WHERE e.id = :id
+            """),
+            {"id": entrega_id},
+        ).mappings().first()
+
+        if not row or not row["email"]:
+            return
+
+        nome   = row["nome"] or "Aluno"
+        titulo = row["recurso_titulo"] or "Tarefa"
+        cor    = "#059669" if nota >= 10 else "#dc2626"
+        estado_texto = "positiva" if nota >= 10 else "negativa"
+
+        html = f"""
+        <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#1a1a2e">
+          <div style="background:#1a1a2e;padding:20px 24px;border-radius:8px 8px 0 0">
+            <h2 style="color:#fff;margin:0;font-size:18px">Academia Profissional</h2>
+            <p style="color:#94a3b8;margin:4px 0 0;font-size:12px">Campus Virtual</p>
+          </div>
+          <div style="background:#f8fafc;padding:24px;border-radius:0 0 8px 8px;border:1px solid #e2e8f0">
+            <p style="margin:0 0 16px">Olá <strong>{nome}</strong>,</p>
+            <p style="margin:0 0 16px">A tua entrega foi avaliada:</p>
+            <div style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:16px;margin-bottom:16px">
+              <p style="margin:0 0 6px;font-size:13px;color:#64748b">Tarefa</p>
+              <p style="margin:0 0 12px;font-weight:700">{titulo}</p>
+              <p style="margin:0 0 6px;font-size:13px;color:#64748b">Nota</p>
+              <p style="margin:0 0 {'16px' if feedback else '0'};font-size:28px;font-weight:800;color:{cor}">{nota}/20
+                <span style="font-size:13px;font-weight:400;color:#64748b">— classificação {estado_texto}</span>
+              </p>
+              {f'<p style="margin:0 0 6px;font-size:13px;color:#64748b">Comentário do professor</p><p style="margin:0;font-size:13px;line-height:1.6">{feedback}</p>' if feedback else ''}
+            </div>
+            <a href="/as-minhas-entregas"
+               style="display:inline-block;background:#1a1a2e;color:#fff;padding:10px 20px;
+                      border-radius:6px;text-decoration:none;font-size:13px">
+              Ver todas as minhas entregas
+            </a>
+            <p style="margin:20px 0 0;font-size:11px;color:#94a3b8">
+              Campus Virtual — Academia Profissional Prof. Albino de Matos
+            </p>
+          </div>
+        </div>
+        """
+
+        msg = Message(
+            subject=f"Nota disponível: {titulo}",
+            recipients=[row["email"]],
+            html=html,
+        )
+        mail.send(msg)
+        current_app.logger.info("[mail] nota enviada a %s (entrega %s)", row["email"], entrega_id)
+
+    except Exception as e:
+        current_app.logger.warning("[mail] falhou ao enviar nota entrega %s: %s", entrega_id, e)

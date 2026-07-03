@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Nova mensagem — Campus Virtual{% endblock %}
+{% block hero_title %}Nova mensagem{% endblock %}
+
+{% block content %}
+
+<div class="view-header">
+  <div>
+    <a href="{{ url_for('messages.inbox') }}" class="btn btn-secondary btn-sm" style="margin-bottom:10px">
+      ← Voltar às mensagens
+    </a>
+    <h1>Nova mensagem</h1>
+    <p class="subtitle">Escreve a um docente, colega ou à administração</p>
+  </div>
+</div>
+
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in msgs %}
+    <div class="alert alert-{{ cat }} mb-20">{{ msg }}</div>
+  {% endfor %}
+{% endwith %}
+
+<div class="card" style="max-width:640px;margin:0 auto">
+  <div class="card-body">
+    <form method="post" action="{{ url_for('messages.nova') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div style="margin-bottom:14px">
+        <label class="text-sm text-muted" for="destinatario_id">Para</label>
+        <select id="destinatario_id" name="destinatario_id" required
+                style="width:100%;margin-top:6px;padding:8px 12px;box-sizing:border-box">
+          <option value="" disabled {{ 'selected' if not para else '' }}>— Escolhe o destinatário —</option>
+          {% for d in destinatarios %}
+            <option value="{{ d.id }}" {{ 'selected' if para == d.id else '' }}>
+              {{ d.nome or d.username }}{{ (' ' + d.apelido) if d.apelido else '' }}{{ (' · ' + d.roles) if d.roles else '' }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <label class="text-sm text-muted" for="assunto">Assunto</label>
+        <input id="assunto" type="text" name="assunto" required
+               maxlength="255"
+               value="{{ assunto_inicial or '' }}"
+               placeholder="Assunto da mensagem"
+               style="width:100%;margin-top:6px;padding:8px 12px;box-sizing:border-box">
+      </div>
+
+      <div style="margin-bottom:20px">
+        <label class="text-sm text-muted" for="corpo">Mensagem</label>
+        <textarea id="corpo" name="corpo" required rows="8"
+                  placeholder="Escreve a tua mensagem…"
+                  style="width:100%;margin-top:6px;padding:8px 12px;resize:vertical;box-sizing:border-box"></textarea>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px">
+        <a href="{{ url_for('messages.inbox') }}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary" style="padding:10px 28px">Enviar mensagem</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
